@@ -1,0 +1,10 @@
+APP:
+  ENVIRONMENT: test
+  DEBUG: True
+  # Only accept True or False
+
+DATABASE:
+  USERNAME: root
+  PASSWORD: root
+  HOST: localhost
+  DB: 'invitrodb_v3o5'

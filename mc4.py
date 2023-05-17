@@ -1,7 +1,8 @@
 from tcplFit2 import tcplFit2
-from load_mc3_data import load_mc3_data
+from tcplLoadData import load_mc3_data
 from tcplMthdLoad import tcplMthdLoad
 from mc4_mthds import mc4_mthds
+from tcplWriteData import tcplWriteData
 
 id = 5
 # fitmodels = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
@@ -21,4 +22,7 @@ for method_key in ms['mthd'].tolist():
 # fit
 bidirectional = True
 df = tcplFit2(df, fitmodels=fitmodels, bidirectional=bidirectional)
+
+tcplWriteData(dat = df, lvl = 4)
+
 print(df.head(1))

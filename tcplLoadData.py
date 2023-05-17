@@ -1,4 +1,5 @@
 from tcplQuery import tcplQuery
+import yaml
 
 def load_mc3_data(aeid = "80"):
     return tcplLoadData(lvl=3, fld='aeid', val=aeid, type="mc")
@@ -28,11 +29,8 @@ def tcplListFlds(tbl, db):
         `TABLE_SCHEMA` = '{db}' 
         AND 
         `TABLE_NAME` = '{tbl}';
-    """
+    """   
     query = tcplQuery(qformat.format(db=db, tbl=tbl))["COLUMN_NAME"].tolist()
-    # if verbose:
-    #     print(query)
-    # query = [q[0] for q in query]
     return query
 
 
@@ -91,7 +89,13 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
         # if verbose:
         #     print(f"fld: {fld}")
         #     print(f"val: {val}")
-        fld = prepField(fld = fld, tbl = tbls, db = "invitrodb_v3o5")
+        
+
+        with open("config.yaml", "r") as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+            db = config['DATABASE']['DB']
+
+        fld = prepField(fld = fld, tbl = tbls, db = db)
         
         if add_fld:
             wtest = False
