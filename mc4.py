@@ -7,7 +7,7 @@ id = 5
 # fitmodels = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
 fitmodels = ["cnst"]
 
-df = load_mc3_data(id)
+df = load_mc3_data(id) #.head(100)
 ms = tcplMthdLoad(lvl = 4, id = id, type = "mc")
 
 if (ms.shape[0] == 0):
@@ -18,9 +18,7 @@ mthd_funcs = mc4_mthds()
 for method_key in ms['mthd'].tolist():
     df = mthd_funcs.get(method_key)(df)
 
-bidirectional = True
 # fit
+bidirectional = True
 df = tcplFit2(df, fitmodels=fitmodels, bidirectional=bidirectional)
-dat = df
-
-print(dat['fitparams'])
+print(df.head(1))

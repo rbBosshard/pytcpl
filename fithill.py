@@ -6,7 +6,8 @@ from acy import tcplObj
 
 def fithill(conc, resp, bidirectional=True, verbose=False, nofit=False):
     logc = np.log10(conc)
-    fenv = globals()
+    fname = "hill"
+    func = globals()[fname]
   
     pars = ["tp", "ga", "p", "er"]
     sds = [param + "_sd" for param in pars]

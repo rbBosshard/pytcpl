@@ -93,18 +93,17 @@ import numpy as np
 from scipy.stats import t, norm
 
 def tcplObj(p, conc, resp, fname, errfun="dt4", err=None):
-    # print(p, conc, resp, fname, errfun, err)
     mu = fname(ps=p, x=conc)  # get model values for each conc
     if err is None:
         err = np.exp(p) #if len(p) == 1 else p[-1] # set error term
-    print(p, err)
     # objective function is the sum of log-likelihood of response given the model at each concentration
     # scaled by variance (err)
+    # negate objective function to maximize likelihood
     if errfun == "dt4":
         # degree of freedom paramter = 4 for Student’s t probability density function
-        return np.sum(t.logpdf((resp - mu) / err, df=4) - np.log(err))
+        return -np.sum(t.logpdf((resp - mu) / err, df=4) - np.log(err))
     elif errfun == "dnorm":
-        return np.sum(norm.logpdf((resp - mu) / err) - np.log(err))
+        return -np.sum(norm.logpdf((resp - mu) / err) - np.log(err))
 
 def cnst(ps, x):
     # ignores ps

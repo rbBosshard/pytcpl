@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 from acy import acy
@@ -9,16 +8,12 @@ from fitcnst import fitcnst
 from fithill import fithill
 
 def tcplfit2_core(conc, resp, cutoff, force_fit=False, bidirectional=True, verbose=False, do_plot=False,
-                  fitmodels=("cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"),
-                  **kwargs):
+                  fitmodels=("cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5")):
 
-    conc = conc.iloc[0]#.values.tolist()
-    resp = resp.iloc[0]#.values.tolist()
-    cutoff = cutoff.iloc[0]#.values.tolist()
-    # for i in range(len(conc)):
-    #     print(conc[i])
-    # print(conc)
-    # print(type(conc))
+    conc = conc.iloc[0]
+    resp = resp.iloc[0]
+    cutoff = cutoff.iloc[0]
+
     logc = np.log10(conc)
     df = pd.DataFrame({'indexes': logc, 'values': resp})
     df.pivot_table(values='values', index='indexes', aggfunc='median')
@@ -52,7 +47,6 @@ def tcplfit2_core(conc, resp, cutoff, force_fit=False, bidirectional=True, verbo
         else:
             model_results = {"success": False}
 
-        print(model_results)
         # Add specific calculations for each model
         if to_fit:
             if model in ("poly1", "poly2", "pow", "exp2", "exp3"):
