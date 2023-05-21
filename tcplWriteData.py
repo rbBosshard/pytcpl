@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 from tcplAppend import tcplAppend
-from tcplQuery import tcplQuery
+from query_db import tcplQuery
 from tcplCascade import tcplCascade
 from write_lvl_4 import write_lvl_4
 
@@ -34,9 +34,10 @@ def tcplWriteData(dat, lvl):
         qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
 
         m5id_map = tcplQuery(query=qstring)
-        m5id_map.set_index(["aeid", "m4id"], inplace=True)
-        dat.set_index(["aeid", "m4id"], inplace=True)
-        dat = dat.loc[m5id_map.index]
+        m5id_map = m5id_map.set_index(["aeid", "m4id"])
+        dat = dat.set_index(["aeid", "m4id"])
+        dat = dat.join(m5id_map, how="left")
+
         tcplAppend(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]],tbl="mc5_param_")
     else:
         n = dat.shape[0]

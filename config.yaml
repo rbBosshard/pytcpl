@@ -1,10 +1,10 @@
 APP:
   ENVIRONMENT: test
-  DEBUG: True
-  # Only accept True or False
+  DEBUG: True # Only accept True or False
 
 DATABASE:
   USERNAME: root
   PASSWORD: root
   HOST: localhost
-  DB: 'invitrodb_v3o5'
+  PORT: 3306
+  DB: invitrodb_v3o5

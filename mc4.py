@@ -8,7 +8,7 @@ id = 5
 # fitmodels = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
 fitmodels = ["cnst"]
 
-df = load_mc3_data(id) #.head(100)
+df = load_mc3_data(id).head(100)
 ms = tcplMthdLoad(lvl = 4, id = id, type = "mc")
 
 if (ms.shape[0] == 0):

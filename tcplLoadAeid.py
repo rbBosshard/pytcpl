@@ -1,4 +1,4 @@
-from tcplQuery import tcplQuery
+from query_db import tcplQuery
 from buildAssayQ import buildAssayQ
 
 def tcplLoadAeid(fld=None, val=None, add_fld=None):

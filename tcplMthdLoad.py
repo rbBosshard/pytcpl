@@ -1,8 +1,10 @@
-from tcplQuery import tcplQuery
+from query_db import tcplQuery
 
 def tcplMthdLoad(lvl, id = None, type = "mc"):
     if isinstance(id, int) or isinstance(id, str):
-        id = list(map(str, [id]))
+        id = [id]
+    id = list(map(str, id))
+    
     id_name = "acid" if type == "mc" and lvl == 2 else "aeid"
     flds = [id_name, f"b.{type}{lvl}_mthd AS mthd", f"b.{type}{lvl}_mthd_id AS mthd_id"]
     if lvl < 4 and type == "mc":

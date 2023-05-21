@@ -1,8 +1,8 @@
-from tcplQuery import tcplQuery
+from query_db import tcplQuery
 
 def tcplDelete(tbl, fld, val):
     qformat = f"DELETE FROM {tbl} WHERE"
-    qformat += f"  {' AND '.join([f'{fld} IN (%s)' for _ in val])}"
+    qformat += f" {' AND '.join([f'{fld} IN (%s)' for _ in val])}"
     qformat += ";"
 
     if not isinstance(val, list):

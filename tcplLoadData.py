@@ -1,4 +1,4 @@
-from tcplQuery import tcplQuery
+from query_db import tcplQuery
 import yaml
 
 def load_mc3_data(aeid = "80"):
@@ -109,13 +109,27 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             fld = [fld]
         qformat += "  " + " AND ".join([f"{fld[i]} IN (%s)" for i in range(len(fld))])
         qformat += ";"
+        print(f"qformat: {qformat}")
         if not isinstance(val, list):
             val = [val]
-        val = [','.join(['"' + str(v) + '"']) for v in val]
 
-        qstring = qformat % tuple(val)
-        # if verbose:
-        #     print(f"qstring: {qstring}")
+
+        val = ','.join([str(v) for v in val])
+        # expr = str(val[0])
+        # for i in range(len(val[1:])):
+        #     expr += "," + str(val[i+1])
+
+        # expr = "(" + expr + ")" 
+        # val = ','.join(['"' + str(v) + '"']) for v in val
+
+        # qstring = qstring.strip("[]")
+        # qstring = "(" + qstring + ")"
+        # print(f"expr: {expr}")
+        print(f"val: {val}")
+        qstring = qformat % val
+       
+        if True:
+            print(f"qstring: {qstring}")
 
     else:
         qstring = qformat
