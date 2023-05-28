@@ -1,8 +1,17 @@
 from query_db import tcplQuery
 import yaml
 
-def load_mc3_data(aeid = "80"):
+mc4_name = "mc4_"
+mc4_agg_name = "mc4_agg_"
+mc4_param_name = "mc4_param_"
+mc5_name = "mc5_"
+mc5_param_name = "mc5_param_"
+
+def load_mc3_data(aeid = "5"):
     return tcplLoadData(lvl=3, fld='aeid', val=aeid, type="mc")
+
+def load_mc4_data(aeid = "5"):
+    return tcplLoadData(lvl=4, fld='aeid', val=aeid, type="mc")
 
 def check_tcpl_db_schema():
     return False
@@ -35,8 +44,6 @@ def tcplListFlds(tbl, db):
 
 
 def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
-    model, model_param, model_val = None, None, None
-    hit_param, hit_val = None, None
     tbls = None
     
     if lvl == 0 and type == "mc":
@@ -70,26 +77,64 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             "WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id "
       )
     
-    if lvl == "agg" and type == "mc":
-        tbls = ["mc3", "mc4_agg", "mc4"]
+    # if lvl == "agg" and type == "mc":
+    #     tbls = ["mc3", "mc4_agg", "mc4"]
+    #     qformat = (
+    #         "SELECT mc4_agg.aeid, mc4_agg.m4id, mc4_agg.m3id, mc4_agg.m2id, mc4_agg.m1id, mc4_agg.m0id, mc4.spid, logc, resp "
+    #         "FROM mc3, mc4_agg, mc4 "
+    #         "WHERE mc3.m3id = mc4_agg.m3id "
+    #         "AND mc4.m4id = mc4_agg.m4id "
+    #     )
+    
+    # if lvl == 4 and type == "mc":
+    #     tbls = ["mc4", "mc4_param"]
+    #     qformat = (
+    #       "SELECT mc4.m4id,mc4.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,model,model_param,model_val "
+    #       "FROM mc4_param, mc4 "
+    #       "WHERE mc4.m4id = mc4_param.m4id " 
+    #     )
+
+    # if lvl == 5 and type == "mc":
+    #     tbls = ["mc4", "mc5", "mc5_param"]
+    #     qformat = (
+    #       " SELECT mc5.m5id,mc5.m4id,mc5.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,hitc,modl,fitc,coff,hit_param,hit_val "
+    #       "FROM mc4, mc5, mc5_param "
+    #       "WHERE mc4.m4id = mc5.m4id "
+    #       "AND mc5.m5id = mc5_param.m5id "
+    #    )
+
+    if lvl == "agg":
+        tbls = ["mc3", f"{mc4_agg_name}", f"{mc4_name}"]
         qformat = (
-            "SELECT mc4_agg.aeid, mc4_agg.m4id, mc4_agg.m3id, mc4_agg.m2id, mc4_agg.m1id, mc4_agg.m0id, mc4.spid, logc, resp "
-            "FROM mc3, mc4_agg, mc4 "
-            "WHERE mc3.m3id = mc4_agg.m3id "
-            "AND mc4.m4id = mc4_agg.m4id"
+            f"SELECT {mc4_agg_name}.aeid, {mc4_agg_name}.m4id, {mc4_agg_name}.m3id, {mc4_agg_name}.m2id, {mc4_agg_name}.m1id, {mc4_agg_name}.m0id, {mc4_name}.spid, logc, resp "
+            f"FROM mc3, {mc4_agg_name}, {mc4_name} "
+            f"WHERE mc3.m3id = {mc4_agg_name}.m3id "
+            f"AND {mc4_name}.m4id = {mc4_agg_name}.m4id "
         )
     
+    if lvl == 4 and type == "mc":
+        tbls = [f"{mc4_name}", f"{mc4_param_name}"]
+        qformat = (
+            f"SELECT mc4_.m4id,{mc4_name}.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,model,model_param,model_val "
+            f"FROM {mc4_param_name}, {mc4_name} "
+            f"WHERE {mc4_name}.m4id = {mc4_param_name}.m4id "
+        )
+    if lvl == 5 and type == "mc":
+        tbls = [f"{mc4_name}", f"{mc5_name}", f"{mc5_param_name}"]
+        qformat = (
+            f"SELECT {mc5_name}.m5id,{mc5_name}.m4id,{mc5_name}.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,hitc,modl,fitc,coff,hit_param,hit_val "
+            f"FROM {mc4_name}, {mc5_name}, {mc5_param_name} "
+            f"WHERE {mc4_name}.m4id = {mc5_name}.m4id "
+            f"AND {mc5_name}.m5id = {mc5_param_name}.m5id "
+       )
+
+
     if tbls is None:
         raise ValueError("Invalid 'lvl' and 'type' combination.")
     
     if fld is not None:
         if val is None:
             raise ValueError("'val' cannot be None. Please provide a valid value for the specified field.")
-        
-        # if verbose:
-        #     print(f"fld: {fld}")
-        #     print(f"val: {val}")
-        
 
         with open("config.yaml", "r") as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
@@ -100,8 +145,8 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
         if add_fld:
             wtest = False
         wtest = lvl in [0] or (lvl == 2 and type == "sc")
-        if not check_tcpl_db_schema() and lvl == 4:
-            wtest = True
+        # if not check_tcpl_db_schema() and lvl == 4:
+        #     wtest = True
         
         qformat = qformat + ("WHERE" if wtest else "AND")
         
@@ -109,27 +154,14 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             fld = [fld]
         qformat += "  " + " AND ".join([f"{fld[i]} IN (%s)" for i in range(len(fld))])
         qformat += ";"
-        print(f"qformat: {qformat}")
+        # print(f"qformat: {qformat}")
         if not isinstance(val, list):
             val = [val]
 
 
         val = ','.join([str(v) for v in val])
-        # expr = str(val[0])
-        # for i in range(len(val[1:])):
-        #     expr += "," + str(val[i+1])
-
-        # expr = "(" + expr + ")" 
-        # val = ','.join(['"' + str(v) + '"']) for v in val
-
-        # qstring = qstring.strip("[]")
-        # qstring = "(" + qstring + ")"
-        # print(f"expr: {expr}")
-        print(f"val: {val}")
         qstring = qformat % val
-       
-        if True:
-            print(f"qstring: {qstring}")
+        # print(f"qstring: {qstring}")
 
     else:
         qstring = qformat

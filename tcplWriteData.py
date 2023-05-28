@@ -30,7 +30,7 @@ def tcplWriteData(dat, lvl):
     elif lvl == 5:
         tcplAppend(dat=dat[["aeid", "m4id", "m5id", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(), tbl="mc5_")
         # get m5id for mc5_param
-        qformat = "SELECT m5id, m4id, aeid FROM mc5 WHERE aeid IN (%s);"
+        qformat = "SELECT m5id, m4id, aeid FROM mc5_ WHERE aeid IN (%s);"
         qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
 
         m5id_map = tcplQuery(query=qstring)
@@ -38,7 +38,7 @@ def tcplWriteData(dat, lvl):
         dat = dat.set_index(["aeid", "m4id"])
         dat = dat.join(m5id_map, how="left")
 
-        tcplAppend(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]],tbl="mc5_param_")
+        tcplAppend(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl="mc5_param_")
     else:
         n = dat.shape[0]
         tbl = "mc" + str(lvl)

@@ -1,7 +1,7 @@
 import numpy as np
 from tcplfit2_core import tcplfit2_core
 
-def tcplFit2(dat, fitmodels=["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"], bmed=None, bidirectional=True):
+def tcplFit2(dat, fitmodels, bidirectional=True):
     if 'bmed' not in dat.columns:
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
@@ -44,10 +44,11 @@ def tcplFit2(dat, fitmodels=["cnst", "hill", "gnls", "poly1", "poly2", "pow", "e
                     conc=x['concentration_unlogged'],
                     resp=x['response'],
                     cutoff=x['bmad'],
+                    fitmodels=fitmodels,
                     bidirectional=bidirectional,
                     verbose=False,
                     force_fit=True,
-                    fitmodels=fitmodels)
+                    )
     ).values.tolist()
     
     return dat

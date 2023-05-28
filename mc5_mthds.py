@@ -1,0 +1,30 @@
+import numpy as np
+
+def mc5_mthds(ae):
+    return {
+        'pc20': lambda df: [20],
+        'pc50': lambda df: [50],
+        'pc70': lambda df: [70],
+        'log2_1.2': lambda df: [np.log2(1.2)],
+        'log10_1.2': lambda df: [np.log10(1.2)],
+        'log2_2': lambda df: [np.log2(2)],
+        'log10_2': lambda df: [np.log10(2)],
+        'neglog2_0.88': lambda df: [-1 * np.log2(0.88)],
+        'coff_2.32': lambda df: [2.32],
+        'fc0.2': lambda df: [0.2],
+        'fc0.3': lambda df: [0.3],
+        'fc0.5': lambda df: [0.5],
+        'pc05': lambda df: [5],
+        'pc10': lambda df: [10],
+        'pc25': lambda df: [25],
+        'pc30': lambda df: [30],
+        'pc95': lambda df: [95],
+        'bmad1': lambda df: df['bmad'].aggregate(lambda x: x.unique()),
+        'bmad2': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 2),
+        'bmad3': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 3),
+        'bmad4': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 4),
+        'bmad5': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 5),
+        'bmad6': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 6),
+        'bmad10': lambda df: df['bmad'].aggregate(lambda x: x.unique() * 10),
+        'maxmed20pct': lambda df: df['max_med'].aggregate(lambda x: np.max(x) * 0.20),
+    }

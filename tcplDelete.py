@@ -10,7 +10,5 @@ def tcplDelete(tbl, fld, val):
     val = [','.join([f'"{x}"' for x in v]) for v in val]
 
     qstring = qformat % tuple(val)
-    print(f'query: {qstring}')
-    res = tcplQuery(qstring)
-    print(f'res: {res}')
+    tcplQuery(qstring)
 

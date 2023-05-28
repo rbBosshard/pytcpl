@@ -45,39 +45,37 @@ def write_lvl_4(dat):
 
     # get l3 dat for agg columns
     dat_agg = dat[['aeid', 'm4id']].assign(m3id=dat['m3ids'])
+
     # how many m3ids are there per m4id datapoint?
     # for i in range(dat_agg.shape[0]):
     #     print(f'shape: {len(dat_agg.m3id.iloc[i])}')
     dat_agg = dat_agg.set_index('m4id')
-    # dat_agg = dat_agg.groupby("m4id")
-    dat_agg = dat_agg.explode('m3id')
+
+    dat_agg = dat_agg.explode('m3id').reset_index()
+
     ids = list(dat_agg['m3id'])
-    print(ids)
     l3_dat = tcplLoadData(lvl = 3, fld = "m3id", val = ids, type = "mc")
-    print(l3_dat.columns.tolist())
-    # print(l3_dat.head(5))
+
     l3_dat = l3_dat[["m0id","m1id","m2id","m3id"]]
     dat_agg = dat_agg.set_index("m3id")
     l3_dat = l3_dat.set_index("m3id")
     dat_agg = dat_agg.join(l3_dat, how="left")
     dat_agg = dat_agg.reset_index()
 
-    print(f'dat_agg: {dat_agg}')
-    print(f'dat_param: {dat_param}')
-    print(f'onesd: {onesd}')
-    print(f'bmed: {bmed}')
+    # print(f'dat_agg: {dat_agg}')
+    # print(f'dat_param: {dat_param}')
+    # print(f'onesd: {onesd}')
+    # print(f'bmed: {bmed}')
 
     tcplAppend(dat_agg[mc4_agg_cols], "mc4_agg_")
-
     tcplAppend(dat_param, "mc4_param_")
-
     tcplAppend(onesd, "mc4_param_")
-
     tcplAppend(bmed, "mc4_param_")
 
 
 def tcplFit2_unnest(output):
-    modelnames = output["modelnames"]
+    modelnames = list(output.keys())
+
     res = {}
 
     for m in modelnames:
@@ -85,47 +83,12 @@ def tcplFit2_unnest(output):
 
     test = pd.DataFrame(columns=["model", "model_param", "model_val"])
     for m in modelnames:
-        # print([(param , val) for param, val in res[m].items()])
+        # print([(m, param , val) for param, val in res[m].items()])
         lst = {param: val for param, val in res[m].items()}
         new_row = pd.DataFrame({"model": m, "model_param": list(lst.keys()), "model_val": list(lst.values())})
         test = pd.concat([test, new_row])
 
     return test
-
-
-def tcplFit2_nest(dat):
-    modelnames = dat["model"].unique()
-
-    for m in modelnames:
-        globals()[m] = dict(tuple(dat[dat["model"] == m].groupby("model_param")["model_val"]))
-        
-    for m in modelnames:
-        if m == "cnst":
-            modpars = "er"
-        elif m == "exp2":
-            modpars = ["a", "b", "er"]
-        elif m == "exp3":
-            modpars = ["a", "b", "p", "er"]
-        elif m == "exp4":
-            modpars = ["tp", "ga", "er"]
-        elif m == "exp5":
-            modpars = ["tp", "ga", "p", "er"]
-        elif m == "hill":
-            modpars = ["tp", "ga", "p", "er"]
-        elif m == "poly1":
-            modpars = ["a", "er"]
-        elif m == "poly2":
-            modpars = ["a", "b", "er"]
-        elif m == "pow":
-            modpars = ["a", "p", "er"]
-        elif m == "gnls":
-            modpars = ["tp", "ga", "p", "la", "q", "er"]
-
-        globals()[m]["pars"] = modpars
-
-    out1 = [globals()[m] for m in modelnames] + [{"modelnames": modelnames}]
-
-    return out1
 
 
 def log_model_params(datc):

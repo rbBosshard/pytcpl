@@ -39,14 +39,12 @@ def get_db_conn():
         return None
 
 def tcplQuery(query):
-    
     try:
         if query.lower().startswith("delete"):
             db_conn= get_db_conn()
             mycursor = db_conn.cursor()
-            ok = mycursor.execute(query)
+            mycursor.execute(query)
             db_conn.commit()
-            print(ok)
         else:
             engine = get_sqlalchemy_engine()
             df = pd.read_sql_query(text(query), con=engine.connect())

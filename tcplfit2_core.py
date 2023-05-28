@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 from acy import acy
 
 from fitcnst import fitcnst
+from fitpoly1 import fitpoly1
+from fitpoly2 import fitpoly2
 from fithill import fithill
 
-def tcplfit2_core(conc, resp, cutoff, force_fit=False, bidirectional=True, verbose=False, do_plot=False,
-                  fitmodels=("cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5")):
-
+def tcplfit2_core(conc, resp, cutoff, fitmodels, bidirectional, verbose= False, force_fit=False):
     conc = conc.iloc[0]
     resp = resp.iloc[0]
     cutoff = cutoff.iloc[0]
@@ -29,35 +29,34 @@ def tcplfit2_core(conc, resp, cutoff, force_fit=False, bidirectional=True, verbo
 
     # Fit each model based on conditions
     # modelnames = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
-    modelnames = ["cnst"]
+    modelnames = fitmodels
 
     for model in modelnames:
         # Only fit when four or more concentrations, the model is in fitmodels, and
         # (either one response is above cutoff OR force_fit is True OR it's the constant model.)
         to_fit = len(rmds) >= 4 and model in fitmodels and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
-        fname = "fit" + model  # requires each model function have name "fit____" where ____ is the model name
+        fname = "fit" + model  # requires each model function have name "fit____" where ____ is the model name        
+        # Use curve_fit to fit the model function
+        fit_func = globals()[fname]  # Get the function object by name
 
-        if to_fit:
-            # Use curve_fit to fit the model function
-            fit_func = globals()[fname]  # Get the function object by name
-            # print(fit_func)
-            model_results = fit_func(conc, resp, nofit = not to_fit) #, **kwargs)
-            # Create a dictionary to store the model results
-            # model_results = {"conc": conc, "resp": resp, "params": popt, "covariance": pcov, "success": True}
-        else:
-            model_results = {"success": False}
+        model_results = fit_func(np.array(conc), np.array(resp), nofit = not to_fit)
 
         # Add specific calculations for each model
         if to_fit:
+            # print("model_results:", model_results)  
             if model in ("poly1", "poly2", "pow", "exp2", "exp3"):
-                model_results["top"] = np.max(model_results["params"])
+                model_results["top"] = model_results["modl"][np.argmax(np.abs(model_results["modl"]))] # top is taken to be highest model value
                 model_results["ac50"] = acy(.5 * model_results["top"], model_results, type=model)
             elif model in ("hill", "exp4", "exp5"):
-                model_results["top"] = model_results["params"][0]
-                model_results["ac50"] = model_results["params"][1]
+                # methods with a theoretical top/ac50
+                model_results["top"] = model_results["tp"]
+                model_results["ac50"] = model_results["ga"]
             elif model == "gnls":
+                # gnls methods; use calculated top/ac50, etc.
                 model_results["top"] = acy(0, model_results, type=model, returntop=True)
+                # check if the theoretical top was calculated
                 if np.isnan(model_results["top"]):
+                    # if the theoretical top is NA return NA for ac50 and ac50_loss
                     if verbose:
                         print("'top' for 'gnls' is not able to be calculated returning NA. "
                               "AC50 for gain and loss directions are returned as NA.")
@@ -77,27 +76,8 @@ def tcplfit2_core(conc, resp, cutoff, force_fit=False, bidirectional=True, verbo
         print(aics)
         print("Winner:", min(aics, key=aics.get))
 
-    # # Plot all models if do_plot is True and there is at least one successful model
-    # shortnames = [model for model in modelnames if model != "cnst"]
-    # successes = [locals()[model]["success"] for model in shortnames]
-    # if do_plot and all(successes):
-    #     sorted_indices = np.argsort(logc)
-    #     resp_sorted = resp[sorted_indices]
-    #     logc_sorted = logc[sorted_indices]
-
-    #     plt.figure()
-    #     plt.scatter(logc_sorted, resp_sorted, color="black", label="resp")
-
-    #     for model in shortnames:
-    #         modl_sorted = locals()[model]["modl"][sorted_indices]
-    #         plt.plot(logc_sorted, modl_sorted, label=model)
-
-    #     plt.legend(loc="upper left")
-    #     plt.show()
-
     # Put all the model outputs into one dictionary and return
+    out = {}
     for modelname in modelnames:
-        out = {model: locals()[modelname]}
-    out["modelnames"] = modelnames
-    # out.update(kwargs)
+        out[modelname] =  locals()[modelname]
     return out

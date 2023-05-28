@@ -3,54 +3,57 @@ import math
 from scipy.optimize import root_scalar
 
 def acy(y, modpars, type="hill", returntop=False, returntoploc=False, getloss=False, verbose=False):
-    a, b, tp, ga, p, q, la, success, top = [None] * 8
-    locals().update(modpars)
+    keys = list(modpars.keys()) #  ["a", "b", "tp", "ga", "p", "q", "la", "success", "top"]
+    success, aic, cov, rme, modl, pars, sds, top = [modpars.get(k) for k in keys]
+    locals().update(pars)
+    locals().update(modpars) # unpack modpars dict into local variables
 
     if success is not None:
         if success == 0:
             return math.nan
 
     if not returntop:
-        if tp is not None and abs(y) >= abs(tp):
+        if "tp" in modpars and modpars["tp"] is not None and abs(y) >= abs(modpars["tp"]):
             if verbose:
                 warnings.warn("y (specified activity response) is greater than tp in function acy, returning NA")
             return math.nan
-        if top is not None and abs(y) >= abs(top):
+        if "top" in modpars and modpars["top"] is not None and abs(y) >= abs(modpars["top"]):
             if verbose:
                 warnings.warn("y (specified activity response) is greater than top in function acy, returning NA")
             return math.nan
-        if tp is not None and y * tp < 0:
+        if "tp" in modpars and modpars["tp"] is not None and y * modpars["tp"] < 0:
             if verbose:
                 warnings.warn("y (specified activity response) is wrong sign in function acy, returning NA")
             return math.nan
 
     if type == "poly1":
-        return y / a
+        return y / locals()["a"]
     elif type == "poly2":
-        return b * (-1 + math.sqrt(1 + 4 * y / a)) / 2
+        return locals()["b"] * (-1 + math.sqrt(1 + 4 * y / locals()["a"])) / 2
     elif type == "pow":
-        return (y / a) ** (1 / p)
+        return (y / locals()["a"]) ** (1 / locals()["p"])
     elif type == "exp2":
-        return b * math.log(y / a + 1)
+        return locals()["b"] * math.log(y / locals()["a"] + 1)
     elif type == "exp3":
-        return b * (math.log(y / a + 1)) ** (1 / p)
+        return locals()["b"] * (math.log(y / locals()["a"] + 1)) ** (1 / locals()["p"])
     elif type == "exp4":
-        return -ga * math.log2(1 - y / tp)
+        return -locals()["ga"] * math.log2(1 - y / locals()["tp"])
     elif type == "exp5":
-        return ga * (-math.log2(1 - y / tp)) ** (1 / p)
+        return locals()["ga"] * (-math.log2(1 - y / locals()["tp"])) ** (1 / locals()["p"])
     elif type == "hill":
-        return ga / ((tp / y) - 1) ** (1 / p)
+        return locals()["ga"] / ((locals()["tp"] / y) - 1) ** (1 / locals()["p"])
     elif type == "gnls":
         toploc = None
+        args = (locals()["tp"], locals()["ga"], locals()["p"], locals()["la"], locals()["q"])
         try:
-            toploc = root_scalar(gnlsderivobj, args=(tp, ga, p, la, q), method='brentq', bracket=[ga, la]).root
+            toploc = root_scalar(gnlsderivobj, args=args, method='brentq', bracket=[locals()["ga"], locals()["la"]]).root
         except ValueError:
             if verbose:
                 warnings.warn("toploc could not be found numerically")
-            topval = tp
+            topval = locals()["tp"]
             toploc = math.nan
         else:
-            topval = gnls([tp, ga, p, la, q], toploc)
+            topval = gnls(list(args), toploc)
 
         if returntoploc:
             return toploc
@@ -65,9 +68,10 @@ def acy(y, modpars, type="hill", returntop=False, returntoploc=False, getloss=Fa
             return toploc
 
         if getloss:
-            output = root_scalar(acgnlsobj, args=(y, tp, ga, p, la, q), method='brentq', bracket=[toploc, 1e5]).root
+            args = (y, locals()["tp"], locals()["ga"], locals()["p"], locals()["la"], locals()["q"])
+            output = root_scalar(acgnlsobj, args=args, method='brentq', bracket=[toploc, 1e5]).root
         else:
-            output = root_scalar(acgnlsobj, args=(y, tp, ga, p, la, q), method='brentq', bracket=[1e-8, toploc]).root
+            output = root_scalar(acgnlsobj, args=args, method='brentq', bracket=[1e-8, toploc]).root
 
         if math.isnan(output):
             return math.nan
@@ -95,7 +99,10 @@ from scipy.stats import t, norm
 def tcplObj(p, conc, resp, fname, errfun="dt4", err=None):
     mu = fname(ps=p, x=conc)  # get model values for each conc
     if err is None:
-        err = np.exp(p) #if len(p) == 1 else p[-1] # set error term
+        if isinstance(p, list) or isinstance(p, np.ndarray):
+            err = np.exp(p[-1]) # set error term ?
+        else:
+            err = np.exp(p)
     # objective function is the sum of log-likelihood of response given the model at each concentration
     # scaled by variance (err)
     # negate objective function to maximize likelihood

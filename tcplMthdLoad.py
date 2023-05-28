@@ -18,7 +18,7 @@ def tcplMthdLoad(lvl, id = None, type = "mc"):
         qstring = f"{qformat} ORDER BY {id_name}, a.exec_ordr"
     else:
         qstring = qformat
-    # if verbose:
-    #     print(f"qstring: {qstring}")
+
+    # print(f"qstring: {qstring}")
     dat = tcplQuery(query=qstring)
     return dat
