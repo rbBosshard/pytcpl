@@ -22,24 +22,13 @@ def tcplHit2(mc4, coff):
 
 
     test = (
-        nested_mc4.apply(lambda row: pd.Series(tcplhit2_core(row['params'], 
-                                                             row['conc'], 
-                                                             row['resp'], 
-                                                             row['bmed'], coff, row['onesd'])), axis=1)
-        .join(nested_mc4.drop(['conc', 'resp'], axis=1))
+        nested_mc4.assign(df = lambda x: [tcplhit2_core(params = x.params, conc = np.array(x.conc), resp = np.array(x.resp), bmed = x.bmed, cutoff = coff, onesd = x.onesd) for _, x in x.iterrows()]).drop(['conc', 'resp'], axis=1)
     )
 
-    res = pd.concat([test, pd.DataFrame(test['df'].tolist())], axis=1)
+    res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)
 
-
-    res['ac95'] = res.apply(lambda row: acy(0.95 * row['top'], 
-                                            {'a': row['a'], 'b': row['b'], 
-                                             'ga': row['ga'], 'la': row['la'], 
-                                             'p': row['p'], 'q': row['q'], 
-                                             'tp': row['tp']}), axis=1)
-
-    res['coff_upper'] = 1.2 * res['cutoff']
-    res['coff_lower'] = 0.8 * res['cutoff']
+    res['coff_upper'] = 1.2 * coff
+    res['coff_lower'] = 0.8 * coff
 
     mc4_subset = mc4[['m4id', 'logc_min', 'logc_max']].drop_duplicates()
 
@@ -62,21 +51,27 @@ def tcplHit2(mc4, coff):
     )
 
     mc5 = pd.merge(
-        res[['m4id', 'aeid', 'fit_method', 'hitcall', 'fitc', 'cutoff']].rename(columns={'fit_method': 'modl', 'hitcall': 'hitc', 'fitc': 'fitc', 'cutoff': 'coff'}),
+        res,
         mc4[['m4id', 'aeid']].drop_duplicates(),
-        on=['m4id', 'aeid'],
+        on=['m4id'],
         how='left'
     )
-    mc5['model_type'] = 2
+    mc5 = mc5[['m4id', 'aeid', 'fit_method', 'hitcall', 'fitc', 'cutoff']].rename(columns={"fit_method": "modl", "hitcall" : "hitc", "cutoff" : "coff"}).assign(model_type=2)
 
-    mc5_param = pd.merge(
-        res[['m4id', 'aeid', 'top_over_cutoff', 'bmd']].rename(columns={'top_over_cutoff': 'hit_param', 'bmd': 'hit_val'}),
-        mc4[['m4id', 'aeid']].drop_duplicates(),
-        on=['m4id', 'aeid'],
-        how='left'
+    mc5_param = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on='m4id', how='left')
+
+    pivots = ["top_over_cutoff", "rmse", "a", "b", "tp", "p", "q", "ga", "la", "er", "bmr", "bmdl", "bmdu", "caikwt",
+        "mll", "hitcall", "ac50", "ac50_loss", "top", "ac5", "ac10", "ac20", "acc", "ac1sd", "bmd"]
+    
+    # pivots2 = []
+    pivots = list(mc5_param.loc[:,'top_over_cutoff':'bmd'].columns)
+
+    mc5_param = mc5_param.melt(
+    id_vars=['m4id', 'aeid'],  # Specify other columns to keep unchanged
+    value_vars=pivots,  # Specify the columns to pivot
+    var_name="hit_param",  # Name for the new column containing column names
+    value_name="hit_val"  # Name for the new column containing column values
     )
-    mc5_param = pd.melt(mc5_param, id_vars=['m4id', 'aeid'], value_vars=['hit_param', 'hit_val'], 
-                        var_name='hit_param', value_name='hit_val')
     mc5_param = mc5_param.dropna(subset=['hit_val'])
 
     mc5 = pd.merge(mc5, mc5_param, on=['m4id', 'aeid'], how='inner')
@@ -87,9 +82,12 @@ def tcplFit2_nest(dat):
     modelnames = dat["model"].unique()
 
     dicts = {}
-
     for m in modelnames:
-        dicts[m] = dict(tuple(dat[dat["model"] == m].groupby("model_param")["model_val"]))
+        ok = dat[dat["model"] == m].groupby("model_param")["model_val"].apply(float) # throws warning, 
+        # tup = tuple(ok)
+
+        # p = dict(tup)
+        dicts[m] = ok.to_dict()
         
     for m in modelnames:
         if m == "cnst":
@@ -113,12 +111,7 @@ def tcplFit2_nest(dat):
         elif m == "gnls":
             modpars = ["tp", "ga", "p", "la", "q", "er"]
 
-        dicts[m]["pars"] = modpars
+        dicts[m]["pars"] = {x: dicts[m][x] for x in modpars}
 
-    
-    print("?????")
-    print([dicts[m] for m in modelnames])
-    
     out = dicts #+ [{"modelnames": modelnames}] # out = list with list[0] = values and list[1]=keys
-
     return out

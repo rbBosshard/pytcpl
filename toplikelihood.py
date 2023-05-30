@@ -4,6 +4,7 @@ from scipy.stats import chi2
 from acy import tcplObj
 
 def toplikelihood(fname, cutoff, conc, resp, ps, top, mll):
+    #reparameterize so that top is exactly at cutoff
     if fname == "exp2":
         ps[0] = cutoff / (np.exp(np.max(conc) / ps[1]) - 1)
     elif fname == "exp3":
@@ -23,6 +24,7 @@ def toplikelihood(fname, cutoff, conc, resp, ps, top, mll):
     elif fname == "pow":
         ps[0] = cutoff / (np.max(conc) ** ps[1])
 
+    #get loglikelihood of top exactly at cutoff, use likelihood profile test
     loglik = tcplObj(p=ps, conc=conc, resp=resp, fname=fname)
     if abs(top) >= cutoff:
         out = (1 + chi2.cdf(2 * (mll - loglik), 1)) / 2

@@ -10,7 +10,6 @@ from fit_method_helper import init_fit_method, generate_output
 def fitpoly1(conc, resp, bidirectional=True, verbose=False, nofit=False):
     fitmethod = "poly1"
     pars, sds, mmed, er_est, out = init_fit_method(fitmethod, conc, resp, bidirectional)
-    
     if nofit:
         return out
       
@@ -36,7 +35,6 @@ def fitpoly1(conc, resp, bidirectional=True, verbose=False, nofit=False):
     args = (conc, resp, globals()[fitmethod])
     try:
         fit = minimize(tcplObj, x0=guess, method = 'L-BFGS-B', args=args)
-        print(f"{fitmethod} >>> Fitted.")
     except Exception as e:
         print(f"{fitmethod} >>> Error during optimization: {e} {fit.message}")
         fit = None

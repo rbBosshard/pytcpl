@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 from mad import mad
-from acy import cnst, poly1
+from acy import cnst, poly1, poly2
 
 def init_fit_method(fitmethod, conc, resp, bidirectional=False):
     with open("config.yaml", "r") as f:
@@ -9,10 +9,11 @@ def init_fit_method(fitmethod, conc, resp, bidirectional=False):
         pars_keys = config['FITPARS'][fitmethod.upper()]
 
     pars = dict.fromkeys(pars_keys)
-    print(f"pars: {fitmethod} {pars}")
     sds = dict.fromkeys([param + "_sd" for param in pars])
     myparams = ["success", "aic", "cov", "rme", "modl", "pars", "sds"]
     out = {param: np.nan for param in myparams}
+    out["pars"] = pars
+    out["sds"] = sds
 
     # median at each conc, for multi-valued responses
     unique_conc = np.unique(conc)
@@ -28,11 +29,11 @@ def init_fit_method(fitmethod, conc, resp, bidirectional=False):
 
 def generate_output(fitmethod, conc, resp, pars, sds, out, fit):
     out["success"] = 1
-    print(f"len: {fitmethod} {fit.x}")
     out["aic"] = 2 * len(fit.x) + 2 * fit.fun
     out["pars"] = {param: fit.x[i] for i, param in enumerate(pars)}
     out["modl"] = globals()[fitmethod](fit.x, conc)
     out["rme"] = np.sqrt(np.mean((out["modl"] - resp) ** 2))
+    
 
     try:
         # Estimate the covariance matrix using the inverse of the Hessian

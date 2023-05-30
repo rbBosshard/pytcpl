@@ -80,6 +80,9 @@ def tcplFit2_unnest(output):
 
     for m in modelnames:
         res[m] = {name: val for name, val in output[m].items() if name not in ["pars", "sds", "modl"]}
+        # pars = output[m]["pars"]
+        # if pars is not np.nan:
+        res[m].update(output[m]["pars"])
 
     test = pd.DataFrame(columns=["model", "model_param", "model_val"])
     for m in modelnames:

@@ -28,25 +28,28 @@ def tcplWriteData(dat, lvl):
         if "fitparams" in dat.columns:
             write_lvl_4(dat)
     elif lvl == 5:
-        tcplAppend(dat=dat[["aeid", "m4id", "m5id", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(), tbl="mc5_")
+        mc5_name = "mc5_"
+        tcplAppend(dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(), tbl=mc5_name)
         # get m5id for mc5_param
-        qformat = "SELECT m5id, m4id, aeid FROM mc5_ WHERE aeid IN (%s);"
+        qformat = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN (%s);"
         qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
 
         m5id_map = tcplQuery(query=qstring)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
         dat = dat.set_index(["aeid", "m4id"])
-        dat = dat.join(m5id_map, how="left")
+        dat = dat.join(m5id_map, how="left").reset_index()
 
-        tcplAppend(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl="mc5_param_")
-    else:
-        n = dat.shape[0]
-        tbl = "mc" + str(lvl)
-        if n <= 1e6:
-            tcplAppend(dat=dat, tbl=tbl)
-        else:
-            rbins = np.array_split(np.arange(n), np.ceil(n / 1e6))
-            for x in rbins:
-                tcplAppend(dat=dat.iloc[x], tbl=tbl)
+        mc5_param_name = "mc5_param_"
+
+        tcplAppend(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name)
+    # else:
+    #     n = dat.shape[0]
+    #     tbl = "mc" + str(lvl)
+    #     if n <= 1e6:
+    #         tcplAppend(dat=dat, tbl=tbl)
+    #     else:
+    #         rbins = np.array_split(np.arange(n), np.ceil(n / 1e6))
+    #         for x in rbins:
+    #             tcplAppend(dat=dat.iloc[x], tbl=tbl)
 
     return True

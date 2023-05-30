@@ -3,14 +3,10 @@ import math
 from scipy.optimize import root_scalar
 
 def acy(y, modpars, type="hill", returntop=False, returntoploc=False, getloss=False, verbose=False):
-    keys = list(modpars.keys()) #  ["a", "b", "tp", "ga", "p", "q", "la", "success", "top"]
-    success, aic, cov, rme, modl, pars, sds, top = [modpars.get(k) for k in keys]
-    locals().update(pars)
-    locals().update(modpars) # unpack modpars dict into local variables
-
-    if success is not None:
-        if success == 0:
-            return math.nan
+    if "pars" in modpars:
+        locals().update(modpars["pars"])
+    else:
+        locals().update(modpars) # unpack modpars dict into local variables
 
     if not returntop:
         if "tp" in modpars and modpars["tp"] is not None and abs(y) >= abs(modpars["tp"]):

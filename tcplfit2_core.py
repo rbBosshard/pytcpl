@@ -43,7 +43,6 @@ def tcplfit2_core(conc, resp, cutoff, fitmodels, bidirectional, verbose= False, 
 
         # Add specific calculations for each model
         if to_fit:
-            # print("model_results:", model_results)  
             if model in ("poly1", "poly2", "pow", "exp2", "exp3"):
                 model_results["top"] = model_results["modl"][np.argmax(np.abs(model_results["modl"]))] # top is taken to be highest model value
                 model_results["ac50"] = acy(.5 * model_results["top"], model_results, type=model)

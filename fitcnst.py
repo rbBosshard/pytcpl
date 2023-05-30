@@ -11,20 +11,12 @@ def fitcnst(conc, resp, nofit=False):
     if nofit:
         return out
     
-    conc_max = np.max(conc)
     # Optimize the model
-    offset = 2
-    # Starting parameters for the Model
-    a0 = mmed / conc_max  # use largest response with desired directionality
-    if a0 == 0:
-        a0 = 0.01  # if 0, use a smallish number
     guess = [er_est]  # linear coeff (a); set to run through the max resp at the max conc
-
     args = (conc, resp, globals()[fitmethod])
     try:
         # fit = minimize_scalar(tcplObj, bracket=(er_est - offset, er_est + offset), method='brent', options={'maxiter': 500, 'xtol': 1e-4}, args=args)
         fit = minimize(tcplObj, x0=guess, method = 'L-BFGS-B', args=args)
-        print(f"{fitmethod} >>> Fitted.")
     except Exception as e:
         print(f"{fitmethod} >>> Error during optimization: {e}", )
         fit = None
