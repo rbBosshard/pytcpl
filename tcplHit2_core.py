@@ -11,13 +11,12 @@ from bmdbounds import bmdbounds
 def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, conthits=True, aicc=False, identifiers=None, bmd_low_bnd=None, bmd_up_bnd=None):
     # a=b=tp=p=q=ga=la=er=top=ac50=ac50_loss=ac5=ac10=ac20=ac95=acc=ac1sd=bmd=None
     # bmdl=bmdu=caikwt=mll=None
-    fitout = None
+    fitout = {}
     top = 0
     modelnames = params.keys()
     aics = {}
     for m in modelnames:
         aics[m] = params[m]["aic"]
-        top = params[m]["top"]
 
     aics_values = list(aics.values())
     aics_keys = list(aics.keys())
@@ -120,8 +119,10 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
                 bmd -= bmd_diff
                 bmdl -= bmd_diff
                 bmdu -= bmd_diff
-
-    top_over_cutoff = np.abs(top) / cutoff
+    try:
+        top_over_cutoff = np.abs(top) / cutoff
+    except:
+        top_over_cutoff = np.nan
     # conc = "|".join(conc)
     # resp = "|".join(resp)
 
@@ -139,7 +140,8 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
         out[name] = locals()[name]
 
     locals().update(fitout)
-    locals().update(fitout["pars"])
+    if "pars" in fitout:
+        locals().update(fitout["pars"])
 
     for name in name_list2:
         if name in locals():
