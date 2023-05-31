@@ -92,15 +92,10 @@ def acgnlsobj(x, y, tp, ga, p, la, q):
 import numpy as np
 from scipy.stats import t, norm
 
-def tcplObj(p, conc, resp, fname, errfun="dt4", err=None):
-    mu = fname(ps=p, x=conc)  # get model values for each conc
-    if err is None:
-        if isinstance(p, list) or isinstance(p, np.ndarray):
-            err = np.exp(p[-1]) # set error term ?
-        else:
-            err = np.exp(p)
-    # objective function is the sum of log-likelihood of response given the model at each concentration
-    # scaled by variance (err)
+def tcplObj(ps, conc, resp, fname, errfun="dt4"):
+    mu = fname(ps=ps, x=conc)  # get model values for each conc, ps = parameter vector
+    err = np.exp(ps[-1])
+    # objective function is the sum of log-likelihood of response given the model at each concentrationscaled by variance (err)
     # negate objective function to maximize likelihood
     if errfun == "dt4":
         # degree of freedom paramter = 4 for Student’s t probability density function

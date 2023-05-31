@@ -17,7 +17,7 @@ def bmdbounds(fit_method, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     else:
         fname = fit_method
 
-    maxloglik = tcplObj(p=pars, conc=conc, resp=resp, fname=fname)
+    maxloglik = tcplObj(ps=pars, conc=conc, resp=resp, fname=fname)
 
     if which_bound == "lower":
         xs = 10 ** np.linspace(-5, np.log10(bmd), num=100)

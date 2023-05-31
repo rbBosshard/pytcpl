@@ -4,7 +4,7 @@ from scipy.linalg import inv
 
 from acy import tcplObj
 
-def fithill(conc, resp, bidirectional=True, verbose=False, nofit=False):
+def fithill(conc, resp, bidirectional=True, nofit=False):
     logc = np.log10(conc)
     fname = "hill"
     func = globals()[fname]
@@ -56,9 +56,6 @@ def fithill(conc, resp, bidirectional=True, verbose=False, nofit=False):
     fit = minimize(tcplObj, g, args=(logc, resp), method="Nelder-Mead", bounds=hbnds)
   
     if fit.success:
-        if verbose:
-            print("hill >>>", fit.nfev, fit.status)
-  
         success = 1
         aic = 2 * len(fit.x) - 2 * fit.fun
         fname = "loghill"

@@ -71,5 +71,5 @@ def bmdobj(bmd, fname, bmr, conc, resp, ps, mll, onesp, partype=2):
         elif partype == 3:
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
-    loglik = tcplObj(p=ps, conc=conc, resp=resp, fname=fname)
+    loglik = tcplObj(ps=ps, conc=conc, resp=resp, fname=fname)
     return mll - loglik - chi2.ppf(1 - 2 * onesp, 1) / 2

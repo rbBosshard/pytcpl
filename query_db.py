@@ -47,7 +47,7 @@ def tcplQuery(query):
             db_conn.commit()
         else:
             engine = get_sqlalchemy_engine()
-            df = pd.read_sql_query(text(query), con=engine.connect())
+            df = pd.read_sql(text(query), con=engine.connect())
             return df
     except Exception as e:
         print(f"Error querying MySQL: {e}")

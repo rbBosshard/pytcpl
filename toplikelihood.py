@@ -25,7 +25,7 @@ def toplikelihood(fname, cutoff, conc, resp, ps, top, mll):
         ps[0] = cutoff / (np.max(conc) ** ps[1])
 
     #get loglikelihood of top exactly at cutoff, use likelihood profile test
-    loglik = tcplObj(p=ps, conc=conc, resp=resp, fname=fname)
+    loglik = tcplObj(ps=ps, conc=conc, resp=resp, fname=fname)
     if abs(top) >= cutoff:
         out = (1 + chi2.cdf(2 * (mll - loglik), 1)) / 2
     if abs(top) < cutoff:

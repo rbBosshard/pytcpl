@@ -7,14 +7,6 @@ mc4_param_name = "mc4_param_"
 mc5_name = "mc5_"
 mc5_param_name = "mc5_param_"
 
-def load_mc3_data(aeid = "5"):
-    return tcplLoadData(lvl=3, fld='aeid', val=aeid, type="mc")
-
-def load_mc4_data(aeid = "5"):
-    return tcplLoadData(lvl=4, fld='aeid', val=aeid, type="mc")
-
-def check_tcpl_db_schema():
-    return False
 
 def prepField(fld, tbl, db):
     tbl_flds = [tcplListFlds(t, db) for t in tbl]
@@ -27,6 +19,7 @@ def prepField(fld, tbl, db):
         raise ValueError("Not all given fields available in query.")
         
     return pre + "." + fld
+
 
 def tcplListFlds(tbl, db):
     qformat = """
@@ -77,32 +70,6 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             "WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id "
       )
     
-    # if lvl == "agg" and type == "mc":
-    #     tbls = ["mc3", "mc4_agg", "mc4"]
-    #     qformat = (
-    #         "SELECT mc4_agg.aeid, mc4_agg.m4id, mc4_agg.m3id, mc4_agg.m2id, mc4_agg.m1id, mc4_agg.m0id, mc4.spid, logc, resp "
-    #         "FROM mc3, mc4_agg, mc4 "
-    #         "WHERE mc3.m3id = mc4_agg.m3id "
-    #         "AND mc4.m4id = mc4_agg.m4id "
-    #     )
-    
-    # if lvl == 4 and type == "mc":
-    #     tbls = ["mc4", "mc4_param"]
-    #     qformat = (
-    #       "SELECT mc4.m4id,mc4.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,model,model_param,model_val "
-    #       "FROM mc4_param, mc4 "
-    #       "WHERE mc4.m4id = mc4_param.m4id " 
-    #     )
-
-    # if lvl == 5 and type == "mc":
-    #     tbls = ["mc4", "mc5", "mc5_param"]
-    #     qformat = (
-    #       " SELECT mc5.m5id,mc5.m4id,mc5.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,hitc,modl,fitc,coff,hit_param,hit_val "
-    #       "FROM mc4, mc5, mc5_param "
-    #       "WHERE mc4.m4id = mc5.m4id "
-    #       "AND mc5.m5id = mc5_param.m5id "
-    #    )
-
     if lvl == "agg":
         tbls = ["mc3", f"{mc4_agg_name}", f"{mc4_name}"]
         qformat = (
@@ -115,10 +82,11 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
     if lvl == 4 and type == "mc":
         tbls = [f"{mc4_name}", f"{mc4_param_name}"]
         qformat = (
-            f"SELECT mc4_.m4id,{mc4_name}.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,model,model_param,model_val "
+            f"SELECT {mc4_name}.m4id,{mc4_name}.aeid,spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,model,model_param,model_val "
             f"FROM {mc4_param_name}, {mc4_name} "
             f"WHERE {mc4_name}.m4id = {mc4_param_name}.m4id "
         )
+
     if lvl == 5 and type == "mc":
         tbls = [f"{mc4_name}", f"{mc5_name}", f"{mc5_param_name}"]
         qformat = (
@@ -127,7 +95,6 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             f"WHERE {mc4_name}.m4id = {mc5_name}.m4id "
             f"AND {mc5_name}.m5id = {mc5_param_name}.m5id "
        )
-
 
     if tbls is None:
         raise ValueError("Invalid 'lvl' and 'type' combination.")

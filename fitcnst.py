@@ -1,27 +1,14 @@
-import numpy as np
-from scipy.optimize import minimize_scalar
-from scipy.optimize import minimize
+from fit_method_helper import init_fit_method, fit
 
-from acy import tcplObj, cnst
-from fit_method_helper import init_fit_method, generate_output
-
-def fitcnst(conc, resp, nofit=False):
+def fitcnst(conc, resp, bidirectional=True, to_fit=False):
     fitmethod = "cnst"
-    pars, sds, mmed, er_est, out = init_fit_method(fitmethod, conc, resp)
-    if nofit:
-        return out
+    pars, sds, out, mmed, er_est, args = init_fit_method(fitmethod, conc, resp)
     
-    # Optimize the model
-    guess = [er_est]  # linear coeff (a); set to run through the max resp at the max conc
-    args = (conc, resp, globals()[fitmethod])
-    try:
-        # fit = minimize_scalar(tcplObj, bracket=(er_est - offset, er_est + offset), method='brent', options={'maxiter': 500, 'xtol': 1e-4}, args=args)
-        fit = minimize(tcplObj, x0=guess, method = 'L-BFGS-B', args=args)
-    except Exception as e:
-        print(f"{fitmethod} >>> Error during optimization: {e}", )
-        fit = None
+    if to_fit:
+        guess = [er_est]  # linear coeff (a); set to run through the max resp at the max conc
+        out = fit(conc, resp, fitmethod, pars, sds, out, args, guess)
+    
+    return out, to_fit
 
-    if fit:
-        out = generate_output(fitmethod, conc, resp, pars, sds, out, fit)
         
-    return out
+
