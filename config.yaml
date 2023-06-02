@@ -1,22 +1,6 @@
-APP:
-  ENVIRONMENT: test
-  DEBUG: True # Only accept True or False
-
 DATABASE:
   USERNAME: root
   PASSWORD: root
   HOST: localhost
   PORT: 3306
   DB: invitrodb_v3o5
-
-FITPARS:
-  CNST: ['er']
-  EXP2: ['a', 'b', 'er']
-  EXP3: ['a', 'b', 'p', 'er']
-  EXP4: ['tp', 'ga', 'er']
-  EXP5: ['tp', 'ga', 'p', 'er']
-  HILL: ['tp', 'ga', 'p', 'er']
-  POLY1: ['a', 'er']
-  POLY2: ['a', 'b', 'er']
-  POW: ['a', 'p', 'er']
-  GNLS: ['tp', 'ga', 'p', 'la', 'q', 'er']

@@ -12,8 +12,10 @@ from tcplHit2 import tcplHit2
 import warnings
 warnings.filterwarnings("ignore")
 
-id = 80
+id = 5
 chunk_mc4 = 100
+
+parallel = True
 
 fitmodels = ["cnst", "poly1", "poly2" ]
 # fitmodels = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
@@ -104,10 +106,10 @@ name = "pipeline"
 
 with cProfile.Profile() as pr:
     mc4()
-    mc5()
+    # mc5()
 
 pr.dump_stats(f'{name}.prof')
 
 print("Profiling complete")
 
-## Type `snakeviz mc4.prof ` in terminal to view profile in browser
+## Type `snakeviz pipeline.prof ` in terminal to view profile in browser
