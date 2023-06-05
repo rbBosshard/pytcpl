@@ -2,7 +2,7 @@ import numpy as np
 from math import exp
 from bmd_bounds import bmd_bounds
 
-from acy import acy
+from pytcpl.acy import acy
 from hitloginner import hitloginner, hitcontinner, nestselect
 
 

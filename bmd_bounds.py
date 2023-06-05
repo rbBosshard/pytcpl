@@ -2,8 +2,8 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 from scipy.stats import chi2
 
-from acy import tcplObj
-from acy import acy
+from pytcpl.acy import tcplObj
+from pytcpl.acy import acy
 
 
 def bmd_bounds(fit_method, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):

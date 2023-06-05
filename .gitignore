@@ -1,11 +1,12 @@
 __pycache__
 
-/docs
+.idea/
 .lprof/
+
+docs/
 
 *.csv
 *.prof
-
 *.ipynb
 
 

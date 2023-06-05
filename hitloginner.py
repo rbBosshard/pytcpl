@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, chi2
-from acy import cnst, poly1, poly2
-from acy import tcplObj
+from pytcpl.acy import tcplObj
 
 
 def hitloginner(conc, resp, top, cutoff, ac50=None):
