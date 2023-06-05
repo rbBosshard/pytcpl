@@ -2,8 +2,7 @@ import pandas as pd
 import yaml
 import time
 import mysql.connector as mysql
-from sqlalchemy import create_engine, text, delete
-from sqlalchemy.dialects import mysql as mysql_dialect
+from sqlalchemy import create_engine, text
 
 
 def get_db_config():
@@ -11,6 +10,7 @@ def get_db_config():
         config = yaml.load(f, Loader=yaml.FullLoader)
         config_db = config['DATABASE']
         return config_db['USERNAME'], config_db['PASSWORD'], config_db['HOST'], config_db['PORT'], config_db['DB']
+
 
 def get_sqlalchemy_engine():
     username, password, host, port, db = get_db_config()
@@ -23,11 +23,12 @@ def get_sqlalchemy_engine():
         print(f"Error connecting to MySQL: {error}")
         return None
 
+
 def get_db_conn():
     username, password, host, port, db = get_db_config()
 
     try:
-        db_conn =  mysql.connect(
+        db_conn = mysql.connect(
             host=host,
             user=username,
             password=password,
@@ -40,10 +41,11 @@ def get_db_conn():
         print(f"Error connecting to MySQL: error: {error}")
         return None
 
-def tcplQuery(query):
+
+def tcpl_query(query):
     try:
         if query.lower().startswith("delete"):
-            db_conn= get_db_conn()
+            db_conn = get_db_conn()
             mycursor = db_conn.cursor()
             mycursor.execute(query)
             db_conn.commit()
@@ -56,16 +58,3 @@ def tcplQuery(query):
     except Exception as e:
         print(f"Error querying MySQL: {e}")
         return None
-    
-# def tcplDelete(tbl, fld, val):
-#     engine = get_sqlalchemy_engine()
-#     pd = update(tbl).where(fld.in_(val))
-#     print(pd)
-#     del_stmt = delete(tbl)
-#     stmt = del_stmt.where(fld.in_(val))
-#     print(f"stmt: {stmt}")
-    
-#     with engine.begin() as conn:
-#         res = conn.execute(stmt)
-#         print(f"res: {res}")
-#         print(res.rowcount)

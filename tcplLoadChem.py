@@ -1,8 +1,8 @@
 import pandas as pd
-from query_db import tcplQuery
+from query_db import tcpl_query
 
-def tcplLoadChem(field=None, val=None, exact=True, include_spid=True):
-    tbl = ["chemical", "sample"]
+
+def tcpl_load_chem(field=None, val=None, exact=True, include_spid=True):
     field_mapping = {
         "chid": "chid",
         "spid": "spid",
@@ -17,9 +17,9 @@ def tcplLoadChem(field=None, val=None, exact=True, include_spid=True):
         if field not in field_mapping:
             raise ValueError("Invalid 'field' value.")
 
-    qstring = _ChemQ(field=field, val=val, exact=exact)
+    qstring = _chem_q(field=field, val=val, exact=exact)
 
-    dat = tcplQuery(query=qstring)
+    dat = tcpl_query(query=qstring)
     dat = pd.DataFrame(dat)
 
     if dat.shape[0] == 0:
@@ -39,7 +39,7 @@ def tcplLoadChem(field=None, val=None, exact=True, include_spid=True):
     return dat
 
 
-def _ChemQ(field, val, exact):
+def _chem_q(field, val, exact):
     qstring = """
       SELECT spid, chemical.chid, casn, chnm, dsstox_substance_id
       FROM sample

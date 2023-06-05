@@ -1,7 +1,7 @@
-import pandas as pd
-from query_db import tcplQuery
+from query_db import tcpl_query
 
-def tcplLoadUnit(aeid):
+
+def tcpl_load_unit(aeid):
     qformat = """
     SELECT
       aeid,
@@ -15,7 +15,7 @@ def tcplLoadUnit(aeid):
     aeid_str = ",".join(str(id) for id in aeid)
     qstring = qformat.format(aeid_str)
 
-    dat = tcplQuery(query=qstring)
+    dat = tcpl_query(query=qstring)
 
     if dat.shape[0] == 0:
         print("Warning: The given aeid(s) do not have response units.")

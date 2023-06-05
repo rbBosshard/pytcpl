@@ -1,6 +1,7 @@
 import numpy as np
 
-def mc5_mthds(ae):
+
+def mc5_mthds():
     return {
         'pc20': lambda df: [20],
         'pc50': lambda df: [50],

@@ -1,11 +1,11 @@
-import pandas as pd
-from tcplPrepOtpt import tcplPrepOtpt
+from tcplPrepOtpt import tcpl_prep_otpt
 
-def tcplSubsetChid(dat, flag=False):
+
+def tcpl_subset_chid(dat, flag=False):
     if "m5id" not in dat.columns:
         raise ValueError("'dat' must be a DataFrame with level 5 data.")
     if "casn" not in dat.columns:
-        dat = tcplPrepOtpt(dat)  # Assuming tcplPrepOtpt is a function that preprocesses the data
+        dat = tcpl_prep_otpt(dat)  # Assuming tcplPrepOtpt is a function that preprocesses the data
 
     dat["hitc"] = dat["hitc"] >= 0.9
     dat["chit"] = dat.groupby(["aeid", "chid"])["hitc"].transform(lambda x: x.mean() >= 0.5)
@@ -29,12 +29,13 @@ def tcplSubsetChid(dat, flag=False):
         # dat["nflg"] = dat["nflg"].fillna(0)
     else:
         dat["nflg"] = False
-    
+
     # also add "ac50", 
-    dat = dat.sort_values(by=["aeid", "chid", "fitc.ordr", "nflg", "max_med"], ascending=[True, True, True, True, False], na_position="last")
-    
+    dat = dat.sort_values(by=["aeid", "chid", "fitc.ordr", "nflg", "max_med"],
+                          ascending=[True, True, True, True, False], na_position="last")
+
     min_modl_ga = dat.groupby(["aeid", "casn"]).apply(lambda x: x.index[0]).reset_index(name="ind")
 
     dat = dat.loc[min_modl_ga["ind"]]
-    
+
     return dat

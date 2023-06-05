@@ -1,2 +1,12 @@
 __pycache__
-    
+
+/docs
+.lprof/
+
+*.csv
+*.prof
+
+*.ipynb
+
+
+

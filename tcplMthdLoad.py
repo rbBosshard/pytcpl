@@ -1,10 +1,11 @@
-from query_db import tcplQuery
+from query_db import tcpl_query
 
-def tcplMthdLoad(lvl, id = None, type = "mc"):
+
+def tcpl_mthd_load(lvl, id=None, type="mc", verbose=False):
     if isinstance(id, int) or isinstance(id, str):
         id = [id]
     id = list(map(str, id))
-    
+
     id_name = "acid" if type == "mc" and lvl == 2 else "aeid"
     flds = [id_name, f"b.{type}{lvl}_mthd AS mthd", f"b.{type}{lvl}_mthd_id AS mthd_id"]
     if lvl < 4 and type == "mc":
@@ -19,6 +20,7 @@ def tcplMthdLoad(lvl, id = None, type = "mc"):
     else:
         qstring = qformat
 
-    # print(f"qstring: {qstring}")
-    dat = tcplQuery(query=qstring)
+    if verbose:
+        print(f"qstring: {qstring}")
+    dat = tcpl_query(query=qstring)
     return dat

@@ -1,18 +1,17 @@
 import numpy as np
-import pandas as pd
 from math import exp
+from bmd_bounds import bmd_bounds
 
 from acy import acy
-from hitcontinner import hitcontinner
-from hitloginner import hitloginner
-from nestselect import nestselect
-from bmdbounds import bmdbounds
+from hitloginner import hitloginner, hitcontinner, nestselect
 
-def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, conthits=True, aicc=False, identifiers=None, bmd_low_bnd=None, bmd_up_bnd=None):
-    # a=b=tp=p=q=ga=la=er=top=ac50=ac50_loss=ac5=ac10=ac20=ac95=acc=ac1sd=bmd=None
-    # bmdl=bmdu=caikwt=mll=None
+
+def tcpl_hit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, conthits=True, aicc=False,
+                   identifiers=None, bmd_low_bnd=None, bmd_up_bnd=None):
     fitout = {}
     top = 0
+    modpars = None
+    caikwt = None
     modelnames = params.keys()
     aics = {}
     for m in modelnames:
@@ -31,7 +30,7 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
         # pvalue hardcoded to .05
         if "poly1" in aics_keys and "poly2" in aics_keys:
             aics = nestselect(aics, "poly1", "poly2", dfdiff=1, pval=0.05)
-      
+
         if conthits:
             # if all fits, except the constant fail, use none for the fit method
             # when continuous hit calling is in use
@@ -76,7 +75,6 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
     if np.isnan(hitcall):
         hitcall = 0
 
-    
     bmr = onesd * bmr_scale  # magic bmr is default 1.349
     if hitcall > 0:
 
@@ -90,14 +88,13 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
         bmd = acy(np.sign(top) * bmr, modpars, type=fit_method)
 
         # get bmdl and bmdu
-        bmdl = bmdbounds(fit_method,
-                         bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                         bmd=bmd, which_bound="lower")
-        bmdu = bmdbounds(fit_method,
-                         bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                         bmd=bmd, which_bound="upper")
+        bmdl = bmd_bounds(fit_method,
+                          bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                          bmd=bmd, which_bound="lower")
+        bmdu = bmd_bounds(fit_method,
+                          bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                          bmd=bmd, which_bound="upper")
 
-        ################################################################33
         # apply bmd min
         if bmd_low_bnd is not None and not np.isnan(bmd):
             min_conc = min(conc)
@@ -121,19 +118,15 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
                 bmdu -= bmd_diff
     try:
         top_over_cutoff = np.abs(top) / cutoff
-    except:
+    except ZeroDivisionError:
         top_over_cutoff = np.nan
-    # conc = "|".join(conc)
-    # resp = "|".join(resp)
 
-    # out = {"cutoff": cutoff, "onesd": onesd, "bmr_scale": bmr_scale, "bmed": bmed, "conthits": conthits, "aicc": aicc, "identifiers": identifiers, "bmd_low_bnd": bmd_low_bnd, "bmd_up_bnd": bmd_up_bnd}
-    out ={}
-    # row contains the specified columns and any identifying, unused columns in the input
+    out = {}
     name_list1 = [
         "n_gt_cutoff", "cutoff", "fit_method"]
     name_list2 = [
         "top_over_cutoff", "rmse", "a", "b", "tp", "p", "q", "ga", "la", "er", "bmr", "bmdl", "bmdu", "caikwt",
-        "mll", "hitcall", "ac50", "ac50_loss", "top", "ac5", "ac10", "ac20", "ac95","acc", "ac1sd", "bmd"]
+        "mll", "hitcall", "ac50", "ac50_loss", "top", "ac5", "ac10", "ac20", "ac95", "acc", "ac1sd", "bmd"]
     name_list3 = ["conc", "resp"]
 
     for name in name_list1:
@@ -146,12 +139,7 @@ def tcplhit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
     for name in name_list2:
         if name in locals():
             out[name] = locals()[name]
-    
-    out = {k: v for k, v in out.items() if v is not None}
-        
-    
-    # row = {name: globals()[name] for name in name_list}
-    # if identifiers is not None:
-    #     row.update(identifiers)
-    return out
 
+    out = {k: v for k, v in out.items() if v is not None}
+
+    return out

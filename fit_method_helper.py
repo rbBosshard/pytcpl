@@ -2,8 +2,7 @@ import numpy as np
 from mad import mad
 from acy import cnst, poly1, poly2
 from scipy.optimize import minimize
-from acy import tcplObj
-from acy import acy
+from acy import acy, tcplObj
 
 
 def curve_fit(fitmethod, conc, resp, bidirectional, to_fit):
@@ -20,19 +19,22 @@ def curve_fit(fitmethod, conc, resp, bidirectional, to_fit):
         'gnls': ['tp', 'ga', 'p', 'la', 'q', 'er']
     }.get(fitmethod)
 
-    out = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, **{p: None for p in ["success", "aic", "cov", "rme", "modl"]}}
+    # Prepare (nested) output dictionary
+    out = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params},
+           **{p: None for p in ["success", "aic", "cov", "rme", "modl"]}}
 
     if to_fit:
         initial_values, bounds = get_bounds_and_initial_values(fitmethod, conc, resp, bidirectional)
         args = (conc, resp, globals()[fitmethod])
-        
+
         try:
-            fit = minimize(tcplObj, x0=initial_values, method='L-BFGS-B', args=args) #bounds=bounds, 
+            fit = minimize(tcplObj, x0=initial_values, method='L-BFGS-B', args=args)  # bounds=bounds,
             out = generate_output(fitmethod, conc, resp, out, fit)
         except Exception as e:
-            print(f"{fitmethod} >>> Error during optimization: {e}")   
+            print(f"{fitmethod} >>> Error during optimization: {e}")
 
     return out
+
 
 def get_bounds_and_initial_values(fitmethod, conc, resp, bidirectional):
     # median at each conc, for multi-valued responses
@@ -42,26 +44,27 @@ def get_bounds_and_initial_values(fitmethod, conc, resp, bidirectional):
     mmed = rmds[np.argmax(rmds)] if not bidirectional else rmds[np.argmax(np.abs(rmds))]
     er_est = np.log(rmad) if (rmad := mad(resp)) > 0 else np.log(1e-16)
     conc_max = np.max(conc)
-    a0 = mmed / conc_max if mmed != 0 else 0.01 # use largest response with desired directionality, if 0, use a smallish number
+    # use largest response with desired directionality, if 0, use a smallish number
+    a0 = mmed / conc_max if mmed != 0 else 0.01
     abs_a0 = abs(a0)
     lim = 1e-8
     initial_values = []
-    bounds = () # Assume bidirectional is True!
+    bounds = ()  # Assume bidirectional is True!
     if fitmethod == "poly1":
         initial_values += [a0]
-        bounds += ((-lim*abs_a0, lim*abs_a0),)
+        bounds += ((-lim * abs_a0, lim * abs_a0),)
     if fitmethod == "poly2":
         initial_values += [a0 / 2, conc_max]
-        bounds += ((-lim*abs_a0, lim*abs_a0), (-lim*conc_max, lim*conc_max))
+        bounds += ((-lim * abs_a0, lim * abs_a0), (-lim * conc_max, lim * conc_max))
 
     # last step always append 1) er_est to initial_values, and 2) (None, None) to bounds
     initial_values += [er_est]
     bounds += ((None, None),)
-    return initial_values, bounds
+    return np.array(initial_values), bounds
 
 
 def generate_output(fitmethod, conc, resp, out, fit):
-    out["success"] = 1 
+    out["success"] = 1
     out["aic"] = 2 * len(fit.x) + 2 * fit.fun
     out["pars"] = {param: fit.x[i] for i, param in enumerate(out["pars"])}
     out["modl"] = globals()[fitmethod](fit.x, conc)
@@ -72,22 +75,23 @@ def generate_output(fitmethod, conc, resp, out, fit):
         # Inverse of the objective function’s Hessian; may be an approximation. Not available for all solvers.
         covariance_matrix = np.linalg.inv(fit.hess_inv.todense())
         # Access the uncertainty estimates
-        uncertainties = np.sqrt(np.diag(covariance_matrix)) # uncertainties = standard deviations of parameters = diag_sqrt of covariance matrix
+        uncertainties = np.sqrt(np.diag(
+            covariance_matrix))  # uncertainties = standard deviations of parameters = diag_sqrt of covariance matrix
 
         if not np.any(np.isnan(uncertainties)):
             out["cov"] = 1
             out["sds"] = {param: uncertainties[i] for i, param in enumerate(out["sds"])}
 
-    except Exception as e: 
-            print(f"{fitmethod} >>> Error calculating parameter covariance: {e}")
-            out["cov"] = 0
+    except Exception as e:
+        print(f"{fitmethod} >>> Error calculating parameter covariance: {e}")
+        out["cov"] = 0
 
     return out
 
 
 def assign_extra_attributes(fitmethod, out):
     if fitmethod in ("poly1", "poly2", "pow", "exp2", "exp3"):
-        out["top"] = out["modl"][np.argmax(np.abs(out["modl"]))] # top is taken to be highest model value
+        out["top"] = out["modl"][np.argmax(np.abs(out["modl"]))]  # top is taken to be highest model value
         out["ac50"] = acy(.5 * out["top"], out, type=fitmethod)
     elif fitmethod in ("hill", "exp4", "exp5"):
         # methods with a theoretical top/ac50
