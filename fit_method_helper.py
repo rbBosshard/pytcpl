@@ -6,9 +6,8 @@ from acy import tcplObj
 from acy import acy
 
 
-
 def curve_fit(fitmethod, conc, resp, bidirectional, to_fit):
-    method_params = {
+    params = {
         'cnst': ['er'],
         'exp2': ['a', 'b', 'er'],
         'exp3': ['a', 'b', 'p', 'er'],
@@ -19,9 +18,8 @@ def curve_fit(fitmethod, conc, resp, bidirectional, to_fit):
         'poly2': ['a', 'b', 'er'],
         'pow': ['a', 'p', 'er'],
         'gnls': ['tp', 'ga', 'p', 'la', 'q', 'er']
-    }
+    }.get(fitmethod)
 
-    params = method_params[fitmethod]
     out = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, **{p: None for p in ["success", "aic", "cov", "rme", "modl"]}}
 
     if to_fit:

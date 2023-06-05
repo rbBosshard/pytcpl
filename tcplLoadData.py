@@ -62,6 +62,7 @@ def tcplLoadData(lvl, fld=None, val=None, type="mc", add_fld=True):
             "WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc2.m0id "
         )
     
+    # This takes very long
     if lvl == 3 and type == "mc":
         tbls = ["mc0", "mc1", "mc3"]
         qformat = (

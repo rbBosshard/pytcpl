@@ -1,9 +1,8 @@
 import re 
 
-def convertNames(names):
-    names = [re.sub("aenm", "assay_component_endpoint_name", name) for name in names]
-    names = [re.sub("acnm", "assay_component_name", name) for name in names]
-    names = [re.sub("anm", "assay_name", name) for name in names]
-    names = [re.sub("asnm", "assay_source_name", name) for name in names]
-    
-    return names
+def convertNames(name):
+    name = re.sub("aenm", "assay_component_endpoint_name", name)
+    name = re.sub("acnm", "assay_component_name", name)
+    name = re.sub("anm", "assay_name", name)
+    name = re.sub("asnm", "assay_source_name", name) 
+    return name

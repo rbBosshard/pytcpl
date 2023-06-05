@@ -9,11 +9,13 @@ def tcplFit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=Tr
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
         dat = dat.assign(osd=None)
+
+    print(dat.shape)
     
     grouped = dat.groupby(['aeid', 'spid', 'logc'])
     dat['rmns'] = grouped['resp'].transform(np.mean)
     dat['rmds'] = grouped['resp'].transform(np.median)
-    dat['nconcs'] = grouped['logc'].transform('count')
+    dat['nconc'] = grouped['logc'].transform('count')
     dat['med_rmds'] = dat['rmds'] >= (3 * dat['bmad'])
     
     grouped = dat.groupby(['aeid', 'spid'])
@@ -31,8 +33,8 @@ def tcplFit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=Tr
         logc_min=('logc', np.min),
         nconc=('logc', 'nunique'),
         npts=('resp', 'count'),
-        nrep=('nconcs', np.median),
-        nmed_gtbl = ('med_rmds', lambda x: np.sum(x) / grouped['nconcs'].first().iloc[0]),
+        nrep=('nconc', np.median),
+        nmed_gtbl = ('med_rmds', lambda x: np.sum(x) / grouped['nconc'].first().iloc[0]),
         concentration_unlogged = ('logc', lambda x: list(10**(x))),
         response = ('resp', list),
         m3ids = ('m3id', list)
@@ -40,7 +42,6 @@ def tcplFit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=Tr
     
     grouped = dat.groupby('aeid')
     dat['tmpi'] = grouped['m3ids'].transform(lambda x: np.arange(len(x), 0, -1))    
-
 
     def tcplfit2_core(group):
         conc = np.array(group['concentration_unlogged'].iloc[0])
@@ -69,6 +70,8 @@ def tcplFit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=Tr
     else: # Serial version for debugging
         for _, group in dat.groupby('spid'):
             fitparams.append(tcplfit2_core(group))
+
+    dat["fitparams"] = fitparams
     return dat
 
 def get_to_fit_condition(cutoff, force_fit, rmds, model):

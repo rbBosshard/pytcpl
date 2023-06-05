@@ -15,9 +15,7 @@ def tcplHit2(mc4, coff):
     l3_dat = pd.merge(l4_agg, data, on=['aeid', 'm3id', 'm2id', 'm1id', 'm0id', 'spid', 'logc', 'resp'], how='left')
 
     nested_mc4 = nested_mc4.merge(l3_dat.groupby("m4id").agg(conc=("logc", lambda x: list(10**x)), resp=("resp", lambda x: list(x))).reset_index(), on="m4id", how="left")
-
     nested_mc4 = nested_mc4.merge(mc4.query('model_param == "onesd"')[["m4id", "model_val"]].rename(columns={"model_val": "onesd"}), on="m4id", how="inner")
-
     nested_mc4 = nested_mc4.merge(mc4.query('model_param == "bmed"')[["m4id", "model_val"]].rename(columns={"model_val": "bmed"}), on="m4id", how="inner")
 
 

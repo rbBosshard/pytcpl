@@ -11,18 +11,20 @@ def buildAssayQ(out, tblo, fld=None, val=None, add_fld=None):
     tblo = [tbls[i] for i in tblo]
 
     fld = convertNames(fld)
-    add_fld = convertNames(add_fld)
+    # add_fld = convertNames(add_fld)
 
     with open("config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         db = config['DATABASE']['DB']
 
     fld = prepField(fld=fld, tbl=tblo, db=db)
-    add_fld = prepField(fld=add_fld, tbl=tblo, db=db)
-    afld = list(set(fld + out + add_fld))
-
+    if not isinstance(fld, list):
+        fld = [fld] 
+    # add_fld = prepField(fld=add_fld, tbl=tblo, db=db)
+    # afld = list(set(fld + out + add_fld))
+    afld = list(set(fld + out))
     atbl = list(set([x.split(".")[0] for x in afld]))
-    tbls = list(set(tbls[min([atbl.index(tbl) for tbl in tbls]):max([atbl.index(tbl) for tbl in tbls])]))
+    tbls = list(set(atbl))
     if not any(["map" in field for field in afld]):
         tbls = [tbl for tbl in tbls if tbl != "assay_component_map"]
 
@@ -50,9 +52,10 @@ def buildAssayQ(out, tblo, fld=None, val=None, add_fld=None):
 
         if not isinstance(val, list):
             val = [val]
-        val = [','.join([f'"{x}"' for x in v]) for v in val]
 
-        qstring = qformat % tuple(val)
+        val = ','.join((str(v) for v in val)).replace("[", "").replace("]", "")
+
+        qstring = qformat % val
     else:
         qstring = qformat
 
