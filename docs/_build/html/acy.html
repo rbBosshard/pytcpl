@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>acy module &mdash; PyTcpl 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyTcpl
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">acy module</a><ul>
+<li><a class="reference internal" href="#acy.acgnlsobj"><code class="docutils literal notranslate"><span class="pre">acgnlsobj()</span></code></a></li>
+<li><a class="reference internal" href="#acy.acy"><code class="docutils literal notranslate"><span class="pre">acy()</span></code></a></li>
+<li><a class="reference internal" href="#acy.cnst"><code class="docutils literal notranslate"><span class="pre">cnst()</span></code></a></li>
+<li><a class="reference internal" href="#acy.exp2"><code class="docutils literal notranslate"><span class="pre">exp2()</span></code></a></li>
+<li><a class="reference internal" href="#acy.exp3"><code class="docutils literal notranslate"><span class="pre">exp3()</span></code></a></li>
+<li><a class="reference internal" href="#acy.exp4"><code class="docutils literal notranslate"><span class="pre">exp4()</span></code></a></li>
+<li><a class="reference internal" href="#acy.exp5"><code class="docutils literal notranslate"><span class="pre">exp5()</span></code></a></li>
+<li><a class="reference internal" href="#acy.gnls"><code class="docutils literal notranslate"><span class="pre">gnls()</span></code></a></li>
+<li><a class="reference internal" href="#acy.gnlsderivobj"><code class="docutils literal notranslate"><span class="pre">gnlsderivobj()</span></code></a></li>
+<li><a class="reference internal" href="#acy.hillfn"><code class="docutils literal notranslate"><span class="pre">hillfn()</span></code></a></li>
+<li><a class="reference internal" href="#acy.loggnls"><code class="docutils literal notranslate"><span class="pre">loggnls()</span></code></a></li>
+<li><a class="reference internal" href="#acy.loghill"><code class="docutils literal notranslate"><span class="pre">loghill()</span></code></a></li>
+<li><a class="reference internal" href="#acy.poly1"><code class="docutils literal notranslate"><span class="pre">poly1()</span></code></a></li>
+<li><a class="reference internal" href="#acy.poly2"><code class="docutils literal notranslate"><span class="pre">poly2()</span></code></a></li>
+<li><a class="reference internal" href="#acy.pow"><code class="docutils literal notranslate"><span class="pre">pow()</span></code></a></li>
+<li><a class="reference internal" href="#acy.tcplObj"><code class="docutils literal notranslate"><span class="pre">tcplObj()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyTcpl</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">acy module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/acy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-acy">
+<span id="acy-module"></span><h1>acy module<a class="headerlink" href="#module-acy" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.acgnlsobj">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">acgnlsobj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ga</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">la</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#acgnlsobj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.acgnlsobj" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.acy">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">acy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modpars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hill'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returntop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returntoploc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">getloss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#acy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.acy" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.cnst">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">cnst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#cnst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.cnst" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.exp2">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">exp2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#exp2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.exp2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.exp3">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">exp3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#exp3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.exp3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.exp4">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">exp4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#exp4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.exp4" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.exp5">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">exp5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#exp5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.exp5" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.gnls">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">gnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#gnls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.gnls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.gnlsderivobj">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">gnlsderivobj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ga</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">la</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#gnlsderivobj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.gnlsderivobj" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.hillfn">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">hillfn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#hillfn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.hillfn" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.loggnls">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">loggnls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#loggnls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.loggnls" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.loghill">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">loghill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#loghill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.loghill" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.poly1">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">poly1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#poly1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.poly1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.poly2">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">poly2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#poly2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.poly2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.pow">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">pow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#pow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.pow" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="acy.tcplObj">
+<span class="sig-prename descclassname"><span class="pre">acy.</span></span><span class="sig-name descname"><span class="pre">tcplObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dt4'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/acy.html#tcplObj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#acy.tcplObj" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Robin Bosshard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

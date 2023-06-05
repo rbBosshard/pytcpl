@@ -3,8 +3,6 @@ __pycache__
 .idea/
 .lprof/
 
-docs/
-
 *.csv
 *.prof
 *.ipynb

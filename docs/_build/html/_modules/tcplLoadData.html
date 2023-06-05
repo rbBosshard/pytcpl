@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tcplLoadData &#8212; PyTcpl 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tcplLoadData</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">query_db</span> <span class="kn">import</span> <span class="n">tcpl_query</span>
+
+<span class="n">mc4_name</span> <span class="o">=</span> <span class="s2">&quot;mc4_&quot;</span>
+<span class="n">mc4_agg_name</span> <span class="o">=</span> <span class="s2">&quot;mc4_agg_&quot;</span>
+<span class="n">mc4_param_name</span> <span class="o">=</span> <span class="s2">&quot;mc4_param_&quot;</span>
+<span class="n">mc5_name</span> <span class="o">=</span> <span class="s2">&quot;mc5_&quot;</span>
+<span class="n">mc5_param_name</span> <span class="o">=</span> <span class="s2">&quot;mc5_param_&quot;</span>
+
+
+<div class="viewcode-block" id="prep_field"><a class="viewcode-back" href="../tcplLoadData.html#tcplLoadData.prep_field">[docs]</a><span class="k">def</span> <span class="nf">prep_field</span><span class="p">(</span><span class="n">fld</span><span class="p">,</span> <span class="n">tbl</span><span class="p">):</span>
+    <span class="n">tbl_flds</span> <span class="o">=</span> <span class="p">[</span><span class="n">tcpl_list_flds</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tbl</span><span class="p">]</span>
+    <span class="n">pre</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tbl</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">fld</span> <span class="ow">in</span> <span class="n">tbl_flds</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">pre</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">pre</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not all given fields available in query.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pre</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">fld</span></div>
+
+
+<div class="viewcode-block" id="tcpl_list_flds"><a class="viewcode-back" href="../tcplLoadData.html#tcplLoadData.tcpl_list_flds">[docs]</a><span class="k">def</span> <span class="nf">tcpl_list_flds</span><span class="p">(</span><span class="n">tbl</span><span class="p">):</span>
+    <span class="n">qformat</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT </span>
+<span class="s2">        `COLUMN_NAME` </span>
+<span class="s2">    FROM </span>
+<span class="s2">        `INFORMATION_SCHEMA`.`COLUMNS` </span>
+<span class="s2">    WHERE </span>
+<span class="s2">        `TABLE_NAME` = &#39;</span><span class="si">{tbl}</span><span class="s2">&#39;;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">tcpl_query</span><span class="p">(</span><span class="n">qformat</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tbl</span><span class="o">=</span><span class="n">tbl</span><span class="p">))[</span><span class="s2">&quot;COLUMN_NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="tcpl_load_data"><a class="viewcode-back" href="../tcplLoadData.html#tcplLoadData.tcpl_load_data">[docs]</a><span class="k">def</span> <span class="nf">tcpl_load_data</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span> <span class="n">fld</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mc0&quot;</span><span class="p">]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;m0id&quot;</span><span class="p">,</span> <span class="s2">&quot;spid&quot;</span><span class="p">,</span> <span class="s2">&quot;acid&quot;</span><span class="p">,</span> <span class="s2">&quot;apid&quot;</span><span class="p">,</span> <span class="s2">&quot;rowi&quot;</span><span class="p">,</span> <span class="s2">&quot;coli&quot;</span><span class="p">,</span> <span class="s2">&quot;wllt&quot;</span><span class="p">,</span> <span class="s2">&quot;wllq&quot;</span><span class="p">,</span> <span class="s2">&quot;conc&quot;</span><span class="p">,</span> <span class="s2">&quot;rval&quot;</span><span class="p">,</span> <span class="s2">&quot;srcf&quot;</span><span class="p">]</span>
+        <span class="n">col_str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">col_str</span><span class="si">}</span><span class="s2"> FROM mc0 &quot;</span>
+
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mc0&quot;</span><span class="p">,</span> <span class="s2">&quot;mc1&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SELECT mc1.m0id, m1id, spid, mc1.acid, apid, rowi, coli, wllt, wllq, &quot;</span>
+            <span class="s2">&quot;conc, rval, cndx, repi, srcf &quot;</span>
+            <span class="s2">&quot;FROM mc0, mc1 &quot;</span>
+            <span class="s2">&quot;WHERE mc0.m0id = mc1.m0id &quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mc0&quot;</span><span class="p">,</span> <span class="s2">&quot;mc1&quot;</span><span class="p">,</span> <span class="s2">&quot;mc2&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SELECT mc2.m0id, mc2.m1id, m2id,spid, mc2.acid, apid, rowi, coli, wllt, conc, cval, cndx, repi &quot;</span>
+            <span class="s2">&quot;FROM mc0, mc1, mc2 &quot;</span>
+            <span class="s2">&quot;WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc2.m0id &quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># This takes very long</span>
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mc0&quot;</span><span class="p">,</span> <span class="s2">&quot;mc1&quot;</span><span class="p">,</span> <span class="s2">&quot;mc3&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;SELECT mc3.m0id, mc3.m1id, mc3.m2id, m3id, spid, aeid, logc, resp, cndx, wllt, apid, rowi, coli, repi &quot;</span>
+            <span class="s2">&quot;FROM mc0, mc1, mc3 &quot;</span>
+            <span class="s2">&quot;WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id &quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="s2">&quot;agg&quot;</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mc3&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.aeid,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m4id,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m3id,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m2id,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m1id,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m0id,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.spid,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; logc,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; resp &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;FROM mc3, </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;WHERE mc3.m3id = </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m3id &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;AND </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.m4id = </span><span class="si">{</span><span class="n">mc4_agg_name</span><span class="si">}</span><span class="s2">.m4id &quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc4_param_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.m4id,</span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.aeid,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;spid,bmad,resp_max,resp_min,max_mean,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;max_mean_conc,max_med,max_med_conc,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;logc_max,logc_min,nconc,npts,nrep,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;nmed_gtbl,model,model_param,model_val &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;FROM </span><span class="si">{</span><span class="n">mc4_param_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;WHERE </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.m4id = </span><span class="si">{</span><span class="n">mc4_param_name</span><span class="si">}</span><span class="s2">.m4id &quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mc5_param_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">.m5id,</span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">.m4id,</span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">.aeid,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;spid,bmad,resp_max,resp_min,max_mean,max_mean_conc,max_med,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;max_med_conc,logc_max,logc_min,nconc,npts,nrep,nmed_gtbl,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;hitc,modl,fitc,coff,hit_param,hit_val &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;FROM </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">mc5_param_name</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;WHERE </span><span class="si">{</span><span class="n">mc4_name</span><span class="si">}</span><span class="s2">.m4id = </span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">.m4id &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;AND </span><span class="si">{</span><span class="n">mc5_name</span><span class="si">}</span><span class="s2">.m5id = </span><span class="si">{</span><span class="n">mc5_param_name</span><span class="si">}</span><span class="s2">.m5id &quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lvl not supported&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fld</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fld</span> <span class="o">=</span> <span class="n">prep_field</span><span class="p">(</span><span class="n">fld</span><span class="o">=</span><span class="n">fld</span><span class="p">,</span> <span class="n">tbl</span><span class="o">=</span><span class="n">tbls</span><span class="p">)</span>
+
+        <span class="n">wtest</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span>
+
+        <span class="n">qformat</span> <span class="o">=</span> <span class="n">qformat</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;WHERE&quot;</span> <span class="k">if</span> <span class="n">wtest</span> <span class="k">else</span> <span class="s2">&quot;AND&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fld</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">fld</span> <span class="o">=</span> <span class="p">[</span><span class="n">fld</span><span class="p">]</span>
+        <span class="n">qformat</span> <span class="o">+=</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot; AND &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fld</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> IN (%s)&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fld</span><span class="p">))])</span>
+        <span class="n">qformat</span> <span class="o">+=</span> <span class="s2">&quot;;&quot;</span>
+        <span class="c1"># print(f&quot;qformat: {qformat}&quot;)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+
+        <span class="n">val</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">])</span>
+        <span class="n">qstring</span> <span class="o">=</span> <span class="n">qformat</span> <span class="o">%</span> <span class="n">val</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">qstring</span> <span class="o">=</span> <span class="n">qformat</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qstring: </span><span class="si">{</span><span class="n">qstring</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">tcpl_query</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dat</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyTcpl</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Robin Bosshard.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

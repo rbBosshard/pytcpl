@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tcplFit2 &#8212; PyTcpl 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tcplFit2</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+<span class="kn">from</span> <span class="nn">fit_method_helper</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+
+
+<div class="viewcode-block" id="tcpl_fit2"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.tcpl_fit2">[docs]</a><span class="k">def</span> <span class="nf">tcpl_fit2</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">fitmodels</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;bmed&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">bmed</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;osd&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">osd</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">grouped</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;aeid&#39;</span><span class="p">,</span> <span class="s1">&#39;spid&#39;</span><span class="p">,</span> <span class="s1">&#39;logc&#39;</span><span class="p">])</span>
+    <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;rmns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;resp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;rmds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;resp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">)</span>
+    <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;nconc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;logc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">)</span>
+    <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;med_rmds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;rmds&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;bmad&#39;</span><span class="p">])</span>
+
+    <span class="n">grouped</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;aeid&#39;</span><span class="p">,</span> <span class="s1">&#39;spid&#39;</span><span class="p">])</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="n">bmad</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;bmad&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">),</span>
+        <span class="n">resp_max</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">),</span>
+        <span class="n">osd</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;osd&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">),</span>
+        <span class="n">bmed</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;bmed&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
+        <span class="n">resp_min</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">),</span>
+        <span class="n">max_mean</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;rmns&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">),</span>
+        <span class="n">max_mean_conc</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;rmns&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dat</span><span class="o">.</span><span class="n">logc</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()]),</span>
+        <span class="n">max_med</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;rmds&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">),</span>
+        <span class="n">max_med_conc</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;rmds&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dat</span><span class="o">.</span><span class="n">logc</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()]),</span>
+        <span class="n">logc_max</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;logc&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">),</span>
+        <span class="n">logc_min</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;logc&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">),</span>
+        <span class="n">nconc</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;logc&#39;</span><span class="p">,</span> <span class="s1">&#39;nunique&#39;</span><span class="p">),</span>
+        <span class="n">npts</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+        <span class="n">nrep</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;nconc&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">),</span>
+        <span class="n">nmed_gtbl</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;med_rmds&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;nconc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">concentration_unlogged</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;logc&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">x</span><span class="p">)),</span>
+        <span class="n">response</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span>
+        <span class="n">m3ids</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;m3id&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="n">grouped</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;aeid&#39;</span><span class="p">)</span>
+    <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;tmpi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;m3ids&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">tcplfit2_core</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+        <span class="n">conc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;concentration_unlogged&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s1">&#39;response&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;bmad&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">logc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">conc</span><span class="p">)</span>
+        <span class="n">unique_logc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">logc</span><span class="p">)</span>
+        <span class="n">rmds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">resp</span><span class="p">[</span><span class="n">logc</span> <span class="o">==</span> <span class="n">c</span><span class="p">])</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">unique_logc</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span> <span class="ow">and</span> <span class="n">resp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;all response values are 0: add epsilon (1e-6) to all response elements.&quot;</span><span class="p">)</span>
+            <span class="n">resp</span> <span class="o">+=</span> <span class="mf">1e-6</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">fitmodels</span><span class="p">:</span>
+            <span class="n">to_fit</span> <span class="o">=</span> <span class="n">get_to_fit_condition</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">force_fit</span><span class="p">,</span> <span class="n">rmds</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="n">bidirectional</span><span class="p">,</span> <span class="n">to_fit</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">fitparams</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
+        <span class="n">fitparams</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">tcplfit2_core</span><span class="p">)(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;spid&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Serial version for debugging</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">dat</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;spid&#39;</span><span class="p">):</span>
+            <span class="n">fitparams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tcplfit2_core</span><span class="p">(</span><span class="n">group</span><span class="p">))</span>
+
+    <span class="n">dat</span><span class="p">[</span><span class="s2">&quot;fitparams&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitparams</span>
+    <span class="k">return</span> <span class="n">dat</span></div>
+
+
+<div class="viewcode-block" id="get_to_fit_condition"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.get_to_fit_condition">[docs]</a><span class="k">def</span> <span class="nf">get_to_fit_condition</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">force_fit</span><span class="p">,</span> <span class="n">rmds</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">to_fit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rmds</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rmds</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">cutoff</span><span class="p">)</span> <span class="ow">or</span> <span class="n">force_fit</span> <span class="ow">or</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;cnst&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">to_fit</span></div>
+
+
+<div class="viewcode-block" id="cnst"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.cnst">[docs]</a><span class="k">def</span> <span class="nf">cnst</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># ignores ps</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="exp2"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.exp2">[docs]</a><span class="k">def</span> <span class="nf">exp2</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># a = ps[0], b = ps[1]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exp3"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.exp3">[docs]</a><span class="k">def</span> <span class="nf">exp3</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># a = ps[0], b = ps[1], p = ps[2]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="exp4"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.exp4">[docs]</a><span class="k">def</span> <span class="nf">exp4</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># tp = ps[0], ga = ps[1]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="exp5"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.exp5">[docs]</a><span class="k">def</span> <span class="nf">exp5</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># tp = ps[0], ga = ps[1], p = ps[2]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="gnls"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.gnls">[docs]</a><span class="k">def</span> <span class="nf">gnls</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># gnls function with regular units</span>
+    <span class="c1"># tp = ps[0], ga = ps[1], p = ps[2], la = ps[3], q = ps[4]</span>
+    <span class="n">gn</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ls</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">gn</span> <span class="o">*</span> <span class="n">ls</span></div>
+
+
+<div class="viewcode-block" id="loggnls"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.loggnls">[docs]</a><span class="k">def</span> <span class="nf">loggnls</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># gnls function with log units: x = log10(conc) and ga/la = log10(gain/loss ac50)</span>
+    <span class="c1"># tp = ps[0], ga = ps[1], p = ps[2], la = ps[3], q = ps[4]</span>
+    <span class="n">gn</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">((</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">ls</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">ps</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="n">ps</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">gn</span> <span class="o">*</span> <span class="n">ls</span></div>
+
+
+<div class="viewcode-block" id="hillfn"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.hillfn">[docs]</a><span class="k">def</span> <span class="nf">hillfn</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># hill function with regular units</span>
+    <span class="c1"># tp = ps[0], ga = ps[1], p = ps[2]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="loghill"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.loghill">[docs]</a><span class="k">def</span> <span class="nf">loghill</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># hill function with log units: x = log10(conc) and ga = log10(ac50)</span>
+    <span class="c1"># tp = ps[0], ga = ps[1], p = ps[2]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="poly1"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.poly1">[docs]</a><span class="k">def</span> <span class="nf">poly1</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># a = ps[0]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="poly2"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.poly2">[docs]</a><span class="k">def</span> <span class="nf">poly2</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># a = ps[0], b = ps[1]</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">x0</span> <span class="o">+</span> <span class="n">x0</span> <span class="o">*</span> <span class="n">x0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="pow"><a class="viewcode-back" href="../tcplFit2.html#tcplFit2.pow">[docs]</a><span class="k">def</span> <span class="nf">pow</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="c1"># a = ps[0], p = ps[1]</span>
+    <span class="k">return</span> <span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyTcpl</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Robin Bosshard.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,7 @@
+requirements module
+===================
+
+.. automodule:: requirements
+   :members:
+   :undoc-members:
+   :show-inheritance:

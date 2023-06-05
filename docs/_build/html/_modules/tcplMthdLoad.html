@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tcplMthdLoad &#8212; PyTcpl 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tcplMthdLoad</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">query_db</span> <span class="kn">import</span> <span class="n">tcpl_query</span>
+
+
+<div class="viewcode-block" id="tcpl_mthd_load"><a class="viewcode-back" href="../tcplMthdLoad.html#tcplMthdLoad.tcpl_mthd_load">[docs]</a><span class="k">def</span> <span class="nf">tcpl_mthd_load</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;mc&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">id</span><span class="p">))</span>
+
+    <span class="n">id_name</span> <span class="o">=</span> <span class="s2">&quot;acid&quot;</span> <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;mc&quot;</span> <span class="ow">and</span> <span class="n">lvl</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;aeid&quot;</span>
+    <span class="n">flds</span> <span class="o">=</span> <span class="p">[</span><span class="n">id_name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;b.</span><span class="si">{</span><span class="nb">type</span><span class="si">}{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd AS mthd&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;b.</span><span class="si">{</span><span class="nb">type</span><span class="si">}{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd_id AS mthd_id&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">lvl</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;mc&quot;</span><span class="p">:</span>
+        <span class="n">flds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;a.exec_ordr AS ordr&quot;</span><span class="p">)</span>
+    <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;%s_</span><span class="si">{</span><span class="n">id_name</span><span class="si">}</span><span class="s2"> AS a&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;%s_methods AS b&quot;</span><span class="p">]</span>
+    <span class="n">qformat</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flds</span><span class="p">)</span><span class="si">}</span><span class="s2"> FROM </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tbls</span><span class="p">)</span><span class="si">}</span><span class="s2"> WHERE a.%s_mthd_id = b.%s_mthd_id&quot;</span>
+    <span class="n">qformat</span> <span class="o">=</span> <span class="n">qformat</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="si">}{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">qformat</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qformat</span><span class="si">}</span><span class="s2"> AND </span><span class="si">{</span><span class="n">id_name</span><span class="si">}</span><span class="s2"> IN (</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="si">}</span><span class="s2">);&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">lvl</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;mc&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">lvl</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;sc&quot;</span><span class="p">):</span>
+        <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">qformat</span><span class="si">}</span><span class="s2"> ORDER BY </span><span class="si">{</span><span class="n">id_name</span><span class="si">}</span><span class="s2">, a.exec_ordr&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">qstring</span> <span class="o">=</span> <span class="n">qformat</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qstring: </span><span class="si">{</span><span class="n">qstring</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">tcpl_query</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dat</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyTcpl</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Robin Bosshard.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
