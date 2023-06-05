@@ -1,7 +1,10 @@
 import numpy as np
 from mad import mad
 from scipy.optimize import minimize
-from pytcpl.acy import acy, tcplObj
+from acy import acy, tcplObj
+
+from acy import cnst, poly1, poly2
+
 
 
 def curve_fit(fitmethod, conc, resp, bidirectional, to_fit):

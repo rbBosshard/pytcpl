@@ -3,6 +3,8 @@ import math
 from scipy.optimize import root_scalar
 
 
+
+
 def acy(y, modpars, type="hill", returntop=False, returntoploc=False, getloss=False, verbose=False):
     if "pars" in modpars:
         locals().update(modpars["pars"])

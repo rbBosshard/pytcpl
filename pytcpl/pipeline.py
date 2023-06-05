@@ -27,6 +27,8 @@ parallelize = 0
 bidirectional = True
 ml = 1
 
+export_path = "export/"
+
 fitmodels = ["cnst", "poly1", "poly2"]
 
 
@@ -65,10 +67,10 @@ def mc4():
         df = mthd_funcs[method_key](df)
 
     if do_fit:
-        df = tcpl_fit2(df, fitmodels, bidirectional, parallelize)
-        df.to_csv("df.csv")
+        df = tcpl_fit2(df, fitmodels, bidirectional, force_fit=False, parallelize=parallelize)
+        df.to_csv(export_path+"df.csv")
     else:
-        df = pd.read_csv("df.csv")
+        df = pd.read_csv(export_path+"df.csv")
 
     print(f"Curve-fitted {df.shape[0]} series")
     print_elapsed_time(start_time)
@@ -160,8 +162,8 @@ def export():
     # be the sample with the lowest modl_ga.
     df = tcpl_subset_chid(dat=d1, flag=False)  # [ , list(m4id, modl_ga)]
     if ml:
-        df.to_csv("chem.csv", header=True, index=True)
-        # df = pd.read_csv("chem.csv")
+        df.to_csv(export_path+"chem.csv", header=True, index=True)
+        # df = pd.read_csv(export_path+"chem.csv")
 
     print_elapsed_time(start_time)
     print("Done export.")

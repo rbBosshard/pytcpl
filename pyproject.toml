@@ -1,0 +1,9 @@
+[project]
+name = "pytcpl"
+authors = [
+    {name = "Robin Bosshard", email = "borobin@student.ethz.ch"},
+]
+version = "0.0.1"
+description = "The pytcpl package provides a set of tools for processing and modeling high-throughput and high-content chemical screening data of the US EPA ToxCast program."
+dependencies = [
+]

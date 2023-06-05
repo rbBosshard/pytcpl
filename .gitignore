@@ -1,11 +1,14 @@
 __pycache__
-
 .idea/
 .lprof/
+pytcpl.egg-info/
+pytcpl/export/
+dist/
 
-*.csv
-*.prof
-*.ipynb
+
+pytcpl/*.csv
+pytcpl/*.prof
+pytcpl/*.ipynb
 
 
 

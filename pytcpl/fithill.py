@@ -2,7 +2,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.linalg import inv
 
-from pytcpl.acy import tcplObj
+from acy import tcplObj
 
 def fithill(conc, resp, bidirectional=True, nofit=False):
     logc = np.log10(conc)

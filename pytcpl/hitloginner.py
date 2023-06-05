@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, chi2
-from pytcpl.acy import tcplObj
-
+from acy import tcplObj
+from acy import cnst, poly1, poly2
 
 def hitloginner(conc, resp, top, cutoff, ac50=None):
     n_gt_cutoff = np.sum(np.abs(resp) > cutoff)
