@@ -22,5 +22,5 @@ def tcpl_mthd_load(lvl, id=None, type="mc", verbose=False):
 
     if verbose:
         print(f"qstring: {qstring}")
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
     return dat

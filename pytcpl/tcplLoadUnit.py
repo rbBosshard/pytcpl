@@ -15,7 +15,7 @@ def tcpl_load_unit(aeid):
     aeid_str = ",".join(str(id) for id in aeid)
     qstring = qformat.format(aeid_str)
 
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
 
     if dat.shape[0] == 0:
         print("Warning: The given aeid(s) do not have response units.")

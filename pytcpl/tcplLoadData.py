@@ -29,7 +29,7 @@ def tcpl_list_flds(tbl):
     WHERE 
         `TABLE_NAME` = '{tbl}';
     """
-    query = tcpl_query(qformat.format(tbl=tbl))["COLUMN_NAME"].tolist()
+    query = tcpl_query(qformat.format(tbl=tbl), False)["COLUMN_NAME"].tolist()
     return query
 
 
@@ -121,7 +121,7 @@ def tcpl_load_data(lvl, fld=None, val=None, verbose=False):
             fld = [fld]
         qformat += "  " + " AND ".join([f"{fld[i]} IN (%s)" for i in range(len(fld))])
         qformat += ";"
-        # print(f"qformat: {qformat}")
+
         if not isinstance(val, list):
             val = [val]
 
@@ -134,6 +134,6 @@ def tcpl_load_data(lvl, fld=None, val=None, verbose=False):
     if verbose:
         print(f"qstring: {qstring}")
 
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
 
     return dat

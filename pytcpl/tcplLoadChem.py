@@ -19,7 +19,7 @@ def tcpl_load_chem(field=None, val=None, exact=True, include_spid=True):
 
     qstring = _chem_q(field=field, val=val, exact=exact)
 
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
     dat = pd.DataFrame(dat)
 
     if dat.shape[0] == 0:

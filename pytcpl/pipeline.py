@@ -11,31 +11,26 @@ from tcplSubsetChid import tcpl_subset_chid
 from query_db import tcpl_query
 from mc5_mthds import mc5_mthds
 from tcplHit2 import tcpl_hit2
-
-
 import warnings
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
+warnings.filterwarnings("error", category=RuntimeWarning)
 
 aeid = 5
-chunk_mc4 = 100
+chunk_mc4 = 50
 test = 0
+parallelize = 1
 verbose = 0
 profile = 0
-
 do_fit = 1
-parallelize = 0
 bidirectional = True
 ml = 1
-
 export_path = "export/"
+fitmodels = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
 
-fitmodels = ["cnst", "poly1", "poly2"]
+# Todo: Check if log() used right everywhere, i.e with the correct base: np.log2, np.log, np.log10
+# Todo: Set consistently for failing fields None or np.nan
 
 
-# fitmodels = ["cnst", "hill", "gnls", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5"]
-
-
-# Pipeline
 def prolog(pipeline_step):
     print(f"Starting {pipeline_step} ...")
     return time.time()
@@ -67,15 +62,15 @@ def mc4():
         df = mthd_funcs[method_key](df)
 
     if do_fit:
-        df = tcpl_fit2(df, fitmodels, bidirectional, force_fit=False, parallelize=parallelize)
+        df = tcpl_fit2(df, fitmodels, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
         df.to_csv(export_path+"df.csv")
     else:
         df = pd.read_csv(export_path+"df.csv")
 
-    print(f"Curve-fitted {df.shape[0]} series")
+    print(f"Curve-fitted {df.shape[0]} series with {len(fitmodels)} candidate fitmodels.")
     print_elapsed_time(start_time)
 
-    tcpl_write_data(dat=df, lvl=4)
+    tcpl_write_data(dat=df, lvl=4, verbose=False)
     print_elapsed_time(start_time)
 
     print("Done mc4.")
@@ -140,12 +135,12 @@ def mc5():
             f"ON {mc4_name}.m4id = {mc4_param_name}.m4id " \
             f"WHERE {mc4_name}.aeid = {aeid};"
 
-    dat = tcpl_query(query)
+    dat = tcpl_query(query, False)
 
     dat = tcpl_hit2(dat, coff=cutoff, verbose=verbose)
     print_elapsed_time(start_time)
 
-    tcpl_write_data(dat=dat, lvl=5)
+    tcpl_write_data(dat=dat, lvl=5, verbose=False)
     print_elapsed_time(start_time)
 
     print("Done mc5.")

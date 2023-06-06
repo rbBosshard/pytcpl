@@ -4,13 +4,11 @@ from joblib import Parallel, delayed
 from fit_method_helper import curve_fit
 
 
-def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=True):
+def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
     if 'bmed' not in dat.columns:
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
         dat = dat.assign(osd=None)
-
-    print(dat.shape)
 
     grouped = dat.groupby(['aeid', 'spid', 'logc'])
     dat['rmns'] = grouped['resp'].transform(np.mean)
@@ -59,7 +57,7 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
         out = {}
         for model in fitmodels:
             to_fit = get_to_fit_condition(cutoff, force_fit, rmds, model)
-            out[model] = curve_fit(model, conc, resp, bidirectional, to_fit)
+            out[model] = curve_fit(model, conc, resp, bidirectional, to_fit, verbose)
 
         return out
 

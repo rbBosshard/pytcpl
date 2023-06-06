@@ -1,9 +1,13 @@
 import numpy as np
+import scipy.optimize as optimize
 from scipy.optimize import minimize_scalar
 from scipy.stats import chi2
 
-from acy import tcplObj
+from acy import tcpl_obj
 from acy import acy
+
+from acy import cnst, poly1, poly2, pow, exp2, exp3, exp4, exp5, hill_, gnls_
+from pytcpl.get_params import get_params
 
 
 def bmd_bounds(fit_method, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):
@@ -50,53 +54,55 @@ def bmd_bounds(fit_method, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, whic
     bmdbounds(fit_method="hill", bmr=0.5, pars=pars, conc=conc, resp=resp, which.bound="upper")
     """
 
+    # calculate bmd, if necessary
     if bmd is None:
-        bmd = acy(bmr, pars, type=fit_method)
+        bmd = acy(bmr, pars, fitmethod=fit_method)
     if not np.isfinite(bmd):
         return np.nan
 
-    if fit_method == "hill":
-        fname = fit_method + "fn"
-    else:
-        fname = fit_method
+    params = [pars[key] for key in get_params(fit_method)]
 
-    maxloglik = tcplObj(ps=pars, conc=conc, resp=resp, fname=fname)
+    # Todo: recheck if right method is applied (also in R package), i.e. log variant
+    if fit_method in ["hill", "gnls"]:
+        fit_method += "_"
 
+    # negated max negative loglikelihood. Todo: recheck if everything is correct like this
+    maxloglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fname=globals()[fit_method])
+
+    # search for bounds to ensure sign change
+    bmdrange = None
     if which_bound == "lower":
         xs = 10 ** np.linspace(-5, np.log10(bmd), num=100)
-        ys = np.array([bmd_obj(x, fname=fname, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
+        ys = np.array([bmd_obj(x, fname=fit_method, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
                                onesp=onesidedp, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
             return np.nan
         bmdrange = np.array([np.max(xs[ys >= 0]), bmd])
+
     elif which_bound == "upper":
         if fit_method == "gnls":
-            toploc = acy(bmr, pars, type="gnls", returntoploc=True)
+            toploc = acy(bmr, pars, fitmethod="gnls", returntoploc=True)
             xs = 10 ** np.linspace(np.log10(bmd), np.log10(toploc), num=100)
         else:
             xs = 10 ** np.linspace(np.log10(bmd), 5, num=100)
-        ys = np.array([bmd_obj(x, fname=fname, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
+        ys = np.array([bmd_obj(x, fname=fit_method, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
                                onesp=onesidedp, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
             return np.nan
         bmdrange = np.array([bmd, np.min(xs[ys >= 0])])
 
     try:
-        # Change?
-        out = minimize_scalar(bmd_obj, bracket=bmdrange, args=(fname, bmr, conc, resp, pars, maxloglik,
-                                                               onesidedp, 2), method='brentq')
-        if out.success:
-            return out.root
-        else:
-            return np.nan
-    except:
+        # use type 2 param. only
+        return optimize.root_scalar(bmd_obj, bracket=bmdrange,
+                                   args=(fit_method, bmr, conc, resp, pars, maxloglik, onesidedp, 2)).root
+    except ValueError:
         return np.nan
 
 
 def bmd_obj(bmd, fname, bmr, conc, resp, ps, mll, onesp, partype=2):
-    def log2(x):
-        return np.log(x) / np.log(2)
-
+    # implements the BMD substitutions in Appendix A of the Technical Report.
+    # Changes one of the existing parameters to an explicit bmd parameter through
+    # the magic of algebra.
     if fname == "exp2":
         if partype == 1:
             ps["a"] = bmr / (np.exp(bmd / ps["b"]) - 1)
@@ -115,24 +121,24 @@ def bmd_obj(bmd, fname, bmr, conc, resp, ps, mll, onesp, partype=2):
         if partype == 1:
             ps["tp"] = bmr / (1 - 2 ** (-bmd / ps["ga"]))
         elif partype == 2:
-            ps["ga"] = bmd / (-log2(1 - bmr / ps["tp"]))
+            ps["ga"] = bmd / (-np.log2(1 - bmr / ps["tp"]))
         elif partype == 3:
-            ps["ga"] = bmd / (-log2(1 - bmr / ps["tp"]))
+            ps["ga"] = bmd / (-np.log2(1 - bmr / ps["tp"]))
     elif fname == "exp5":
         if partype == 1:
             ps["tp"] = bmr / (1 - 2 ** (-(bmd / ps["ga"]) ** ps["p"]))
         elif partype == 2:
-            ps["ga"] = bmd / ((-log2(1 - bmr / ps["tp"])) ** (1 / ps["p"]))
+            ps["ga"] = bmd / ((-np.log2(1 - bmr / ps["tp"])) ** (1 / ps["p"]))
         elif partype == 3:
-            ps["p"] = np.log(-log2(1 - bmr / ps["tp"])) / np.log(bmd / ps["ga"])
-    elif fname == "hillfn":
+            ps["p"] = np.log(-np.log2(1 - bmr / ps["tp"])) / np.log(bmd / ps["ga"])
+    elif fname == "hill_":
         if partype == 1:
             ps["tp"] = bmr * (1 + (ps["ga"] / bmd) ** ps["p"])
         elif partype == 2:
             ps["ga"] = bmd * (ps["tp"] / bmr - 1) ** (1 / ps["p"])
         elif partype == 3:
             ps["p"] = np.log(ps["tp"] / bmr - 1) / np.log(ps["ga"] / bmd)
-    if fname == "gnls":
+    if fname == "gnls_":
         if partype == 1:
             ps["tp"] = bmr * ((1 + (ps["ga"] / bmd) ** ps["p"]) * (1 + (bmd / ps["la"]) ** ps["q"]))
         elif partype == 2:
@@ -161,5 +167,10 @@ def bmd_obj(bmd, fname, bmr, conc, resp, ps, mll, onesp, partype=2):
         elif partype == 3:
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
-    loglik = tcplObj(ps=ps, conc=conc, resp=resp, fname=fname)
+    params = [ps[key] for key in get_params(fname)]
+    loglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fname=globals()[fname])
+
+    # for bmd bounds, we want the difference between the max log-likelihood and the
+    # bounds log-likelihood to be equal to chi-squared at 1-2*onesp (typically .9)
+    # with one degree of freedom divided by two.
     return mll - loglik - chi2.ppf(1 - 2 * onesp, 1) / 2

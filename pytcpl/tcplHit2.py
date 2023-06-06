@@ -93,7 +93,7 @@ def tcpl_fit2_nest(dat):
 
     dicts = {}
     for m in modelnames:
-        ok = dat[dat["model"] == m].groupby("model_param")["model_val"].apply(float)  # throws warning,
+        ok = dat[dat["model"] == m].groupby("model_param")["model_val"].apply(lambda x: float(x.iloc[0]))  # throws warning,
         # tup = tuple(ok)
 
         # p = dict(tup)

@@ -7,7 +7,7 @@ from tcplLoadData import prep_field
 def tcpl_load_aeid(fld=None, val=None):
     out = ["assay_component_endpoint.aeid", "assay_component_endpoint.assay_component_endpoint_name"]
     qstring = build_assay_q(out=out, tblo=[0, 1, 3, 2, 5], fld=fld, val=val)
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
     return dat
 
 

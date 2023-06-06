@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import yaml
 import time
 import mysql.connector as mysql
@@ -8,7 +9,8 @@ from sqlalchemy import create_engine, text
 def get_db_config():
     with open("config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-        config_db = config['DATABASE']
+        login_name = os.getlogin()
+        config_db = config[login_name]['DATABASE']
         return config_db['USERNAME'], config_db['PASSWORD'], config_db['HOST'], config_db['PORT'], config_db['DB']
 
 
@@ -42,7 +44,7 @@ def get_db_conn():
         return None
 
 
-def tcpl_query(query):
+def tcpl_query(query, verbose):
     try:
         if query.lower().startswith("delete"):
             db_conn = get_db_conn()
@@ -53,7 +55,8 @@ def tcpl_query(query):
             engine = get_sqlalchemy_engine()
             start_time = time.time()
             df = pd.read_sql(text(query), con=engine.connect())
-            print(f"Query {query[:100]} >> {df.shape[0]} rows >> {str(time.time() - start_time)} seconds.")
+            if verbose:
+                print(f"Query {query[:100]} >> {df.shape[0]} rows >> {str(time.time() - start_time)} seconds.")
             return df
     except Exception as e:
         print(f"Error querying MySQL: {e}")

@@ -7,7 +7,7 @@ from query_db import tcpl_query, get_sqlalchemy_engine
 from tcplLoadData import tcpl_load_data
 
 
-def tcpl_write_data(dat, lvl, verbose=False):
+def tcpl_write_data(dat, lvl, verbose):
     # Check for valid inputs
     if lvl not in [4, 5]:
         raise ValueError("Invalid lvl input - must be an integer 4 or 5.")
@@ -18,9 +18,9 @@ def tcpl_write_data(dat, lvl, verbose=False):
     if len(ids) >= 500:
         ibins = np.array_split(ids, np.ceil(len(ids) / 500))
         for x in ibins:
-            tcpl_cascade(lvl=lvl, id=x)
+            tcpl_cascade(lvl=lvl, id=x, verbose=False)
     else:
-        tcpl_cascade(lvl=lvl, id=ids)
+        tcpl_cascade(lvl=lvl, id=ids, verbose=False)
 
     dat["modified_by"] = os.getlogin()
 
@@ -28,12 +28,12 @@ def tcpl_write_data(dat, lvl, verbose=False):
         mc4_cols = ["aeid", "spid", "bmad", "resp_max", "resp_min", "max_mean", "max_mean_conc", "max_med",
                     "max_med_conc", "logc_max", "logc_min", "nconc", "npts", "nrep", "nmed_gtbl", "tmpi", "modified_by"]
         mc4_agg_cols = ["m" + str(i) + "id" for i in range(5)] + ["aeid"]
-        tcpl_append(dat[mc4_cols], "mc4_")
+        tcpl_append(dat[mc4_cols], "mc4_", False)
 
         qformat = "SELECT m4id, aeid, tmpi FROM mc4_ WHERE aeid IN ({})"
         ids = dat["aeid"].unique()
         qstring = qformat.format(",".join(["'" + str(i) + "'" for i in ids]))
-        m4id_map = tcpl_query(query=qstring)
+        m4id_map = tcpl_query(query=qstring, verbose=False)
 
         m4id_map = m4id_map.set_index(["aeid", "tmpi"])
         dat = dat.set_index(["aeid", "tmpi"])
@@ -70,9 +70,9 @@ def tcpl_write_data(dat, lvl, verbose=False):
         param = param.set_index("m4id")
         dat1 = param.join(unnested_param, how="left")
         dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
-        tcpl_append(dat_param, "mc4_param_")
-        tcpl_append(onesd, "mc4_param_")
-        tcpl_append(bmed, "mc4_param_")
+        tcpl_append(dat_param, "mc4_param_", False)
+        tcpl_append(onesd, "mc4_param_", False)
+        tcpl_append(bmed, "mc4_param_", False)
 
         # get l3 dat for agg columns
         dat_agg = dat[['aeid', 'm4id']].assign(m3id=dat['m3ids'])
@@ -88,25 +88,25 @@ def tcpl_write_data(dat, lvl, verbose=False):
         l3_dat = l3_dat.set_index("m3id")
         dat_agg = dat_agg.join(l3_dat, how="left")
         dat_agg = dat_agg.reset_index()
-        tcpl_append(dat_agg[mc4_agg_cols], "mc4_agg_")  # lazy
+        tcpl_append(dat_agg[mc4_agg_cols], "mc4_agg_", False)  # lazy
 
     elif lvl == 5:
         mc5_name = "mc5_"
         tcpl_append(
             dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(),
-            tbl=mc5_name)
+            tbl=mc5_name, verbose=False)
         # get m5id for mc5_param
         qformat = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN (%s);"
         qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
 
-        m5id_map = tcpl_query(query=qstring)
+        m5id_map = tcpl_query(query=qstring, verbose=False)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
         dat = dat.set_index(["aeid", "m4id"])
         dat = dat.join(m5id_map, how="left").reset_index()
 
         mc5_param_name = "mc5_param_"
 
-        tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name)
+        tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name, verbose=False)
 
 
 def log_model_params(datc):
@@ -120,31 +120,32 @@ def unlog_model_params(datc):
     return datc
 
 
-def tcpl_append(dat, tbl):
+def tcpl_append(dat, tbl, verbose):
     engine = get_sqlalchemy_engine()
     with engine.begin() as connection:
         start_time = time.time()
         num_rows_affected = dat.to_sql(name=tbl, con=connection, if_exists="append", index=False)
-        print(f"Append to {tbl} >> {num_rows_affected} affected rows >> {str(time.time() - start_time)} seconds.")
+        if verbose:
+            print(f"Append to {tbl} >> {num_rows_affected} affected rows >> {str(time.time() - start_time)} seconds.")
     return num_rows_affected
 
 
-def tcpl_cascade(lvl, id):
+def tcpl_cascade(lvl, id, verbose):
     if lvl <= 4:
-        tcpl_delete(tbl="mc4_", fld="aeid", val=id)
+        tcpl_delete(tbl="mc4_", fld="aeid", val=id, verbose=False)
     if lvl <= 4:
-        tcpl_delete(tbl="mc4_agg_", fld="aeid", val=id)
+        tcpl_delete(tbl="mc4_agg_", fld="aeid", val=id, verbose=False)
     if lvl <= 4:
-        tcpl_delete(tbl="mc4_param_", fld="aeid", val=id)
+        tcpl_delete(tbl="mc4_param_", fld="aeid", val=id, verbose=False)
     if lvl <= 5:
-        tcpl_delete(tbl="mc5_", fld="aeid", val=id)
+        tcpl_delete(tbl="mc5_", fld="aeid", val=id, verbose=False)
     if lvl <= 5:
-        tcpl_delete(tbl="mc5_param_", fld="aeid", val=id)
+        tcpl_delete(tbl="mc5_param_", fld="aeid", val=id, verbose=False)
+    if verbose:
+        print("Completed delete cascade for", len(id), "ids\n")
 
-    print("Completed delete cascade for", len(id), "ids\n")
 
-
-def tcpl_delete(tbl, fld, val):
+def tcpl_delete(tbl, fld, val, verbose):
     qformat = f"DELETE FROM {tbl} WHERE"
     qformat += f" {' AND '.join([f'{fld} IN (%s)' for _ in val])}"
     qformat += ";"
@@ -154,4 +155,4 @@ def tcpl_delete(tbl, fld, val):
     val = [','.join([f'"{x}"' for x in v]) for v in val]
 
     qstring = qformat % tuple(val)
-    tcpl_query(qstring)
+    tcpl_query(qstring, False)

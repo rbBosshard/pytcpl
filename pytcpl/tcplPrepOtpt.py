@@ -63,7 +63,7 @@ def tcpl_load_conc_unit(spid):
     spid_str = '","'.join(str(id) for id in spid)
     qstring = qformat.format(spid_str)
 
-    dat = tcpl_query(query=qstring)
+    dat = tcpl_query(query=qstring, verbose=False)
 
     if dat.shape[0] == 0:
         # print("The given spid(s) do not have concentration units.")

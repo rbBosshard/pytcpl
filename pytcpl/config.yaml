@@ -1,6 +1,36 @@
-DATABASE:
-  USERNAME: root
-  PASSWORD: root
-  HOST: localhost
-  PORT: 3306
-  DB: invitrodb_v3o5
+# Add here new user
+bossh:
+  DATABASE:
+    USERNAME: root
+    PASSWORD: root
+    HOST: localhost
+    PORT: 3306
+    DB: invitrodb_v3o5
+robin:
+  DATABASE:
+    USERNAME: robin
+    PASSWORD: robin
+    HOST: localhost
+    PORT: 3306
+    DB: invitrodb_v3o5
+kasia:
+  DATABASE:
+    USERNAME: kasia
+    PASSWORD: kasia
+    HOST: localhost
+    PORT: 3306
+    DB: invitrodb_v3o5
+eliza:
+  DATABASE:
+    USERNAME: eliza
+    PASSWORD: eliza
+    HOST: localhost
+    PORT: 3306
+    DB: invitrodb_v3o5
+lili:
+  DATABASE:
+    USERNAME: lili
+    PASSWORD: lili
+    HOST: localhost
+    PORT: 3306
+    DB: invitrodb_v3o5

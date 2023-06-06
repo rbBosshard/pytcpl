@@ -10,10 +10,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-project = 'PyTcpl'
+project = 'pytcpl'
 copyright = '2023, Robin Bosshard'
 author = 'Robin Bosshard'
-release = '1.0.0'
+release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

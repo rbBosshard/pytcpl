@@ -3,15 +3,18 @@ from math import exp
 from bmd_bounds import bmd_bounds
 
 from acy import acy
-from hitloginner import hitloginner, hitcontinner, nestselect
+from hitloginner import hitcontinner, nestselect
 
 
 def tcpl_hit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, conthits=True, aicc=False,
                    identifiers=None, bmd_low_bnd=None, bmd_up_bnd=None):
+    # Todo: ensure if fit_method == const then do not compute more than needed
+    a = b = tp = p = q = ga = la = er = \
+        top = ac50 = ac50_loss = ac5 = ac10 = ac20 = ac95 = acc = ac1sd = \
+        bmd = bmdl = bmdu = caikwt = mll = np.nan
+
     fitout = {}
-    top = 0
     modpars = None
-    caikwt = None
     modelnames = params.keys()
     aics = {}
     for m in modelnames:
@@ -49,43 +52,39 @@ def tcpl_hit2_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, c
                         caikwt = 0
                     else:
                         caikwt = 1 / (1 + term)
-        else:
-            fit_method = min(aics, key=aics.get)
+
         # if the fit_method is not reported as 'none', obtain model information
         if fit_method != "none":
             fitout = params[fit_method]
             top = fitout["top"]
             rmse = fitout["rme"]
             modpars = fitout["pars"]
+
     n_gt_cutoff = np.sum(np.abs(resp) > cutoff)
 
-    # compute discrete or continuous hitcalls
     if fit_method == "none":
         hitcall = 0
-    elif conthits:
+    else:
+        # compute continuous hitcall
         mll = len(modpars) - aics[fit_method] / 2
+
         hitcall = hitcontinner(conc, resp, top, cutoff, fitout["er"],
                                ps=modpars, fit_method=fit_method,
                                caikwt=caikwt, mll=mll)
-    else:
-        hitcall = hitloginner(conc, resp, top, cutoff, fitout["ac50"])
-
-    hitcall = hitcall
 
     if np.isnan(hitcall):
         hitcall = 0
 
     bmr = onesd * bmr_scale  # magic bmr is default 1.349
     if hitcall > 0:
-
         # fill ac's; can put after hit logic
-        ac5 = acy(.05 * top, modpars, type=fit_method)  # note: cnst model automatically returns NAs
-        ac10 = acy(.1 * top, modpars, type=fit_method)
-        ac20 = acy(.2 * top, modpars, type=fit_method)
-        ac95 = acy(.95 * top, modpars, type=fit_method)
-        acc = acy(np.sign(top) * cutoff, modpars | {"top": top}, type=fit_method)
-        ac1sd = acy(np.sign(top) * onesd, modpars, type=fit_method)
-        bmd = acy(np.sign(top) * bmr, modpars, type=fit_method)
+        ac5 = acy(.05 * top, modpars, fitmethod=fit_method)  # note: cnst model automatically returns NAs
+        ac10 = acy(.1 * top, modpars, fitmethod=fit_method)
+        ac20 = acy(.2 * top, modpars, fitmethod=fit_method)
+        ac95 = acy(.95 * top, modpars, fitmethod=fit_method)
+        acc = acy(np.sign(top) * cutoff, modpars | {"top": top}, fitmethod=fit_method)
+        ac1sd = acy(np.sign(top) * onesd, modpars, fitmethod=fit_method)
+        bmd = acy(np.sign(top) * bmr, modpars, fitmethod=fit_method)
 
         # get bmdl and bmdu
         bmdl = bmd_bounds(fit_method,
