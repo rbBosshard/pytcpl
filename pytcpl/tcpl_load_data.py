@@ -1,4 +1,4 @@
-from query_db import tcpl_query
+from pytcpl.query_db import tcpl_query
 
 mc4_name = "mc4_"
 mc4_agg_name = "mc4_agg_"
@@ -8,16 +8,18 @@ mc5_param_name = "mc5_param_"
 
 
 def prep_field(fld, tbl):
-    tbl_flds = [tcpl_list_flds(t) for t in tbl]
-    pre = None
+    pre = None  # Initialize a variable to store the table that contains the field
+
+    # Iterate over the tables in the list
     for i in range(len(tbl)):
-        if fld in tbl_flds[i]:
-            pre = tbl[i]
+        # Check if the field exists in the table's fields
+        if fld in tcpl_list_flds(tbl[i]):
+            pre = tbl[i]  # Set the table as the one containing the field
 
     if pre is None:
         raise ValueError("Not all given fields available in query.")
 
-    return pre + "." + fld
+    return pre + "." + fld  # Return the fully qualified field name
 
 
 def tcpl_list_flds(tbl):

@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from tcplHit2_core import tcpl_hit2_core
-from tcplLoadData import tcpl_load_data
+from pytcpl.tcpl_hit2_core import tcpl_hit2_core
+from pytcpl.tcpl_load_data import tcpl_load_data
 
 
 def tcpl_hit2(mc4, coff, verbose=False):

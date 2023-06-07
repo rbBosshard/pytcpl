@@ -18,7 +18,7 @@ The pytcpl package provides a set of tools for processing and modeling high-thro
 
 ### Create docs
 - `sphinx-apidoc -o ../docs .`
-- `cd ../docs && make html && cd ../pytcpl`
+- `cd ../docs && make clean && make html && cd ../pytcpl`
 
 ### Build python package
 `python -m build`

@@ -1,10 +1,11 @@
-import time
-import pandas as pd
-import numpy as np
 import os
+import time
 
-from query_db import tcpl_query, get_sqlalchemy_engine
-from tcplLoadData import tcpl_load_data
+import numpy as np
+import pandas as pd
+
+from pytcpl.query_db import tcpl_query, get_sqlalchemy_engine
+from pytcpl.tcpl_load_data import tcpl_load_data
 
 
 def tcpl_write_data(dat, lvl, verbose):
@@ -12,15 +13,19 @@ def tcpl_write_data(dat, lvl, verbose):
     if lvl not in [4, 5]:
         raise ValueError("Invalid lvl input - must be an integer 4 or 5.")
 
-    fkey = "aeid" if lvl > 2 else "acid"
-    ids = dat[fkey].unique()
+    ids = dat["aeid"].unique()
 
-    if len(ids) >= 500:
-        ibins = np.array_split(ids, np.ceil(len(ids) / 500))
-        for x in ibins:
-            tcpl_cascade(lvl=lvl, id=x, verbose=False)
-    else:
-        tcpl_cascade(lvl=lvl, id=ids, verbose=False)
+    # Delete old data in cascade
+    if lvl <= 4:
+        tcpl_delete(tbl="mc4_", fld="aeid", val=ids, verbose=False)
+        tcpl_delete(tbl="mc4_agg_", fld="aeid", val=ids, verbose=False)
+        tcpl_delete(tbl="mc4_param_", fld="aeid", val=ids, verbose=False)
+    if lvl <= 5:
+        tcpl_delete(tbl="mc5_", fld="aeid", val=ids, verbose=False)
+        tcpl_delete(tbl="mc5_param_", fld="aeid", val=ids, verbose=False)
+
+    if verbose:
+        print("Completed delete cascade for", len(ids), "ids\n")
 
     dat["modified_by"] = os.getlogin()
 
@@ -81,8 +86,32 @@ def tcpl_write_data(dat, lvl, verbose):
         dat_agg = dat_agg.reset_index()
 
         ids = list(dat_agg['m3id'])
-        l3_dat = tcpl_load_data(lvl=3, fld="m3id",
-                                val=ids)  # heavy operation if ids list is long, aggregate ids from 3 huge tables
+        # heavy operation if ids list is long, aggregate ids from 3 huge tables
+        # Create an empty list to store the DataFrames
+        df_list = []
+        # Iterate through the loop
+        chunk_size = 10000
+        num_chunks = len(ids) // chunk_size
+        remaining_elements = len(ids) % chunk_size
+        for i in range(num_chunks):
+            # Create or obtain a DataFrame
+            start_index = i * chunk_size
+            end_index = start_index + chunk_size
+            df = tcpl_load_data(lvl=3, fld="m3id", val=ids[start_index:end_index])
+            df_list.append(df)
+
+        # Handle the last chunk
+        if remaining_elements > 0:
+            start_index = num_chunks * chunk_size
+            end_index = start_index + remaining_elements
+            df = tcpl_load_data(lvl=3, fld="m3id", val=ids[start_index:end_index])
+            df_list.append(df)
+
+        # Concatenate all the DataFrames in the list
+        l3_dat = pd.concat(df_list)
+
+        # l3_dat = tcpl_load_data(lvl=3, fld="m3id", val=ids)
+
         l3_dat = l3_dat[["m0id", "m1id", "m2id", "m3id"]]
         dat_agg = dat_agg.set_index("m3id")
         l3_dat = l3_dat.set_index("m3id")
@@ -109,17 +138,6 @@ def tcpl_write_data(dat, lvl, verbose):
         tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name, verbose=False)
 
 
-def log_model_params(datc):
-    datc.loc[datc["model_param"] == "ac50", "model_val"] = np.log10(
-        datc.loc[datc["model_param"] == "ac50", "model_val"])
-    return datc
-
-
-def unlog_model_params(datc):
-    datc.loc[datc["model_param"] == "ac50", "model_val"] = 10 ** datc.loc[datc["model_param"] == "ac50", "model_val"]
-    return datc
-
-
 def tcpl_append(dat, tbl, verbose):
     engine = get_sqlalchemy_engine()
     with engine.begin() as connection:
@@ -128,21 +146,6 @@ def tcpl_append(dat, tbl, verbose):
         if verbose:
             print(f"Append to {tbl} >> {num_rows_affected} affected rows >> {str(time.time() - start_time)} seconds.")
     return num_rows_affected
-
-
-def tcpl_cascade(lvl, id, verbose):
-    if lvl <= 4:
-        tcpl_delete(tbl="mc4_", fld="aeid", val=id, verbose=False)
-    if lvl <= 4:
-        tcpl_delete(tbl="mc4_agg_", fld="aeid", val=id, verbose=False)
-    if lvl <= 4:
-        tcpl_delete(tbl="mc4_param_", fld="aeid", val=id, verbose=False)
-    if lvl <= 5:
-        tcpl_delete(tbl="mc5_", fld="aeid", val=id, verbose=False)
-    if lvl <= 5:
-        tcpl_delete(tbl="mc5_param_", fld="aeid", val=id, verbose=False)
-    if verbose:
-        print("Completed delete cascade for", len(id), "ids\n")
 
 
 def tcpl_delete(tbl, fld, val, verbose):

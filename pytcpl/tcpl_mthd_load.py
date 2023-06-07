@@ -1,4 +1,4 @@
-from query_db import tcpl_query
+from pytcpl.query_db import tcpl_query
 
 
 def tcpl_mthd_load(lvl, id=None, type="mc", verbose=False):

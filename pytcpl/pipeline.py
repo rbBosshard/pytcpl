@@ -1,34 +1,40 @@
-import time
-import pandas as pd
 import cProfile
-from tcplFit2 import tcpl_fit2
-from tcplLoadData import tcpl_load_data
-from tcplMthdLoad import tcpl_mthd_load
-from mc4_mthds import mc4_mthds
-from tcplWriteData import tcpl_write_data
-from tcplPrepOtpt import tcpl_prep_otpt
-from tcplSubsetChid import tcpl_subset_chid
-from query_db import tcpl_query
-from mc5_mthds import mc5_mthds
-from tcplHit2 import tcpl_hit2
+import time
 import warnings
+
+import pandas as pd
+import ast
+
+from pytcpl.mc4_mthds import mc4_mthds
+from pytcpl.mc5_mthds import mc5_mthds
+from pytcpl.query_db import tcpl_query
+from pytcpl.tcpl_fit2 import tcpl_fit2
+from pytcpl.tcpl_hit2 import tcpl_hit2
+from pytcpl.tcpl_load_data import tcpl_load_data
+from pytcpl.tcpl_mthd_load import tcpl_mthd_load
+from pytcpl.tcpl_prep_otpt import tcpl_prep_otpt
+from pytcpl.tcpl_subset_chid import tcpl_subset_chid
+from pytcpl.tcpl_write_data import tcpl_write_data
+
 # warnings.filterwarnings("ignore")
 warnings.filterwarnings("error", category=RuntimeWarning)
 
-aeid = 5
-chunk_mc4 = 50
+aeid = 80
+chunk_mc4 = 5000
 test = 0
 parallelize = 1
 verbose = 0
-profile = 0
+profile = 1
 do_fit = 1
 bidirectional = True
 ml = 1
 export_path = "export/"
 fitmodels = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
+# fitmodels = ["cnst", "poly1", "poly2"]
 
 # Todo: Check if log() used right everywhere, i.e with the correct base: np.log2, np.log, np.log10
-# Todo: Set consistently for failing fields None or np.nan
+
+# Todo: Set consistently failing fields None or np.nan
 
 
 def prolog(pipeline_step):
@@ -64,10 +70,11 @@ def mc4():
     if do_fit:
         df = tcpl_fit2(df, fitmodels, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
         df.to_csv(export_path+"df.csv")
+        print(f"Curve-fitted {df.shape[0]} series with {len(fitmodels)} candidate fitmodels.")
     else:
         df = pd.read_csv(export_path+"df.csv")
+        # df["fitparams"].transform(lambda x: ast.literal_eval(x))
 
-    print(f"Curve-fitted {df.shape[0]} series with {len(fitmodels)} candidate fitmodels.")
     print_elapsed_time(start_time)
 
     tcpl_write_data(dat=df, lvl=4, verbose=False)
@@ -164,16 +171,21 @@ def export():
     print("Done export.")
 
 
-if __name__ == '__main__':
+def to_profile():
+    mc4()
+    # mc5()
+    # export()
 
+
+if __name__ == '__main__':
+    # Type `snakeviz pytcpl/pipeline.prof` in terminal after run to view profile in browser
     if profile:
         name = "pipeline"
         with cProfile.Profile() as pr:
-            export()
+            to_profile()
 
         pr.dump_stats(f'{name}.prof')
         print("Profiling complete")
-        # Type `snakeviz pipeline.prof ` in terminal to view profile in browser
 
     else:
         mc4()

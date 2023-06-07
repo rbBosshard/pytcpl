@@ -1,11 +1,9 @@
-import warnings
-import math
-from scipy.optimize import root_scalar
 import numpy as np
+from scipy.optimize import root_scalar
 from scipy.stats import t, norm
 
 
-def acy(y, modpars, fitmethod="hill", returntop=False, returntoploc=False, getloss=False, verbose=False):
+def acy(y, modpars, fit_method, returntop=False, returntoploc=False, getloss=False, verbose=False):
     # unpack parameter dictionary into local variables
     if "pars" in modpars:
         locals().update(modpars["pars"])
@@ -15,40 +13,40 @@ def acy(y, modpars, fitmethod="hill", returntop=False, returntoploc=False, getlo
     if not returntop:
         if 'tp' in locals() and locals()["tp"] and abs(y) >= abs(locals()["tp"]):
             if verbose:
-                warnings.warn("y (specified activity response) is greater than tp in function acy, returning NA")
+                print("y (specified activity response) is greater than tp in function acy, returning NA")
             return None
         if 'top' in locals() and locals()["top"] and abs(y) >= abs(locals()["top"]):
             if verbose:
-                warnings.warn("y (specified activity response) is greater than top in function acy, returning NA")
+                print("y (specified activity response) is greater than top in function acy, returning NA")
             return None
         if 'tp' in locals() and locals()["tp"] and y * locals()["tp"] < 0:
             if verbose:
-                warnings.warn("y (specified activity response) is wrong sign in function acy, returning NA")
+                print("y (specified activity response) is wrong sign in function acy, returning NA")
             return None
 
-    if fitmethod == "poly1":
+    if fit_method == "poly1":
         return y / locals()["a"]
-    elif fitmethod == "poly2":
-        return locals()["b"] * (-1 + math.sqrt(1 + 4 * y / locals()["a"])) / 2
-    elif fitmethod == "pow":
+    elif fit_method == "poly2":
+        return locals()["b"] * (-1 + np.sqrt(1 + 4 * y / locals()["a"])) / 2
+    elif fit_method == "pow":
         return (y / locals()["a"]) ** (1 / locals()["p"])
-    elif fitmethod == "exp2":
-        return locals()["b"] * math.log(y / locals()["a"] + 1)
-    elif fitmethod == "exp3":
-        return locals()["b"] * (math.log(y / locals()["a"] + 1)) ** (1 / locals()["p"])
-    elif fitmethod == "exp4":
-        return -locals()["ga"] * math.log2(1 - y / locals()["tp"])
-    elif fitmethod == "exp5":
-        return locals()["ga"] * (-math.log2(1 - y / locals()["tp"])) ** (1 / locals()["p"])
-    elif fitmethod == "hill":
+    elif fit_method == "exp2":
+        return locals()["b"] * np.log(y / locals()["a"] + 1)
+    elif fit_method == "exp3":
+        return locals()["b"] * (np.log(y / locals()["a"] + 1)) ** (1 / locals()["p"])
+    elif fit_method == "exp4":
+        return -locals()["ga"] * np.log2(1 - y / locals()["tp"])
+    elif fit_method == "exp5":
+        return locals()["ga"] * (-np.log2(1 - y / locals()["tp"])) ** (1 / locals()["p"])
+    elif fit_method == "hill":
         return locals()["ga"] / ((locals()["tp"] / y) - 1) ** (1 / locals()["p"])
-    elif fitmethod == "gnls":
+    elif fit_method == "gnls":
         args = (locals()["tp"], locals()["ga"], locals()["p"], locals()["la"], locals()["q"])
         try:
             toploc = root_scalar(gnlsderivobj, bracket=[locals()["ga"], locals()["la"]], args=args).root
         except ValueError:
             if verbose:
-                warnings.warn("toploc could not be found numerically")
+                print("toploc could not be found numerically")
             topval = locals()["tp"]
             toploc = np.nan
         else:
@@ -61,7 +59,7 @@ def acy(y, modpars, fitmethod="hill", returntop=False, returntoploc=False, getlo
 
         if abs(y) > abs(topval):
             if verbose:
-                warnings.warn("y is greater than gnls top in function acy, returning NA")
+                print("y is greater than gnls top in function acy, returning NA")
             return np.nan
 
         if y == topval:
@@ -89,7 +87,7 @@ def acgnlsobj(x, y, tp, ga, p, la, q):
     return gnls_([tp, ga, p, la, q], x) - y
 
 
-def tcpl_obj(ps, conc, resp, fname, errfun="dt4"):
+def tcpl_obj(ps, conc, resp, fit_method, errfun="dt4"):
     # Optimization objective function is called "cost function" or "loss function"
     # and therefore, we want to minimize them, rather than maximize them,
     # hence the negative log likelihood is formed, wrapped with scipy.optimize.minimize()
@@ -97,16 +95,16 @@ def tcpl_obj(ps, conc, resp, fname, errfun="dt4"):
 
     # Objective function is the sum of log-likelihood of response
     # given the model at each concentration scaled by variance (err)
-    mu = fname(ps=ps, x=conc)  # ps = parameter vector, get model values for each conc,
+    mu = fit_method(ps=ps, x=conc)  # ps = parameter vector, get model values for each conc,
     err = np.exp(ps[-1])  # last parameter is the log of the error/variance
-
+    residuals = (resp - mu) / err
+    # Todo: try another density function
     if errfun == "dt4":
-        nll = -np.sum(t.logpdf((resp - mu) / err, df=4) - np.log(
-            err))  # degree of freedom paramter = 4, for Student’s t probability density function
-    elif errfun == "dnorm":
-        nll = -np.sum(norm.logpdf((resp - mu) / err) - np.log(err))
-    else:  # Todo: Try other densitiy functions?
-        nll = None
+        # degree of freedom parameter = 4, for Student’s t probability density function
+        nll = -np.sum(t.logpdf(residuals, df=4) - np.log(err))
+    else:  # errfun == "dnorm":
+        nll = -np.sum(norm.logpdf(residuals) - np.log(err))
+
     return nll  # negative log likelihood scaled by variance
 
 
@@ -161,14 +159,7 @@ def hill_(ps, x):
 def hill(ps, x):
     # hill function with log units: x = log10(conc) and ga = log10(ac50)
     # tp = ps[0], ga = ps[1], p = ps[2]
-    try:
-         res = ps[0] / (1 + 10 ** (ps[2] * (ps[1] - x)))
-    except RuntimeWarning as warning:
-         # Handle the warning
-         print("Caught a RuntimeWarning:", warning)
-
-    return res
-
+    return ps[0] / (1 + 10 ** (ps[2] * (ps[1] - x)))
 
 
 def poly1(ps, x):

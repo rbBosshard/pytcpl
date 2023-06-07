@@ -1,7 +1,7 @@
 import numpy as np
 from joblib import Parallel, delayed
 
-from fit_method_helper import curve_fit
+from pytcpl.tcpl_fit2_helper import curve_fit
 
 
 def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
@@ -56,7 +56,7 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
 
         out = {}
         for model in fitmodels:
-            to_fit = get_to_fit_condition(cutoff, force_fit, rmds, model)
+            to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
             out[model] = curve_fit(model, conc, resp, bidirectional, to_fit, verbose)
 
         return out
@@ -72,76 +72,3 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
     dat["fitparams"] = fitparams
     return dat
 
-
-def get_to_fit_condition(cutoff, force_fit, rmds, model):
-    to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
-    return to_fit
-
-
-def cnst(ps, x):
-    # ignores ps
-    return np.zeros(len(x))
-
-
-def exp2(ps, x):
-    # a = ps[0], b = ps[1]
-    return ps[0] * (np.exp(x / ps[1]) - 1)
-
-
-def exp3(ps, x):
-    # a = ps[0], b = ps[1], p = ps[2]
-    return ps[0] * (np.exp((x / ps[1]) ** ps[2]) - 1)
-
-
-def exp4(ps, x):
-    # tp = ps[0], ga = ps[1]
-    return ps[0] * (1 - 2 ** (-x / ps[1]))
-
-
-def exp5(ps, x):
-    # tp = ps[0], ga = ps[1], p = ps[2]
-    return ps[0] * (1 - 2 ** (-(x / ps[1]) ** ps[2]))
-
-
-def gnls(ps, x):
-    # gnls function with regular units
-    # tp = ps[0], ga = ps[1], p = ps[2], la = ps[3], q = ps[4]
-    gn = 1 / (1 + (ps[1] / x) ** ps[2])
-    ls = 1 / (1 + (x / ps[3]) ** ps[4])
-    return ps[0] * gn * ls
-
-
-def loggnls(ps, x):
-    # gnls function with log units: x = log10(conc) and ga/la = log10(gain/loss ac50)
-    # tp = ps[0], ga = ps[1], p = ps[2], la = ps[3], q = ps[4]
-    gn = 1 / (1 + 10 ** ((ps[1] - x) * ps[2]))
-    ls = 1 / (1 + 10 ** ((x - ps[3]) * ps[4]))
-    return ps[0] * gn * ls
-
-
-def hillfn(ps, x):
-    # hill function with regular units
-    # tp = ps[0], ga = ps[1], p = ps[2]
-    return ps[0] / (1 + (ps[1] / x) ** ps[2])
-
-
-def loghill(ps, x):
-    # hill function with log units: x = log10(conc) and ga = log10(ac50)
-    # tp = ps[0], ga = ps[1], p = ps[2]
-    return ps[0] / (1 + 10 ** (ps[2] * (ps[1] - x)))
-
-
-def poly1(ps, x):
-    # a = ps[0]
-    return ps[0] * x
-
-
-def poly2(ps, x):
-    # a = ps[0], b = ps[1]
-    x0 = x / ps[1]
-    return ps[0] * (x0 + x0 * x0)
-
-
-def pow(ps, x):
-    # a = ps[0], p = ps[1]
-    return ps[0] * x ** ps[1]

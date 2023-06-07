@@ -1,8 +1,9 @@
-import pandas as pd
 import os
-import yaml
 import time
+
 import mysql.connector as mysql
+import pandas as pd
+import yaml
 from sqlalchemy import create_engine, text
 
 
@@ -18,9 +19,7 @@ def get_sqlalchemy_engine():
     username, password, host, port, db = get_db_config()
     url = f"mysql+mysqlconnector://{username}:{password}@{host}:{port}/{db}"
     try:
-        engine = create_engine(url)
-        return engine
-
+        return create_engine(url)
     except Exception as error:
         print(f"Error connecting to MySQL: {error}")
         return None
@@ -28,20 +27,15 @@ def get_sqlalchemy_engine():
 
 def get_db_conn():
     username, password, host, port, db = get_db_config()
-
     try:
-        db_conn = mysql.connect(
+        return mysql.connect(
             host=host,
             user=username,
             password=password,
             port=port,
-            database=db
-        )
-        return db_conn
-
-    except Exception as error:
-        print(f"Error connecting to MySQL: error: {error}")
-        return None
+            database=db)
+    except mysql.Error as error:
+        raise ConnectionError("Error connecting to MySQL: {}".format(error))
 
 
 def tcpl_query(query, verbose):
