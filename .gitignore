@@ -3,7 +3,8 @@ __pycache__
 .lprof/
 pytcpl.egg-info/
 dist/
-pytcpl/export/
+pytcpl/export/*
+pytcpl/profile/*
 pytcpl/*.csv
 pytcpl/*.prof
 pytcpl/*.ipynb
