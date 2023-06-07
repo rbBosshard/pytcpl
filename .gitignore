@@ -3,9 +3,9 @@ __pycache__
 .lprof/
 pytcpl.egg-info/
 dist/
-pytcpl/export/
+pytcpl/export/*
 !pytcpl/export/.gitkeep
-pytcpl/profile/
+pytcpl/profile/*
 !pytcpl/profile/.gitkeep
 pytcpl/*.csv
 pytcpl/*.prof
