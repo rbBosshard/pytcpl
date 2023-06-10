@@ -35,7 +35,7 @@ def tcpl_list_flds(tbl):
     return query
 
 
-def tcpl_load_data(lvl, fld=None, val=None, verbose=False):
+def tcpl_load_data(lvl, fld, val, verbose=False):
 
     if lvl == 0:
         tbls = ["mc0"]

@@ -1,7 +1,7 @@
+import json
 import os
 import time
 
-import numpy as np
 import pandas as pd
 
 from pytcpl.query_db import tcpl_query, get_sqlalchemy_engine
@@ -57,19 +57,22 @@ def tcpl_write_data(dat, lvl, verbose):
         else:
             bmed = pd.DataFrame()
 
-        def tcpl_fit2_unnest(output):
+        import ast
+        def tcpl_fit_unnest(output):
+            output = ast.literal_eval(output) if isinstance(output, str) else output
             modelnames = list(output.keys())
             res = {}
             for m in modelnames:
-                res[m] = {name: val for name, val in output[m].items() if name not in ["pars", "sds", "modl"]}
-                res[m].update(output[m]["pars"])
+                d = json.loads(output[m])
+                res[m] = {name: val for name, val in d.items() if name not in ["pars", "sds", "modl"]}
+                res[m].update(d["pars"])
 
             rows = [{"model": m, "model_param": p, "model_val": val} for m in modelnames for p, val in
                     res[m].items()]
             return pd.DataFrame.from_records(rows, columns=["model", "model_param", "model_val"])
 
-        # unnest fit2 params
-        unnested_param = pd.concat([pd.DataFrame(tcpl_fit2_unnest(x)) for x in param['fitparams']], keys=param['m4id'],
+        # unnest fit params
+        unnested_param = pd.concat([pd.DataFrame(tcpl_fit_unnest(x)) for x in param['fitparams']], keys=param['m4id'],
                                    names=['m4id']).reset_index()
         unnested_param = unnested_param.set_index("m4id")
         param = param.set_index("m4id")
@@ -86,10 +89,7 @@ def tcpl_write_data(dat, lvl, verbose):
         dat_agg = dat_agg.reset_index()
 
         ids = list(dat_agg['m3id'])
-        # heavy operation if ids list is long, aggregate ids from 3 huge tables
-        # Create an empty list to store the DataFrames
         df_list = []
-        # Iterate through the loop
         chunk_size = 10000
         num_chunks = len(ids) // chunk_size
         remaining_elements = len(ids) % chunk_size
@@ -109,8 +109,6 @@ def tcpl_write_data(dat, lvl, verbose):
 
         # Concatenate all the DataFrames in the list
         l3_dat = pd.concat(df_list)
-
-        # l3_dat = tcpl_load_data(lvl=3, fld="m3id", val=ids)
 
         l3_dat = l3_dat[["m0id", "m1id", "m2id", "m3id"]]
         dat_agg = dat_agg.set_index("m3id")

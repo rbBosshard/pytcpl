@@ -1,26 +1,15 @@
 from pytcpl.query_db import tcpl_query
 
 
-def tcpl_mthd_load(lvl, id=None, type="mc", verbose=False):
-    if isinstance(id, int) or isinstance(id, str):
-        id = [id]
-    id = list(map(str, id))
-
-    id_name = "acid" if type == "mc" and lvl == 2 else "aeid"
-    flds = [id_name, f"b.{type}{lvl}_mthd AS mthd", f"b.{type}{lvl}_mthd_id AS mthd_id"]
-    if lvl < 4 and type == "mc":
-        flds.append("a.exec_ordr AS ordr")
-    tbls = [f"%s_{id_name} AS a", f"%s_methods AS b"]
-    qformat = f"SELECT {', '.join(flds)} FROM {', '.join(tbls)} WHERE a.%s_mthd_id = b.%s_mthd_id"
-    qformat = qformat.replace("%s", f"{type}{lvl}")
-    if id is not None:
-        qformat = f"{qformat} AND {id_name} IN ({', '.join(id)});"
-    if (lvl < 4 and type == "mc") or (lvl == 1 and type == "sc"):
-        qstring = f"{qformat} ORDER BY {id_name}, a.exec_ordr"
-    else:
-        qstring = qformat
+def tcpl_mthd_load(lvl, aeid, verbose=False):
+    flds = ["aeid", f"b.mc{lvl}_mthd AS mthd", f"b.mc{lvl}_mthd_id AS mthd_id"]
+    tbls = [f"mc{lvl}_aeid AS a", f"mc{lvl}_methods AS b"]
+    qstring = f"SELECT {', '.join(flds)} " \
+              f"FROM {', '.join(tbls)} " \
+              f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
+              f"AND aeid IN ({', '.join(str(aeid))});"
 
     if verbose:
         print(f"qstring: {qstring}")
-    dat = tcpl_query(query=qstring, verbose=False)
-    return dat
+
+    return tcpl_query(query=qstring, verbose=False)

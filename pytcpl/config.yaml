@@ -1,4 +1,6 @@
 # Add here new user
+NUM_JOBS: 4
+
 bossh:
   DATABASE:
     USERNAME: root

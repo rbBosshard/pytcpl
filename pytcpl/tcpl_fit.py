@@ -1,10 +1,10 @@
 import numpy as np
 from joblib import Parallel, delayed
 
-from pytcpl.tcpl_fit2_helper import curve_fit
+from pytcpl.tcpl_fit_helper import curve_fit
 
 
-def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
+def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
     if 'bmed' not in dat.columns:
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
@@ -41,7 +41,7 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
     grouped = dat.groupby('aeid')
     dat['tmpi'] = grouped['m3ids'].transform(lambda x: np.arange(len(x), 0, -1))
 
-    def tcplfit2_core(group):
+    def tcplfit_core(group):
         conc = np.array(group['concentration_unlogged'].iloc[0])
         resp = np.array(group['response'].iloc[0])
         cutoff = group['bmad'].iloc[0]
@@ -55,7 +55,7 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
             resp += 1e-6
 
         out = {}
-        for model in fitmodels:
+        for model in fit_models:
             to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
             out[model] = curve_fit(model, conc, resp, bidirectional, to_fit, verbose)
 
@@ -64,10 +64,10 @@ def tcpl_fit2(dat, fitmodels, bidirectional=True, force_fit=False, parallelize=T
     fitparams = []
 
     if parallelize:
-        fitparams = Parallel(n_jobs=-1)(delayed(tcplfit2_core)(group) for _, group in dat.groupby('spid'))
+        fitparams = Parallel(n_jobs=-1)(delayed(tcplfit_core)(group) for _, group in dat.groupby('spid'))
     else:  # Serial version for debugging
         for _, group in dat.groupby('spid'):
-            fitparams.append(tcplfit2_core(group))
+            fitparams.append(tcplfit_core(group))
 
     dat["fitparams"] = fitparams
     return dat

@@ -1,15 +1,16 @@
 import cProfile
+import json
 import time
 import warnings
 
+import numpy as np
 import pandas as pd
-import ast
 
 from pytcpl.mc4_mthds import mc4_mthds
 from pytcpl.mc5_mthds import mc5_mthds
 from pytcpl.query_db import tcpl_query
-from pytcpl.tcpl_fit2 import tcpl_fit2
-from pytcpl.tcpl_hit2 import tcpl_hit2
+from pytcpl.tcpl_fit import tcpl_fit
+from pytcpl.tcpl_hit import tcpl_hit
 from pytcpl.tcpl_load_data import tcpl_load_data
 from pytcpl.tcpl_mthd_load import tcpl_mthd_load
 from pytcpl.tcpl_prep_otpt import tcpl_prep_otpt
@@ -19,121 +20,98 @@ from pytcpl.tcpl_write_data import tcpl_write_data
 # warnings.filterwarnings("ignore")
 warnings.filterwarnings("error", category=RuntimeWarning)
 
-aeid = 80
-chunk_mc4 = 5000
+aeid = 5
+head = 200
 test = 0
-parallelize = 1
+parallelize = 0
 verbose = 0
 profile = 1
 do_fit = 1
 bidirectional = True
 ml = 1
 export_path = "export/"
-fitmodels = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
-# fitmodels = ["cnst", "poly1", "poly2"]
-
-# Todo: Check if log() used right everywhere, i.e with the correct base: np.log2, np.log, np.log10
-
-# Todo: Set consistently failing fields None or np.nan
+fit_models = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
+fit_models = ["cnst", "poly1"]
+# fit_models = ["cnst", "poly1", "poly2", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
 
 
-def prolog(pipeline_step):
+#  Todo: Check if log() used right everywhere, i.e with the correct base: np.log2, np.log, np.log10
+
+#  Todo: Set consistently failing fields None or np.nan
+
+
+def pipeline():
+    def mc4():
+        start_time = starting(f"mc4 with id {aeid}")
+        df = tcpl_load_data(lvl=3, fld='aeid', val=aeid)
+        df = df.head(head) if test else df
+        print(f"Loaded L3 AEID {aeid} with ({df.shape[0]} rows) >> {elapsed(start_time)}")
+
+        get_bmad = tcpl_mthd_load(lvl=4, aeid=aeid)
+        for mthd in get_bmad['mthd']:
+            df = mc4_mthds(mthd)(df)
+
+        df = tcpl_fit(df, fit_models, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
+        print(f"Curve-fitted {df.shape[0]} series, with {len(fit_models)} fit models > {elapsed(start_time)}")
+
+        tcpl_write_data(dat=df, lvl=4, verbose=False)
+        print(f"Stored L4 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
+        print("Done mc4.")
+        return df
+
+
+    def mc5(df):
+        start_time = starting(f"mc5 with id {aeid}")
+
+        if df is None:
+            df = tcpl_load_data(lvl=4, fld='aeid', val=aeid, verbose=False)
+            print(f"Loaded L4 AEID {aeid} with ({df.shape[0]} rows) >> {elapsed(start_time)}")
+
+        cutoff = get_mc5_cutoff(df)
+        dat = get_mc5_data()
+        dat = tcpl_hit(dat, cutoff, parallelize, verbose=verbose)
+        print(f"Computed L5 AEID {aeid} hitcall parameters with {dat.shape[0]} rows >> {elapsed(start_time)}")
+
+        tcpl_write_data(dat=dat, lvl=5, verbose=False)
+        print(f"Stored L5 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
+        print("Done mc5.")
+
+
+    # Pipeline
+    df = None
+    df = mc4()
+    mc5(df)
+    # export()
+    print("Pipeline done.")
+
+
+
+def starting(pipeline_step):
     print(f"Starting {pipeline_step} ...")
     return time.time()
 
 
-def print_elapsed_time(start_time):
-    print('Execution time in seconds: ' + str(time.time() - start_time))
+def elapsed(start_time):
+    print('Execution time in seconds: ' + str(round(time.time() - start_time, 2)))
 
 
-def mc4():
-    start_time = prolog(f"mc4 with id {aeid}")
-
-    if test:
-        df = tcpl_load_data(lvl=3, fld='aeid', val=aeid).head(chunk_mc4)
-    else:
-        df = tcpl_load_data(lvl=3, fld='aeid', val=aeid)
-
-    print_elapsed_time(start_time)
-
-    ms = tcpl_mthd_load(lvl=4, id=aeid, type="mc")
-    if ms.shape[0] == 0:
-        print(f"No level 4 methods for AEID {aeid} Level 4 processing incomplete; no updates made to the mc4.")
-        return
-
-    print(f"Loaded L3 AEID {aeid} ({df.shape[0]} rows)")
-
-    mthd_funcs = mc4_mthds()
-    for method_key in ms['mthd']:
-        df = mthd_funcs[method_key](df)
-
-    if do_fit:
-        df = tcpl_fit2(df, fitmodels, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
-        df.to_csv(export_path+"df.csv")
-        print(f"Curve-fitted {df.shape[0]} series with {len(fitmodels)} candidate fitmodels.")
-    else:
-        df = pd.read_csv(export_path+"df.csv")
-        # df["fitparams"].transform(lambda x: ast.literal_eval(x))
-
-    print_elapsed_time(start_time)
-
-    tcpl_write_data(dat=df, lvl=4, verbose=False)
-    print_elapsed_time(start_time)
-
-    print("Done mc4.")
+def get_mc5_cutoff(df):
+    mc5_assay_cutoff_methods = tcpl_mthd_load(lvl=5, aeid=aeid)["mthd"]
+    bmad = df["bmad"].iloc[0]
+    cutoffs = []
+    for mthd in mc5_assay_cutoff_methods:
+        cutoff = mc5_mthds(mthd, bmad)
+        cutoffs.append(cutoff)
+    return np.max(cutoffs) if len(cutoffs) > 0 else 0
 
 
-def mc5():
-    start_time = prolog(f"mc5 with id {aeid}")
-
-    df = tcpl_load_data(lvl=4, fld='aeid', val=aeid, verbose=False)
-
-    # Check if any level 4 data was loaded
-    if df.shape[0] == 0:
-        print(
-            f"No level 4 data for AEID {aeid}. "
-            f"Level 5 processing incomplete; no updates made to the mc5 table for AEID {aeid}.")
-
-        return
-
-    print(f"Loaded L4 AEID {aeid} ({df.shape[0]} rows)")
-
-    ms = tcpl_mthd_load(lvl=5, id=aeid, type="mc")
-    mthd_funcs = mc5_mthds()
-
-    coff = []
-    for method_key in ms['mthd']:
-        coff.append(mthd_funcs[method_key](df))
-
-    if ms.shape[0] == 0:
-        print(f"No level 5 methods for AEID {aeid} -- cutoff will be 0.")
-
-    # Determine final cutoff
-    max_coff = max(coff)
-    df['coff'] = max_coff[0]
-
-    cutoff = max(df['coff'])
-
+def get_mc5_data():
     mc4_name = "mc4_"
     mc4_param_name = "mc4_param_"
-
     query = f"SELECT {mc4_name}.m4id," \
             f"{mc4_name}.aeid," \
-            f"{mc4_name}.spid," \
-            f"{mc4_name}.bmad," \
-            f"{mc4_name}.resp_max," \
-            f"{mc4_name}.resp_min," \
-            f"{mc4_name}.max_mean," \
-            f"{mc4_name}.max_mean_conc," \
-            f"{mc4_name}.max_med," \
-            f"{mc4_name}.max_med_conc," \
             f"{mc4_name}.logc_max," \
             f"{mc4_name}.logc_min," \
-            f"{mc4_name}.nconc," \
-            f"{mc4_name}.npts," \
-            f"{mc4_name}.nrep," \
-            f"{mc4_name}.nmed_gtbl," \
-            f"{mc4_name}.tmpi," \
             f"{mc4_param_name}.model," \
             f"{mc4_param_name}.model_param," \
             f"{mc4_param_name}.model_val " \
@@ -143,18 +121,11 @@ def mc5():
             f"WHERE {mc4_name}.aeid = {aeid};"
 
     dat = tcpl_query(query, False)
-
-    dat = tcpl_hit2(dat, coff=cutoff, verbose=verbose)
-    print_elapsed_time(start_time)
-
-    tcpl_write_data(dat=dat, lvl=5, verbose=False)
-    print_elapsed_time(start_time)
-
-    print("Done mc5.")
+    return dat
 
 
 def export():
-    start_time = prolog(f"Export {aeid}")
+    start_time = starting(f"Export {aeid}")
     # Load the example level 5 data
     d1 = tcpl_load_data(lvl=5, fld="aeid", val=aeid, verbose=verbose)
     d1 = tcpl_prep_otpt(d1)
@@ -167,27 +138,19 @@ def export():
         df.to_csv(export_path+"chem.csv", header=True, index=True)
         # df = pd.read_csv(export_path+"chem.csv")
 
-    print_elapsed_time(start_time)
+    elapsed(start_time)
     print("Done export.")
 
 
-def to_profile():
-    mc4()
-    # mc5()
-    # export()
-
-
 if __name__ == '__main__':
-    # Type `snakeviz pytcpl/pipeline.prof` in terminal after run to view profile in browser
+    # Type `snakeviz pytcpl/profile/pipeline.prof` in terminal after run to view profile in browser
     if profile:
         name = "pipeline"
         with cProfile.Profile() as pr:
-            to_profile()
+            pipeline()
 
-        pr.dump_stats(f'{name}.prof')
+        pr.dump_stats(f'profile/{name}.prof')
         print("Profiling complete")
 
     else:
-        mc4()
-        mc5()
-        export()
+        pipeline()

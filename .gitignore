@@ -7,9 +7,7 @@ pytcpl/export/*
 !pytcpl/export/.gitkeep
 pytcpl/profile/*
 !pytcpl/profile/.gitkeep
-pytcpl/*.csv
-pytcpl/*.prof
-pytcpl/*.ipynb
+pytcpl/tables/*
 
 pytcpl/test.py
 
