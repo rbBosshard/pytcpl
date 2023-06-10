@@ -34,7 +34,7 @@ def curve_fit(fit_model, conc, resp, bidirectional, to_fit, verbose):
             print(f"{fit_model} >>> Error during optimization: {e}")
             # fit = None
 
-    return json.dumps(out)
+    return out
 
 
 def get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose=False):

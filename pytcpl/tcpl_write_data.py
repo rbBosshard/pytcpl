@@ -63,7 +63,7 @@ def tcpl_write_data(dat, lvl, verbose):
             modelnames = list(output.keys())
             res = {}
             for m in modelnames:
-                d = json.loads(output[m])
+                d = output[m]
                 res[m] = {name: val for name, val in d.items() if name not in ["pars", "sds", "modl"]}
                 res[m].update(d["pars"])
 

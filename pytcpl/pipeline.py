@@ -1,10 +1,8 @@
 import cProfile
-import json
 import time
 import warnings
 
 import numpy as np
-import pandas as pd
 
 from pytcpl.mc4_mthds import mc4_mthds
 from pytcpl.mc5_mthds import mc5_mthds
@@ -21,17 +19,20 @@ from pytcpl.tcpl_write_data import tcpl_write_data
 warnings.filterwarnings("error", category=RuntimeWarning)
 
 aeid = 5
-head = 200
-test = 0
+head = 40
+test = 1
 parallelize = 0
 verbose = 0
 profile = 1
 do_fit = 1
 bidirectional = True
 ml = 1
+plot = 1
 export_path = "export/"
 fit_models = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
-fit_models = ["cnst", "poly1"]
+# fit_models = ["cnst", "poly1"]
+
+
 # fit_models = ["cnst", "poly1", "poly2", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
 
 
@@ -51,14 +52,50 @@ def pipeline():
         for mthd in get_bmad['mthd']:
             df = mc4_mthds(mthd)(df)
 
-        df = tcpl_fit(df, fit_models, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
+        mc4 = tcpl_fit(df, fit_models, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
         print(f"Curve-fitted {df.shape[0]} series, with {len(fit_models)} fit models > {elapsed(start_time)}")
 
-        tcpl_write_data(dat=df, lvl=4, verbose=False)
+        pars_tracker = {key: [] for key in fit_models}
+        modl_tracker = {key: [] for key in fit_models}
+
+        conc_tracker = []
+        resp_tracker = []
+
+        fitparams = mc4["fitparams"]
+        for i in range(fitparams.shape[0]):
+            data = fitparams.iloc[i]
+            mc4_row = mc4.iloc[i]
+            conc_tracker.append(mc4_row["concentration_unlogged"])
+            resp_tracker.append(mc4_row["response"])
+
+            for model in list(data.keys()):
+                params = data[model]
+                pars = list(params["pars"].values())
+                modl = params["modl"]
+                pars_tracker[model].append(pars)
+                modl_tracker[model].append(modl)
+
+
+        import matplotlib.pyplot as plt
+        plt.figure()
+        for i in range(len(conc_tracker)):
+            print(i)
+            conc = np.array(conc_tracker[i])
+            resp = np.array(resp_tracker[i])
+            uconc = np.unique(conc)
+            rmds = np.array([np.median(resp[conc == c]) for c in uconc])
+            plt.plot(uconc, rmds, '-ok')
+            for model in fit_models:
+                modl = np.array(modl_tracker[model][i])
+                plt.plot(uconc, modl, '-ok')
+
+        plt.show()
+
+
+        tcpl_write_data(dat=mc4, lvl=4, verbose=False)
         print(f"Stored L4 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
         print("Done mc4.")
-        return df
-
+        return mc4
 
     def mc5(df):
         start_time = starting(f"mc5 with id {aeid}")
@@ -67,7 +104,10 @@ def pipeline():
             df = tcpl_load_data(lvl=4, fld='aeid', val=aeid, verbose=False)
             print(f"Loaded L4 AEID {aeid} with ({df.shape[0]} rows) >> {elapsed(start_time)}")
 
-        cutoff = get_mc5_cutoff(df)
+        assay_cutoff_methods = tcpl_mthd_load(lvl=5, aeid=aeid)["mthd"]
+        bmad = df["bmad"].iloc[0]
+        cutoffs = [mc5_mthds(mthd, bmad) for mthd in assay_cutoff_methods]
+        cutoff = np.max(cutoffs) if len(cutoffs) > 0 else 0
         dat = get_mc5_data()
         dat = tcpl_hit(dat, cutoff, parallelize, verbose=verbose)
         print(f"Computed L5 AEID {aeid} hitcall parameters with {dat.shape[0]} rows >> {elapsed(start_time)}")
@@ -75,7 +115,6 @@ def pipeline():
         tcpl_write_data(dat=dat, lvl=5, verbose=False)
         print(f"Stored L5 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
         print("Done mc5.")
-
 
     # Pipeline
     df = None
@@ -85,7 +124,6 @@ def pipeline():
     print("Pipeline done.")
 
 
-
 def starting(pipeline_step):
     print(f"Starting {pipeline_step} ...")
     return time.time()
@@ -93,16 +131,6 @@ def starting(pipeline_step):
 
 def elapsed(start_time):
     print('Execution time in seconds: ' + str(round(time.time() - start_time, 2)))
-
-
-def get_mc5_cutoff(df):
-    mc5_assay_cutoff_methods = tcpl_mthd_load(lvl=5, aeid=aeid)["mthd"]
-    bmad = df["bmad"].iloc[0]
-    cutoffs = []
-    for mthd in mc5_assay_cutoff_methods:
-        cutoff = mc5_mthds(mthd, bmad)
-        cutoffs.append(cutoff)
-    return np.max(cutoffs) if len(cutoffs) > 0 else 0
 
 
 def get_mc5_data():
@@ -116,7 +144,7 @@ def get_mc5_data():
             f"{mc4_param_name}.model_param," \
             f"{mc4_param_name}.model_val " \
             f"FROM {mc4_name} " \
-            f"INNER JOIN {mc4_param_name} " \
+            f"JOIN {mc4_param_name} " \
             f"ON {mc4_name}.m4id = {mc4_param_name}.m4id " \
             f"WHERE {mc4_name}.aeid = {aeid};"
 
@@ -135,7 +163,7 @@ def export():
     # be the sample with the lowest modl_ga.
     df = tcpl_subset_chid(dat=d1, flag=False)  # [ , list(m4id, modl_ga)]
     if ml:
-        df.to_csv(export_path+"chem.csv", header=True, index=True)
+        df.to_csv(export_path + "chem.csv", header=True, index=True)
         # df = pd.read_csv(export_path+"chem.csv")
 
     elapsed(start_time)
