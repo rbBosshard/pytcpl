@@ -1,4 +1,4 @@
-from pytcpl.query_db import tcpl_query
+from query_db import tcpl_query
 
 mc4_name = "mc4_"
 mc4_agg_name = "mc4_agg_"
@@ -31,7 +31,7 @@ def tcpl_list_flds(tbl):
     WHERE 
         `TABLE_NAME` = '{tbl}';
     """
-    query = tcpl_query(qformat.format(tbl=tbl), False)["COLUMN_NAME"].tolist()
+    query = tcpl_query(qformat.format(tbl=tbl))["COLUMN_NAME"].tolist()
     return query
 
 
@@ -136,6 +136,6 @@ def tcpl_load_data(lvl, fld, val, verbose=False):
     if verbose:
         print(f"qstring: {qstring}")
 
-    dat = tcpl_query(query=qstring, verbose=False)
+    dat = tcpl_query(query=qstring)
 
     return dat

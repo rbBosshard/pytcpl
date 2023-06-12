@@ -2,9 +2,9 @@ import numpy as np
 import scipy.optimize as optimize
 from scipy.stats import chi2
 
-from pytcpl.acy import acy
-from pytcpl.tcpl_obj_fn import tcpl_obj
-from pytcpl.fit_models import get_params, get_fit_model
+from acy import acy
+from tcpl_obj_fn import tcpl_obj
+from fit_models import get_params, get_fit_model
 
 
 def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):

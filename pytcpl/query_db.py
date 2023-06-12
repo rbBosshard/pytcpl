@@ -4,11 +4,14 @@ import time
 import mysql.connector as mysql
 import pandas as pd
 import yaml
+import os
 from sqlalchemy import create_engine, text
 
 
 def get_db_config():
-    with open("config.yaml", "r") as f:
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    CONFIG_PATH = os.path.join(ROOT_DIR, 'config.yaml')
+    with open(CONFIG_PATH, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         login_name = os.getlogin()
         config_db = config[login_name]['DATABASE']
@@ -38,12 +41,12 @@ def get_db_conn():
         raise ConnectionError("Error connecting to MySQL: {}".format(error))
 
 
-def tcpl_query(query, verbose):
+def tcpl_query(query, verbose=False):
     try:
         if query.lower().startswith("delete"):
             db_conn = get_db_conn()
-            mycursor = db_conn.cursor()
-            mycursor.execute(query)
+            cursor = db_conn.cursor()
+            cursor.execute(query)
             db_conn.commit()
         else:
             engine = get_sqlalchemy_engine()

@@ -4,8 +4,8 @@ import time
 
 import pandas as pd
 
-from pytcpl.query_db import tcpl_query, get_sqlalchemy_engine
-from pytcpl.tcpl_load_data import tcpl_load_data
+from query_db import tcpl_query, get_sqlalchemy_engine
+from tcpl_load_data import tcpl_load_data
 
 
 def tcpl_write_data(dat, lvl, verbose):
@@ -38,7 +38,7 @@ def tcpl_write_data(dat, lvl, verbose):
         qformat = "SELECT m4id, aeid, tmpi FROM mc4_ WHERE aeid IN ({})"
         ids = dat["aeid"].unique()
         qstring = qformat.format(",".join(["'" + str(i) + "'" for i in ids]))
-        m4id_map = tcpl_query(query=qstring, verbose=False)
+        m4id_map = tcpl_query(query=qstring)
 
         m4id_map = m4id_map.set_index(["aeid", "tmpi"])
         dat = dat.set_index(["aeid", "tmpi"])
@@ -126,7 +126,7 @@ def tcpl_write_data(dat, lvl, verbose):
         qformat = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN (%s);"
         qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
 
-        m5id_map = tcpl_query(query=qstring, verbose=False)
+        m5id_map = tcpl_query(query=qstring)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
         dat = dat.set_index(["aeid", "m4id"])
         dat = dat.join(m5id_map, how="left").reset_index()
@@ -156,4 +156,4 @@ def tcpl_delete(tbl, fld, val, verbose):
     val = [','.join([f'"{x}"' for x in v]) for v in val]
 
     qstring = qformat % tuple(val)
-    tcpl_query(qstring, False)
+    tcpl_query(qstring)

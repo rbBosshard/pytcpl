@@ -18,9 +18,9 @@ def tcpl_obj(ps, conc, resp, fit_model, errfun="dt4"):
     if errfun == "dt4":
         # degree of freedom parameter = 4, for Student’s t probability density function
         # t.logpdf(x, df, loc, scale) is identically equivalent to t.logpdf(y, df) / scale with y = (x - loc) / scale.
-        ll = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=err))  # Todo: ask why subtracted by log(err)
+        ll = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=err) - np.log(err))  # Todo: ask why subtracted by log(err)
     else:  # errfun == "dnorm":
-        ll = np.sum(norm.logpdf(x=resp, loc=pred, scale=err))
+        ll = np.sum(norm.logpdf(x=resp, loc=pred, scale=err) - np.log(err))
 
     neg_ll = -1 * ll
     return neg_ll  # negative log likelihood scaled by variance

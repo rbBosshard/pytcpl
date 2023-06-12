@@ -13,15 +13,15 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         if 'tp' in locals() and locals()["tp"] and abs(y) >= abs(locals()["tp"]):
             if verbose:
                 print("y (specified activity response) is greater than tp in function acy, returning NA")
-            return None
+            return np.nan
         if 'top' in locals() and locals()["top"] and abs(y) >= abs(locals()["top"]):
             if verbose:
                 print("y (specified activity response) is greater than top in function acy, returning NA")
-            return None
+            return np.nan
         if 'tp' in locals() and locals()["tp"] and y * locals()["tp"] < 0:
             if verbose:
                 print("y (specified activity response) is wrong sign in function acy, returning NA")
-            return None
+            return np.nan
 
     if fit_model == "poly1":
         return y / locals()["a"]

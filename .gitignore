@@ -8,6 +8,7 @@ pytcpl/export/*
 pytcpl/profile/*
 !pytcpl/profile/.gitkeep
 pytcpl/tables/*
+pytcpl/app/*
 
 pytcpl/test.py
 

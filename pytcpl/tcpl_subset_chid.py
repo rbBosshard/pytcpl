@@ -1,4 +1,4 @@
-from pytcpl.tcpl_prep_otpt import tcpl_prep_otpt
+from tcpl_prep_otpt import tcpl_prep_otpt
 
 
 def tcpl_subset_chid(dat, flag=False):

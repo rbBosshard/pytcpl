@@ -2,13 +2,12 @@ import json
 
 import numpy as np
 
-from pytcpl.acy import acy
-from pytcpl.bmd_bounds import bmd_bounds
-from pytcpl.tcpl_hit_helper import hit_cont_inner, nest_select
+from acy import acy
+from bmd_bounds import bmd_bounds
+from tcpl_hit_helper import hit_cont_inner, nest_select
 
 
-def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, conthits=True, aicc=False,
-                  identifiers=None, bmd_low_bnd=None, bmd_up_bnd=None):
+def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bmd_low_bnd=None, bmd_up_bnd=None):
     # Todo: ensure if fit_model == const then do not compute more than needed
     fitout = {}
     modpars = None
@@ -29,23 +28,22 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
         if "poly1" in aics_keys and "poly2" in aics_keys:
             aics = nest_select(aics, "poly1", "poly2", dfdiff=1, pval=0.05)
 
-        if conthits:
-            # if all fits, except the constant fail, use none for the fit method
-            # when continuous hit calling is in use
-            if sum(~np.isnan(aics_values)) == 1 and "cnst" in aics_keys:
-                fit_model = "none"
-            else:
-                # get AIC weights of winner (vs constant) for continuous hitcalls
-                # never choose constant as winner for continuous hitcalls
-                nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
-                fit_model = min(nocnstaics, key=nocnstaics.get)
-                caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
-                if np.isnan(caikwt):
-                    term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
-                    if term == np.inf:
-                        caikwt = 0
-                    else:
-                        caikwt = 1 / (1 + term)
+        # if all fits, except the constant fail, use none for the fit method
+        # when continuous hit calling is in use
+        if sum(~np.isnan(aics_values)) == 1 and "cnst" in aics_keys:
+            fit_model = "none"
+        else:
+            # get AIC weights of winner (vs constant) for continuous hitcalls
+            # never choose constant as winner for continuous hitcalls
+            nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
+            fit_model = min(nocnstaics, key=nocnstaics.get)
+            caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
+            if np.isnan(caikwt):
+                term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
+                if term == np.inf:
+                    caikwt = 0
+                else:
+                    caikwt = 1 / (1 + term)
 
         # if the fit_model is not reported as 'none', obtain model information
         if fit_model != "none":
@@ -73,6 +71,9 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, co
     if np.isnan(hitcall):
         hitcall = 0
 
+    ac50 = np.nan
+    ac95 = np.nan
+    bmd = np.nan
     bmr = onesd * bmr_scale  # magic bmr is default 1.349
     if hitcall > 0:
         # fill ac's; can put after hit logic

@@ -3,25 +3,27 @@ import time
 import warnings
 
 import numpy as np
+from matplotlib import pyplot as plt
 
-from pytcpl.mc4_mthds import mc4_mthds
-from pytcpl.mc5_mthds import mc5_mthds
-from pytcpl.query_db import tcpl_query
-from pytcpl.tcpl_fit import tcpl_fit
-from pytcpl.tcpl_hit import tcpl_hit
-from pytcpl.tcpl_load_data import tcpl_load_data
-from pytcpl.tcpl_mthd_load import tcpl_mthd_load
-from pytcpl.tcpl_prep_otpt import tcpl_prep_otpt
-from pytcpl.tcpl_subset_chid import tcpl_subset_chid
-from pytcpl.tcpl_write_data import tcpl_write_data
+from fit_models import get_fit_model
+from mc4_mthds import mc4_mthds
+from mc5_mthds import mc5_mthds
+from query_db import tcpl_query
+from tcpl_fit import tcpl_fit
+from tcpl_hit import tcpl_hit
+from tcpl_load_data import tcpl_load_data
+from tcpl_mthd_load import tcpl_mthd_load
+from tcpl_prep_otpt import tcpl_prep_otpt
+from tcpl_subset_chid import tcpl_subset_chid
+from tcpl_write_data import tcpl_write_data
 
 # warnings.filterwarnings("ignore")
 warnings.filterwarnings("error", category=RuntimeWarning)
 
 aeid = 5
-head = 40
-test = 1
-parallelize = 0
+head = 20
+test = 0
+parallelize = 1
 verbose = 0
 profile = 1
 do_fit = 1
@@ -31,14 +33,7 @@ plot = 1
 export_path = "export/"
 fit_models = ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
 # fit_models = ["cnst", "poly1"]
-
-
-# fit_models = ["cnst", "poly1", "poly2", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
-
-
-#  Todo: Check if log() used right everywhere, i.e with the correct base: np.log2, np.log, np.log10
-
-#  Todo: Set consistently failing fields None or np.nan
+# fit_models = ["cnst", "poly1", "poly2", "exp2"]
 
 
 def pipeline():
@@ -55,12 +50,18 @@ def pipeline():
         mc4 = tcpl_fit(df, fit_models, bidirectional, force_fit=False, parallelize=parallelize, verbose=verbose)
         print(f"Curve-fitted {df.shape[0]} series, with {len(fit_models)} fit models > {elapsed(start_time)}")
 
+        # track(mc4)
+
+        tcpl_write_data(dat=mc4, lvl=4, verbose=False)
+        print(f"Stored L4 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
+        print("Done mc4.")
+        return mc4
+
+    def track(mc4):
         pars_tracker = {key: [] for key in fit_models}
         modl_tracker = {key: [] for key in fit_models}
-
         conc_tracker = []
         resp_tracker = []
-
         fitparams = mc4["fitparams"]
         for i in range(fitparams.shape[0]):
             data = fitparams.iloc[i]
@@ -75,27 +76,28 @@ def pipeline():
                 pars_tracker[model].append(pars)
                 modl_tracker[model].append(modl)
 
-
-        import matplotlib.pyplot as plt
+        # Define a qualitative colormap
+        colormap = plt.cm.get_cmap('tab10')
         plt.figure()
-        for i in range(len(conc_tracker)):
-            print(i)
+        for i in range(len(modl_tracker["cnst"])):
             conc = np.array(conc_tracker[i])
             resp = np.array(resp_tracker[i])
-            uconc = np.unique(conc)
-            rmds = np.array([np.median(resp[conc == c]) for c in uconc])
-            plt.plot(uconc, rmds, '-ok')
-            for model in fit_models:
-                modl = np.array(modl_tracker[model][i])
-                plt.plot(uconc, modl, '-ok')
+            # uconc = np.unique(conc)
+            # rmds = np.array([np.median(resp[conc == c]) for c in uconc])
+            plt.plot(conc, resp, '-ok')
+            for j, model in enumerate(fit_models):
+                color = colormap(j)
+                pars = pars_tracker[model][i]
+                modl = modl_tracker[model][i]
+                if modl:
+                    x = np.linspace(np.min(conc), np.max(conc), 100)
+                    pars = np.array(pars)
+                    y = get_fit_model(model)(pars, x)
+                    plt.plot(x, y, '-k', color=color, label=model)
 
-        plt.show()
-
-
-        tcpl_write_data(dat=mc4, lvl=4, verbose=False)
-        print(f"Stored L4 AEID {aeid} with {df.shape[0]} rows to db >> {elapsed(start_time)}")
-        print("Done mc4.")
-        return mc4
+        plt.legend(loc="upper left")
+        # plt.show()
+        plt.savefig(f'{export_path} + plot.png')
 
     def mc5(df):
         start_time = starting(f"mc5 with id {aeid}")
@@ -108,7 +110,7 @@ def pipeline():
         bmad = df["bmad"].iloc[0]
         cutoffs = [mc5_mthds(mthd, bmad) for mthd in assay_cutoff_methods]
         cutoff = np.max(cutoffs) if len(cutoffs) > 0 else 0
-        dat = get_mc5_data()
+        dat = get_mc5_data(aeid)
         dat = tcpl_hit(dat, cutoff, parallelize, verbose=verbose)
         print(f"Computed L5 AEID {aeid} hitcall parameters with {dat.shape[0]} rows >> {elapsed(start_time)}")
 
@@ -130,10 +132,10 @@ def starting(pipeline_step):
 
 
 def elapsed(start_time):
-    print('Execution time in seconds: ' + str(round(time.time() - start_time, 2)))
+    return f"Execution time in seconds: {str(round(time.time() - start_time, 2))}"
 
 
-def get_mc5_data():
+def get_mc5_data(aeid):
     mc4_name = "mc4_"
     mc4_param_name = "mc4_param_"
     query = f"SELECT {mc4_name}.m4id," \
@@ -148,7 +150,7 @@ def get_mc5_data():
             f"ON {mc4_name}.m4id = {mc4_param_name}.m4id " \
             f"WHERE {mc4_name}.aeid = {aeid};"
 
-    dat = tcpl_query(query, False)
+    dat = tcpl_query(query)
     return dat
 
 
@@ -166,7 +168,7 @@ def export():
         df.to_csv(export_path + "chem.csv", header=True, index=True)
         # df = pd.read_csv(export_path+"chem.csv")
 
-    elapsed(start_time)
+    print(elapsed(start_time))
     print("Done export.")
 
 

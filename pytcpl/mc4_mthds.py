@@ -1,4 +1,4 @@
-from pytcpl.tcpl_fit_helper import mad
+from tcpl_fit_helper import mad
 
 
 def mc4_mthds(mthd):

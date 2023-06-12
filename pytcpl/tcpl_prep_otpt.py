@@ -2,8 +2,8 @@ import re
 
 import pandas as pd
 
-from pytcpl.query_db import tcpl_query
-from pytcpl.tcpl_load_data import prep_field
+from query_db import tcpl_query
+from tcpl_load_data import prep_field
 
 
 def tcpl_prep_otpt(dat, ids=None):
@@ -63,7 +63,7 @@ def tcpl_load_conc_unit(spid):
     spid_str = '","'.join(str(id) for id in spid)
     qstring = qformat.format(spid_str)
 
-    dat = tcpl_query(query=qstring, verbose=False)
+    dat = tcpl_query(query=qstring)
 
     if dat.shape[0] == 0:
         # print("The given spid(s) do not have concentration units.")
@@ -90,7 +90,7 @@ def tcpl_load_unit(aeid):
     aeid_str = ",".join(str(id) for id in aeid)
     qstring = qformat.format(aeid_str)
 
-    dat = tcpl_query(query=qstring, verbose=False)
+    dat = tcpl_query(query=qstring)
 
     if dat.shape[0] == 0:
         print("Warning: The given aeid(s) do not have response units.")
@@ -120,7 +120,7 @@ def tcpl_load_chem(field=None, val=None, exact=True, include_spid=True):
 
     qstring = _chem_q(field=field, val=val, exact=exact)
 
-    dat = tcpl_query(query=qstring, verbose=False)
+    dat = tcpl_query(query=qstring)
     dat = pd.DataFrame(dat)
 
     if dat.shape[0] == 0:
@@ -182,7 +182,7 @@ def _chem_q(field, val, exact):
 def tcpl_load_aeid(fld=None, val=None):
     out = ["assay_component_endpoint.aeid", "assay_component_endpoint.assay_component_endpoint_name"]
     qstring = build_assay_q(out=out, tblo=[0, 1, 3, 2, 5], fld=fld, val=val)
-    dat = tcpl_query(query=qstring, verbose=False)
+    dat = tcpl_query(query=qstring)
     return dat
 
 

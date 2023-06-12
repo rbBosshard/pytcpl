@@ -1,14 +1,14 @@
 import numpy as np
 from joblib import Parallel, delayed
 
-from pytcpl.tcpl_fit_helper import curve_fit
+from tcpl_fit_helper import curve_fit
 
 
 def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
     if 'bmed' not in dat.columns:
-        dat = dat.assign(bmed=None)
+        dat = dat.assign(bmed=np.nan)
     if 'osd' not in dat.columns:
-        dat = dat.assign(osd=None)
+        dat = dat.assign(osd=np.nan)
 
     grouped = dat.groupby(['aeid', 'spid', 'logc'])
     dat['rmns'] = grouped['resp'].transform(np.mean)

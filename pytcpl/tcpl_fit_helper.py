@@ -2,18 +2,18 @@ import json
 
 import numpy as np
 from scipy.optimize import minimize
-from pytcpl.acy import acy
-from pytcpl.tcpl_obj_fn import tcpl_obj
-from pytcpl.fit_models import get_params
-from pytcpl.fit_models import get_fit_model
+from acy import acy
+from tcpl_obj_fn import tcpl_obj
+from fit_models import get_params
+from fit_models import get_fit_model
 
 
 def curve_fit(fit_model, conc, resp, bidirectional, to_fit, verbose):
     params = get_params(fit_model)
 
     # Prepare (nested) output dictionary
-    out = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params},
-           **{p: None for p in ["success", "aic", "cov", "rme", "modl"]}}
+    out = {"pars": {p: np.nan for p in params}, "sds": {p + "_sd": np.nan for p in params}, "modl": [],
+           **{p: np.nan for p in ["success", "aic", "cov", "rme"]}}
 
     if to_fit:
         initial_values, bounds = get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose)

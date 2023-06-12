@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, BigInteger, TIMESTAMP, BIGINT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from pytcpl.query_db import get_sqlalchemy_engine
+from query_db import get_sqlalchemy_engine
 
 engine = get_sqlalchemy_engine()
 

@@ -1,4 +1,4 @@
-from pytcpl.query_db import tcpl_query
+from query_db import tcpl_query
 
 
 def tcpl_mthd_load(lvl, aeid, verbose=False):
@@ -12,4 +12,4 @@ def tcpl_mthd_load(lvl, aeid, verbose=False):
     if verbose:
         print(f"qstring: {qstring}")
 
-    return tcpl_query(query=qstring, verbose=False)
+    return tcpl_query(query=qstring)
