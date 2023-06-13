@@ -12,8 +12,8 @@ def curve_fit(fit_model, conc, resp, bidirectional, to_fit, verbose):
     params = get_params(fit_model)
 
     # Prepare (nested) output dictionary
-    out = {"pars": {p: np.nan for p in params}, "sds": {p + "_sd": np.nan for p in params}, "modl": [],
-           **{p: np.nan for p in ["success", "aic", "cov", "rme"]}}
+    out = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
+           **{p: None for p in ["success", "aic", "cov", "rme"]}}
 
     if to_fit:
         initial_values, bounds = get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose)

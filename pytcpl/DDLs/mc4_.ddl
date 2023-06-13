@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS `mc4_` (
+  `m4id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `aeid` bigint unsigned NOT NULL,
+  `spid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bmad` double NOT NULL,
+  `resp_max` double NOT NULL,
+  `resp_min` double NOT NULL,
+  `max_mean` double NOT NULL,
+  `max_mean_conc` double NOT NULL,
+  `max_med` double NOT NULL,
+  `max_med_conc` double NOT NULL,
+  `logc_max` double NOT NULL,
+  `logc_min` double NOT NULL,
+  `nconc` int NOT NULL,
+  `npts` int NOT NULL,
+  `nrep` double NOT NULL,
+  `nmed_gtbl` int NOT NULL,
+  `tmpi` int NOT NULL,
+  `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified_by` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`m4id`),
+  KEY `aeid` (`aeid`) USING BTREE,
+  KEY `idx_mc4_spid` (`spid`)
+) ENGINE=InnoDB AUTO_INCREMENT=6186299 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+

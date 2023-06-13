@@ -9,73 +9,35 @@ from tcpl_load_data import tcpl_load_data
 
 def tcpl_hit(mc4, coff, parallelize=False, verbose=False):
     nested_mc4 = get_nested_mc4(mc4, parallelize)
-    val = list(nested_mc4['m4id'].values)
-    l4_agg = tcpl_load_data(lvl='agg', fld='m4id', val=val)
-    # Might be a huge list: Maybe use BETWEEN sql operator to get all values between two values
-    ids = list(l4_agg['m3id'].values)
-    # heavy operation if ids list is long, aggregate ids from 3 huge tables
-    # Create an empty list to store the DataFrames
-    df_list = []
-    # Iterate through the loop
-    chunk_size = 10000
-    num_chunks = len(ids) // chunk_size
-    remaining_elements = len(ids) % chunk_size
-    for i in range(num_chunks):
-        # Create or obtain a DataFrame
-        start_index = i * chunk_size
-        end_index = start_index + chunk_size
-        df = tcpl_load_data(lvl=3, fld='m3id', val=ids[start_index:end_index])
-        df_list.append(df)
-
-    # Handle the last chunk
-    if remaining_elements > 0:
-        start_index = num_chunks * chunk_size
-        end_index = start_index + remaining_elements
-        df = tcpl_load_data(lvl=3, fld='m3id', val=ids[start_index:end_index])
-        df_list.append(df)
-
-    # Concatenate all the DataFrames in the list
-    data = pd.concat(df_list)
-    # data = tcpl_load_data(lvl=3, fld='m3id', val=val)
-
-    l3_dat = pd.merge(l4_agg, data, on=['aeid', 'm3id', 'm2id', 'm1id', 'm0id', 'spid', 'logc', 'resp'], how='left')
-
-    nested_mc4 = nested_mc4.merge(l3_dat.groupby("m4id").agg(conc=("logc", lambda x: list(10 ** x)),
-                                                             resp=("resp", lambda x: list(x))).reset_index(), on="m4id",
-                                  how="left")
-    nested_mc4 = nested_mc4.merge(
-        mc4.query('model_param == "onesd"')[["m4id", "model_val"]].rename(columns={"model_val": "onesd"}), on="m4id",
-        how="inner")
-    nested_mc4 = nested_mc4.merge(
-        mc4.query('model_param == "bmed"')[["m4id", "model_val"]].rename(columns={"model_val": "bmed"}), on="m4id",
-        how="inner")
-
-    if parallelize:
-        # Parallelize the computation
-        test = Parallel(n_jobs=-1)(
-            delayed(tcpl_hit_core)(
-                params=row['params'], conc=np.array(row.conc), resp=np.array(row.resp),
-                bmed=row['bmed'], cutoff=coff, onesd=row['onesd']
-            ) for _, row in nested_mc4.iterrows()
-        )
-        res = nested_mc4
-        res = pd.concat([nested_mc4, pd.DataFrame(test)], axis=1)
-    else:
-        test = (
-            nested_mc4.assign(df=lambda row: [
-                tcpl_hit_core(params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff, onesd=row.onesd,
-                              bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
-        )
-
-        res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)
-
+    l4_agg = tcpl_load_data(lvl='agg', fld='m4id', val=list(nested_mc4['m4id'].values))
+    nested_mc4 = get_nested_mc4_df(l4_agg, mc4, nested_mc4)
+    res = wrapper_tcpl_hit_core(coff, nested_mc4, parallelize)
     res['coff_upper'] = 1.2 * coff
     res['coff_lower'] = 0.8 * coff
+    res = pd.merge(res, mc4[['m4id', 'logc_min', 'logc_max']], on='m4id', how='left')
+    determine_fitc(res)
+    mc5 = build_mc5(mc4, res)
+    return mc5
 
-    mc4_subset = mc4[['m4id', 'logc_min', 'logc_max']].drop_duplicates()
 
-    res = pd.merge(res, mc4_subset, on='m4id', how='left')
+def build_mc5(mc4, res):
+    mc5 = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on=['m4id'], how='left')
+    mc5 = mc5[['m4id', 'aeid', 'fit_model', 'hitcall', 'fitc', 'cutoff']].rename(
+        columns={"fit_model": "modl", "hitcall": "hitc", "cutoff": "coff"}).assign(model_type=2)
+    mc5_param = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on='m4id', how='left')
+    pivots = list(mc5_param.loc[:, 'top_over_cutoff':'bmd'].columns)
+    mc5_param = mc5_param.melt(
+        id_vars=['m4id', 'aeid'],  # Specify other columns to keep unchanged
+        value_vars=pivots,  # Specify the columns to pivot
+        var_name="hit_param",  # Name for the new column containing column names
+        value_name="hit_val"  # Name for the new column containing column values
+    )
+    mc5_param = mc5_param.dropna(subset=['hit_val'])
+    mc5 = pd.merge(mc5, mc5_param, on=['m4id', 'aeid'], how='inner')
+    return mc5
 
+
+def determine_fitc(res):
     res['fitc'] = np.select(
         [
             (res['hitcall'] >= 0.9) & (np.abs(res['top']) <= res['coff_upper']) & (res['ac50'] <= res['logc_min']),
@@ -96,30 +58,60 @@ def tcpl_hit(mc4, coff, parallelize=False, verbose=False):
         default=np.nan
     )
 
-    mc5 = pd.merge(
-        res,
-        mc4[['m4id', 'aeid']].drop_duplicates(),
-        on=['m4id'],
-        how='left'
-    )
-    mc5 = mc5[['m4id', 'aeid', 'fit_model', 'hitcall', 'fitc', 'cutoff']].rename(
-        columns={"fit_model": "modl", "hitcall": "hitc", "cutoff": "coff"}).assign(model_type=2)
 
-    mc5_param = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on='m4id', how='left')
+def wrapper_tcpl_hit_core(coff, nested_mc4, parallelize):
+    if parallelize:
+        test = Parallel(n_jobs=-1)(
+            delayed(tcpl_hit_core)(
+                params=row['params'], conc=np.array(row.conc), resp=np.array(row.resp),
+                bmed=row['bmed'], cutoff=coff, onesd=row['onesd']
+            ) for _, row in nested_mc4.iterrows()
+        )
+        res = pd.concat([nested_mc4, pd.DataFrame(test)], axis=1)
 
-    pivots = list(mc5_param.loc[:, 'top_over_cutoff':'bmd'].columns)
+    else:
+        test = (
+            nested_mc4.assign(df=lambda row: [
+                tcpl_hit_core(params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
+                              onesd=row.onesd,
+                              bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
+        )
 
-    mc5_param = mc5_param.melt(
-        id_vars=['m4id', 'aeid'],  # Specify other columns to keep unchanged
-        value_vars=pivots,  # Specify the columns to pivot
-        var_name="hit_param",  # Name for the new column containing column names
-        value_name="hit_val"  # Name for the new column containing column values
-    )
-    mc5_param = mc5_param.dropna(subset=['hit_val'])
+        res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)
 
-    mc5 = pd.merge(mc5, mc5_param, on=['m4id', 'aeid'], how='inner')
+    return res
 
-    return mc5
+
+def get_nested_mc4_df(l4_agg, mc4, nested_mc4):
+    ids = list(l4_agg['m3id'].values)
+    # heavy operation if ids list is long, aggregate ids from 3 huge tables -> work with chunks
+    df_list = []
+    chunk_size = 10000
+    num_chunks = len(ids) // chunk_size
+    remaining_elements = len(ids) % chunk_size
+    for i in range(num_chunks):
+        start_index = i * chunk_size
+        end_index = start_index + chunk_size
+        df = tcpl_load_data(lvl=3, fld='m3id', val=ids[start_index:end_index])
+        df_list.append(df)
+    if remaining_elements > 0:  # Handle the last chunk
+        start_index = num_chunks * chunk_size
+        end_index = start_index + remaining_elements
+        df = tcpl_load_data(lvl=3, fld='m3id', val=ids[start_index:end_index])
+        df_list.append(df)
+    data = pd.concat(df_list)  # Concatenate all the DataFrames in the list
+
+    l3_dat = pd.merge(l4_agg, data, on=['aeid', 'm3id', 'm2id', 'm1id', 'm0id', 'spid', 'logc', 'resp'], how='left')
+    nested_mc4 = nested_mc4.merge(l3_dat.groupby("m4id").agg(conc=("logc", lambda x: list(10 ** x)),
+                                                             resp=("resp", lambda x: list(x))).reset_index(), on="m4id",
+                                  how="left")
+    nested_mc4 = nested_mc4.merge(
+        mc4.query('model_param == "onesd"')[["m4id", "model_val"]].rename(columns={"model_val": "onesd"}), on="m4id",
+        how="inner")
+    nested_mc4 = nested_mc4.merge(
+        mc4.query('model_param == "bmed"')[["m4id", "model_val"]].rename(columns={"model_val": "bmed"}), on="m4id",
+        how="inner")
+    return nested_mc4
 
 
 def get_nested_mc4(mc4, parallelize):

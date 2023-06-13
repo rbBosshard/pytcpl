@@ -1,6 +1,6 @@
-import json
 import os
 import time
+import ast
 
 import pandas as pd
 
@@ -57,7 +57,7 @@ def tcpl_write_data(dat, lvl, verbose):
         else:
             bmed = pd.DataFrame()
 
-        import ast
+
         def tcpl_fit_unnest(output):
             output = ast.literal_eval(output) if isinstance(output, str) else output
             modelnames = list(output.keys())

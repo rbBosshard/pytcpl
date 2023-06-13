@@ -6,9 +6,9 @@ from tcpl_fit_helper import curve_fit
 
 def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
     if 'bmed' not in dat.columns:
-        dat = dat.assign(bmed=np.nan)
+        dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
-        dat = dat.assign(osd=np.nan)
+        dat = dat.assign(osd=None)
 
     grouped = dat.groupby(['aeid', 'spid', 'logc'])
     dat['rmns'] = grouped['resp'].transform(np.mean)

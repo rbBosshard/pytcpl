@@ -43,7 +43,7 @@ def get_db_conn():
 
 def tcpl_query(query, verbose=False):
     try:
-        if query.lower().startswith("delete"):
+        if any(query.lower().startswith(x) for x in ["delete", "create", "drop"]):
             db_conn = get_db_conn()
             cursor = db_conn.cursor()
             cursor.execute(query)
