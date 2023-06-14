@@ -1,7 +1,17 @@
 import os
 import time
 
+import yaml
+
 from query_db import tcpl_query
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(ROOT_DIR, '../config/config.yaml')
+
+def load_config():
+    with open(os.path.join(CONFIG_PATH)) as file:
+        config = yaml.safe_load(file)
+    return config
 
 
 def starting(pipeline_step):
@@ -53,3 +63,7 @@ def ensure_all_new_db_tables_exist():
             tcpl_query(ddl_query)
 
     print(f"Done >> {elapsed(start_time)}")
+
+
+def export_data(dat, path, folder, id):
+    dat.to_csv(path + f"{folder}/{id}.csv")

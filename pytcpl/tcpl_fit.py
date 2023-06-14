@@ -3,8 +3,10 @@ from joblib import Parallel, delayed
 
 from tcpl_fit_helper import curve_fit
 
+from tqdm import tqdm
 
-def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, verbose=False):
+
+def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, n_jobs=-1, verbose=False):
     if 'bmed' not in dat.columns:
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
@@ -56,19 +58,23 @@ def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=T
 
         out = {}
         for model in fit_models:
+            # Todo: it seems that to_fit is sometimes False
             to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
             out[model] = curve_fit(model, conc, resp, bidirectional, to_fit, verbose)
 
         return out
 
+
     fitparams = []
+    grouped = dat.groupby('spid')
 
     if parallelize:
-        fitparams = Parallel(n_jobs=-1)(delayed(tcplfit_core)(group) for _, group in dat.groupby('spid'))
+        fitparams = Parallel(n_jobs=n_jobs)(delayed(tcplfit_core)(group) for _, group in tqdm(grouped, desc='Fitting curves progress'))
     else:  # Serial version for debugging
-        for _, group in dat.groupby('spid'):
+        for _, group in grouped:
             fitparams.append(tcplfit_core(group))
 
     dat["fitparams"] = fitparams
+
     return dat
 

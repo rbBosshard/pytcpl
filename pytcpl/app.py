@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from fit_models import get_fit_model
-from pipeline_helper import get_mc5_data
+from pipeline_helper import get_mc5_data, load_config
 from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
 
@@ -18,10 +18,10 @@ def powspace(start, stop, power, num):
 @st.cache_data
 def fetch_data(id):
     check_reset()
-    dat = tcpl_load_data(lvl=3, fld='aeid', val=id)
+    dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
     grouped = dat.groupby(['aeid', 'spid'])
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
-    nested_mc4 = get_nested_mc4(get_mc5_data(id), True)
+    nested_mc4 = get_nested_mc4(get_mc5_data(id), parallelize=True, n_jobs=-1)
     return mc4, nested_mc4
 
 
@@ -87,11 +87,11 @@ st.set_page_config(
     # layout="wide",
 )
 
-default_aeid = 80
 
 def main():
+    config = load_config()["pytcpl"]
     st.title("Curve-fit Visualization")
-    aeid = int(st.number_input(label="Enter assay id (aeid)", value=default_aeid, on_change=reset_spid_row))
+    aeid = int(st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
     col1, col2 = st.columns(2)
     with col1:
         st.button("Previous sample", on_click=load_new_sample, args=(aeid, "previous",))

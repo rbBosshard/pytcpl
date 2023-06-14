@@ -22,17 +22,15 @@ def curve_fit(fit_model, conc, resp, bidirectional, to_fit, verbose):
 
         try:
             fit = minimize(tcpl_obj, x0=initial_values, bounds=bounds,  method='L-BFGS-B',
-                           args=args)  # bounds=bounds, method='L-BFGS-B', options={'jac': None, 'hess': None}?
-            if verbose:
+                           args=args)  # bounds=bounds, method='L-BFGS-B'
+            if verbose > 1:
                 print(f"{fit_model} >> success: {fit.success} {fit.message}, "
                       f"iter: {fit.nit}, evals: ({fit.nfev},{fit.njev})")
-            try:
-                out = generate_output(fit_model, conc, resp, out, fit, verbose)
-            except Exception as e:
-                print(f"{fit_model} >>> Error during generating output: {e}")
+
+            out = generate_output(fit_model, conc, resp, out, fit, verbose)
+
         except Exception as e:
-            print(f"{fit_model} >>> Error during optimization: {e}")
-            # fit = None
+            print(f"{fit_model} >>> Error during optimization or generating output: {e}")
 
     return out
 
@@ -104,14 +102,15 @@ def get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose=
 
 
 def generate_output(fit_model, conc, resp, out, fit, verbose=False):
-    out["success"] = fit.success
     if not fit.success:
-        print(f"{fit_model} >> success: {fit.success} {fit.message}, "
-              f"iter: {fit.nit}, evals: ({fit.nfev},{fit.njev})")
+        # print(f"{fit_model} >> success: {fit.success} {fit.message}, "
+        #       f"iter: {fit.nit}, evals: ({fit.nfev},{fit.njev})")
         pass  # Set breakpoint here
     else:
     #     print(f"{fit_model} > iter: {fit.nit}, evals: ({fit.nfev},{fit.njev})")
         pass
+
+    out["success"] = fit.success
     out["aic"] = 2 * len(fit.x) + 2 * fit.fun
     out["pars"] = {param: fit.x[i] for i, param in enumerate(out["pars"])}
     out["modl"] = get_fit_model(fit_model)(fit.x, conc).tolist()
@@ -119,28 +118,26 @@ def generate_output(fit_model, conc, resp, out, fit, verbose=False):
     assign_extra_attributes(fit_model, out)
 
     out["cov"] = 0
-    # try:
-    #     # Estimate the covariance matrix using the inverse of the Hessian
-    #     # Inverse of the objective function’s Hessian; may be an approximation. Not available for all solvers.
-    #     covariance_matrix = np.linalg.inv(fit.hess_inv.todense())
-    #     # Access the uncertainty estimates
-    #     uncertainties = np.sqrt(np.diag(
-    #         covariance_matrix))  # uncertainties = standard deviations of parameters = diag_sqrt of covariance matrix
-    #
-    #     if not np.any(np.isnan(uncertainties)):
-    #         out["cov"] = 1
-    #         out["sds"] = {param: uncertainties[i] for i, param in enumerate(out["sds"])}
-    #         # use taylor's theorem to approximate sd's in change of units
-    #         # (only valid when sd's are much smaller than ln(10))
-    #         if fit_model == "hill":
-    #             out["sds"]["ga_sd"] = out["pars"]["ga"] * np.log2(10) * out["sds"]["ga_sd"]
-    #         if fit_model == "gnls":
-    #             out["sds"]["ga_sd"] = out["pars"]["ga"] * np.log2(10) * out["sds"]["ga_sd"]
-    #             out["sds"]["la_sd"] = out["pars"]["la"] * np.log2(10) * out["sds"]["la_sd"]
-    #
-    # except Exception as e:
-    #     print(f"{fit_model} >>> Error calculating parameter covariance: {e}")
-    #     out["cov"] = 0
+    try:
+        # Estimate the covariance matrix using the inverse of the Hessian
+        # Inverse of the objective function’s Hessian; may be an approximation. Not available for all solvers.
+        covariance_matrix = np.linalg.inv(fit.hess_inv.todense())
+        # uncertainties = standard deviations of parameters = diag_sqrt of covariance matrix
+        uncertainties = np.sqrt(np.diag(covariance_matrix))
+
+        if not np.any(np.isnan(uncertainties)):
+            out["cov"] = 1
+            out["sds"] = {param: uncertainties[i] for i, param in enumerate(out["sds"])}
+            # use taylor's theorem to approx sd's in change of units, only valid when sd's are << than ln(10)
+            if fit_model == "hill":
+                out["sds"]["ga_sd"] = out["pars"]["ga"] * np.log(10) * out["sds"]["ga_sd"]
+            if fit_model == "gnls":
+                out["sds"]["ga_sd"] = out["pars"]["ga"] * np.log(10) * out["sds"]["ga_sd"]
+                out["sds"]["la_sd"] = out["pars"]["la"] * np.log(10) * out["sds"]["la_sd"]
+
+    except Exception as e:
+        print(f"{fit_model} >>> Error calculating parameter covariance: {e}")
+        out["cov"] = 0
 
     return out
 

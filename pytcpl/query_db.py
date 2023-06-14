@@ -10,12 +10,12 @@ from sqlalchemy import create_engine, text
 
 def get_db_config():
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'config.yaml')
+    CONFIG_PATH = os.path.join(ROOT_DIR, '../config/config.yaml')
     with open(CONFIG_PATH, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         login_name = os.getlogin()
-        config_db = config[login_name]['DATABASE']
-        return config_db['USERNAME'], config_db['PASSWORD'], config_db['HOST'], config_db['PORT'], config_db['DB']
+        config_db = config[login_name]['database']
+        return config_db['username'], config_db['password'], config_db['host'], config_db['port'], config_db['db']
 
 
 def get_sqlalchemy_engine():

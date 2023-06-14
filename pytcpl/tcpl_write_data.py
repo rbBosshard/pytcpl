@@ -1,6 +1,6 @@
+import ast
 import os
 import time
-import ast
 
 import pandas as pd
 
@@ -8,24 +8,30 @@ from query_db import tcpl_query, get_sqlalchemy_engine
 from tcpl_load_data import tcpl_load_data
 
 
-def tcpl_write_data(dat, lvl, verbose):
+def tcpl_write_data(id, dat, lvl, verbose):
+    mc4_name = "mc4_"
+    mc4_param_name = "mc4_param_"
+    mc4_agg_name = "mc4_agg_"
+    mc5_name = "mc5_"
+    mc5_param_name = "mc5_param_"
+
     # Check for valid inputs
     if lvl not in [4, 5]:
         raise ValueError("Invalid lvl input - must be an integer 4 or 5.")
 
-    ids = dat["aeid"].unique()
+
 
     # Delete old data in cascade
     if lvl <= 4:
-        tcpl_delete(tbl="mc4_", fld="aeid", val=ids, verbose=False)
-        tcpl_delete(tbl="mc4_agg_", fld="aeid", val=ids, verbose=False)
-        tcpl_delete(tbl="mc4_param_", fld="aeid", val=ids, verbose=False)
+        tcpl_delete(tbl=mc4_name, id=id, verbose=False)
+        tcpl_delete(tbl=mc4_agg_name, id=id, verbose=False)
+        tcpl_delete(tbl=mc4_param_name, id=id, verbose=False)
     if lvl <= 5:
-        tcpl_delete(tbl="mc5_", fld="aeid", val=ids, verbose=False)
-        tcpl_delete(tbl="mc5_param_", fld="aeid", val=ids, verbose=False)
+        tcpl_delete(tbl=mc5_name, id=id, verbose=False)
+        tcpl_delete(tbl=mc5_param_name, id=id, verbose=False)
 
     if verbose:
-        print("Completed delete cascade for", len(ids), "ids\n")
+        print(f"Completed delete cascade for id: {id}")
 
     dat["modified_by"] = os.getlogin()
 
@@ -33,11 +39,9 @@ def tcpl_write_data(dat, lvl, verbose):
         mc4_cols = ["aeid", "spid", "bmad", "resp_max", "resp_min", "max_mean", "max_mean_conc", "max_med",
                     "max_med_conc", "logc_max", "logc_min", "nconc", "npts", "nrep", "nmed_gtbl", "tmpi", "modified_by"]
         mc4_agg_cols = ["m" + str(i) + "id" for i in range(5)] + ["aeid"]
-        tcpl_append(dat[mc4_cols], "mc4_", False)
+        tcpl_append(dat[mc4_cols], mc4_name, False)
 
-        qformat = "SELECT m4id, aeid, tmpi FROM mc4_ WHERE aeid IN ({})"
-        ids = dat["aeid"].unique()
-        qstring = qformat.format(",".join(["'" + str(i) + "'" for i in ids]))
+        qstring = f"SELECT m4id, aeid, tmpi FROM {mc4_name} WHERE aeid IN ({id})"
         m4id_map = tcpl_query(query=qstring)
 
         m4id_map = m4id_map.set_index(["aeid", "tmpi"])
@@ -59,15 +63,15 @@ def tcpl_write_data(dat, lvl, verbose):
 
 
         def tcpl_fit_unnest(output):
-            output = ast.literal_eval(output) if isinstance(output, str) else output
-            modelnames = list(output.keys())
+            output = ast.literal_eval(output) if isinstance(output, str) else output  # Either from csv or db
+            model_names = list(output.keys())
             res = {}
-            for m in modelnames:
+            for m in model_names:
                 d = output[m]
                 res[m] = {name: val for name, val in d.items() if name not in ["pars", "sds", "modl"]}
                 res[m].update(d["pars"])
 
-            rows = [{"model": m, "model_param": p, "model_val": val} for m in modelnames for p, val in
+            rows = [{"model": m, "model_param": p, "model_val": val} for m in model_names for p, val in
                     res[m].items()]
             return pd.DataFrame.from_records(rows, columns=["model", "model_param", "model_val"])
 
@@ -78,9 +82,9 @@ def tcpl_write_data(dat, lvl, verbose):
         param = param.set_index("m4id")
         dat1 = param.join(unnested_param, how="left")
         dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
-        tcpl_append(dat_param, "mc4_param_", False)
-        tcpl_append(onesd, "mc4_param_", False)
-        tcpl_append(bmed, "mc4_param_", False)
+        tcpl_append(dat_param, mc4_param_name, False)
+        tcpl_append(onesd, mc4_param_name, False)
+        tcpl_append(bmed, mc4_param_name, False)
 
         # get l3 dat for agg columns
         dat_agg = dat[['aeid', 'm4id']].assign(m3id=dat['m3ids'])
@@ -97,14 +101,14 @@ def tcpl_write_data(dat, lvl, verbose):
             # Create or obtain a DataFrame
             start_index = i * chunk_size
             end_index = start_index + chunk_size
-            df = tcpl_load_data(lvl=3, fld="m3id", val=ids[start_index:end_index])
+            df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
             df_list.append(df)
 
         # Handle the last chunk
         if remaining_elements > 0:
             start_index = num_chunks * chunk_size
             end_index = start_index + remaining_elements
-            df = tcpl_load_data(lvl=3, fld="m3id", val=ids[start_index:end_index])
+            df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
             df_list.append(df)
 
         # Concatenate all the DataFrames in the list
@@ -115,45 +119,33 @@ def tcpl_write_data(dat, lvl, verbose):
         l3_dat = l3_dat.set_index("m3id")
         dat_agg = dat_agg.join(l3_dat, how="left")
         dat_agg = dat_agg.reset_index()
-        tcpl_append(dat_agg[mc4_agg_cols], "mc4_agg_", False)  # lazy
+        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name, False)  # lazy
 
     elif lvl == 5:
-        mc5_name = "mc5_"
-        tcpl_append(
-            dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(),
+        tcpl_append(dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]],
             tbl=mc5_name, verbose=False)
-        # get m5id for mc5_param
-        qformat = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN (%s);"
-        qstring = qformat % ",".join('"' + str(id) + '"' for id in ids)
-
+        qstring = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN ({id});"
         m5id_map = tcpl_query(query=qstring)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
         dat = dat.set_index(["aeid", "m4id"])
         dat = dat.join(m5id_map, how="left").reset_index()
-
-        mc5_param_name = "mc5_param_"
-
         tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name, verbose=False)
 
 
 def tcpl_append(dat, tbl, verbose):
     engine = get_sqlalchemy_engine()
     with engine.begin() as connection:
-        start_time = time.time()
-        num_rows_affected = dat.to_sql(name=tbl, con=connection, if_exists="append", index=False)
-        if verbose:
-            print(f"Append to {tbl} >> {num_rows_affected} affected rows >> {str(time.time() - start_time)} seconds.")
+        try:
+            num_rows_affected = dat.to_sql(name=tbl, con=connection, if_exists="append", index=False)
+            if verbose:
+                print(f"Append to {tbl} >> {num_rows_affected} affected rows")
+        except Exception as err:
+            print(err)
     return num_rows_affected
 
 
-def tcpl_delete(tbl, fld, val, verbose):
-    qformat = f"DELETE FROM {tbl} WHERE"
-    qformat += f" {' AND '.join([f'{fld} IN (%s)' for _ in val])}"
-    qformat += ";"
-
-    if not isinstance(val, list):
-        val = [val]
-    val = [','.join([f'"{x}"' for x in v]) for v in val]
-
-    qstring = qformat % tuple(val)
+def tcpl_delete(tbl, id, verbose):
+    qstring = f"DELETE FROM {tbl} WHERE aeid in ({id});"
+    if verbose:
+        print(qstring)
     tcpl_query(qstring)

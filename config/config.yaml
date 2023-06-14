@@ -1,0 +1,57 @@
+# Add here new user
+pytcpl:
+  aeid: 5
+  test: 1
+  head: 20
+  parallelize: 1
+  n_jobs: -1
+  verbose: 0
+  profile: 1
+  do_fit: 1
+  store: 1
+  bidirectional: = 1
+  export_path: "export/"
+  new_table_names: ["mc4_", "mc4_agg_", "mc4_param_", "mc5_", "mc5_param_"]
+  fit_models: ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
+  # fit_models: ["cnst", "poly1"]
+  # fit_models: ["cnst", "poly1", "poly2", "exp2"]
+
+
+
+
+# Login specific
+bossh:
+  database:
+    username: root
+    password: root
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+robin:
+  database:
+    username: robin
+    password: robin
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+kasia:
+  database:
+    username: kasia
+    password: kasia
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+eliza:
+  database:
+    username: eliza
+    password: eliza
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+lili:
+  database:
+    username: lili
+    password: lili
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5

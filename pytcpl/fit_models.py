@@ -3,16 +3,16 @@ import numpy as np
 
 def get_fit_model(fit_model):
     return {
-        'cnst': lambda ps, x: np.zeros(len(x)),  # ignores ps
-        'exp2': lambda ps, x: ps[0] * (np.exp(x / ps[1]) - 1),  # a = ps[0], b = ps[1]
-        'exp3': lambda ps, x: ps[0] * (np.exp((x / ps[1]) ** ps[2]) - 1),  # a = ps[0], b = ps[1], p = ps[2]
-        'exp4': lambda ps, x: ps[0] * (1 - 2 ** (-x / ps[1])),  # tp = ps[0], ga = ps[1]
-        'exp5': lambda ps, x: ps[0] * (1 - 2 ** (-(x / ps[1]) ** ps[2])),  # tp = ps[0], ga = ps[1], p = ps[2]
-        'gnls': lambda ps, x: ps[0] / ((1 + (ps[1] / x) ** ps[2]) * (1 + (x / ps[3]) ** ps[4])),  # tp = ps[0], ga = ps[1], p = ps[2], la = ps[3], q = ps[4]
-        'hill': lambda ps, x: ps[0] / (1 + (ps[1] / x) ** ps[2]),  # tp = ps[0], ga = ps[1], p = ps[2]
-        'poly1': lambda ps, x: ps[0] * x,  # a = ps[0]
-        'poly2': lambda ps, x: (temp := x / ps[1], ps[0] * (temp + (temp * temp)))[-1],  # a = ps[0], b = ps[1]
-        'pow': lambda ps, x: ps[0] * x ** ps[1]  # a = ps[0], p = ps[1]
+        'cnst': cnst,
+        'exp2': exp2,
+        'exp3': exp3,
+        'exp4': exp4,
+        'exp5': exp5,
+        'gnls': gnls,
+        'hill': hill,
+        'poly1': poly1,
+        'poly2': poly2,
+        'pow': pow_fn,
     }.get(fit_model)
 
 
@@ -28,3 +28,53 @@ def get_params(fit_model):
                 hill=['tp', 'ga', 'p', 'er'],
                 gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
                 ).get(fit_model)
+
+
+def cnst(ps, x):
+    return np.zeros(len(x))
+
+
+def exp2(ps, x):
+    a, b = ps[:2]
+    return a * (np.exp(x / b) - 1)
+
+
+def exp3(ps, x):
+    a, b, p = ps[:3]
+    return a * (np.exp((x / b) ** p) - 1)
+
+
+def exp4(ps, x):
+    tp, ga = ps[:2]
+    return tp * (1 - 2 ** (-x / ga))
+
+
+def exp5(ps, x):
+    tp, ga, p = ps[:3]
+    return tp * (1 - 2 ** (-(x / ga) ** p))
+
+
+def gnls(ps, x):
+    tp, ga, p, la, q = ps[:5]
+    return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
+
+
+def hill(ps, x):
+    tp, ga, p = ps[:3]
+    return tp / (1 + (ga / x) ** p)
+
+
+def poly1(ps, x):
+    a = ps[:1]
+    return a * x
+
+
+def poly2(ps, x):
+    a, b = ps[:2]
+    frac = x / b
+    return a * (frac + frac ** 2)
+
+
+def pow_fn(ps, x):
+    a, p = ps[:2]
+    return a * x ** p

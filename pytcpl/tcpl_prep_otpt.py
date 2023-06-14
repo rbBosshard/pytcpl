@@ -194,7 +194,7 @@ def build_assay_q(out, tblo, fld=None, val=None):
 
     fld = convert_names(fld)
 
-    fld = prep_field(fld=fld, tbl=tblo)
+    fld = prep_field(fld=fld, tbls=tblo)
     if not isinstance(fld, list):
         fld = [fld]
     # correct?

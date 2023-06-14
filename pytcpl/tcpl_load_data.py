@@ -7,20 +7,11 @@ mc5_name = "mc5_"
 mc5_param_name = "mc5_param_"
 
 
-def prep_field(fld, tbl):
-    pre = None  # Initialize a variable to store the table that contains the field
-
-    # Iterate over the tables in the list
-    for i in range(len(tbl)):
-        # Check if the field exists in the table's fields
-        if fld in tcpl_list_flds(tbl[i]):
-            pre = tbl[i]  # Set the table as the one containing the field
-
-    if pre is None:
-        raise ValueError("Not all given fields available in query.")
-
-    return pre + "." + fld  # Return the fully qualified field name
-
+def prep_field(fld, tbls):
+    # scope with the fully qualified table.field name name to avoid ambiguity
+    for table in tbls:
+        if fld in tcpl_list_flds(table):
+            return f"{table}.{fld}"
 
 def tcpl_list_flds(tbl):
     qformat = """
@@ -35,33 +26,8 @@ def tcpl_list_flds(tbl):
     return query
 
 
-def tcpl_load_data(lvl, fld, val, verbose=False):
-
-    if lvl == 0:
-        tbls = ["mc0"]
-        cols = ["m0id", "spid", "acid", "apid", "rowi", "coli", "wllt", "wllq", "conc", "rval", "srcf"]
-        col_str = ",".join(cols)
-        qformat = f"SELECT {col_str} FROM mc0 "
-
-    elif lvl == 1:
-        tbls = ["mc0", "mc1"]
-        qformat = (
-            "SELECT mc1.m0id, m1id, spid, mc1.acid, apid, rowi, coli, wllt, wllq, "
-            "conc, rval, cndx, repi, srcf "
-            "FROM mc0, mc1 "
-            "WHERE mc0.m0id = mc1.m0id "
-        )
-
-    elif lvl == 2:
-        tbls = ["mc0", "mc1", "mc2"]
-        qformat = (
-            "SELECT mc2.m0id, mc2.m1id, m2id,spid, mc2.acid, apid, rowi, coli, wllt, conc, cval, cndx, repi "
-            "FROM mc0, mc1, mc2 "
-            "WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc2.m0id "
-        )
-
-    # This takes very long
-    elif lvl == 3:
+def tcpl_load_data(lvl, fld, ids, verbose=False):
+    if lvl == 3:
         tbls = ["mc0", "mc1", "mc3"]
         qformat = (
             "SELECT mc3.m0id, mc3.m1id, mc3.m2id, m3id, spid, aeid, logc, resp, cndx, wllt, apid, rowi, coli, repi "
@@ -112,26 +78,21 @@ def tcpl_load_data(lvl, fld, val, verbose=False):
     else:
         raise ValueError("lvl not supported")
 
-    if fld is not None:
-        fld = prep_field(fld=fld, tbl=tbls)
+    fld = prep_field(fld=fld, tbls=tbls)
 
-        wtest = True if lvl in [0] else False
 
-        qformat = qformat + ("WHERE" if wtest else "AND")
+    qformat = qformat + "AND "
 
-        if isinstance(fld, str):
-            fld = [fld]
-        qformat += "  " + " AND ".join([f"{fld[i]} IN (%s)" for i in range(len(fld))])
-        qformat += ";"
+    if isinstance(fld, str):
+        fld = [fld]
+    qformat += " AND ".join([f"{fld[i]} IN (%s)" for i in range(len(fld))])
+    qformat += ";"
 
-        if not isinstance(val, list):
-            val = [val]
+    if not isinstance(ids, list):
+        ids = [ids]
 
-        val = ','.join([str(v) for v in val])
-        qstring = qformat % val
-
-    else:
-        qstring = qformat
+    ids = ','.join([str(v) for v in ids])
+    qstring = qformat % ids
 
     if verbose:
         print(f"qstring: {qstring}")
