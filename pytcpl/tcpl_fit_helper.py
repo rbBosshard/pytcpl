@@ -57,7 +57,7 @@ def get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose=
     lim_small = 1e-8
     initial_values = []
     # Todo: extend for bidirectional == False
-    # Todo: parameterize bounds variable, check for good values
+    # Todo: set correct bounds/constraints
     bounds = ()  # Assume bidirectional is True.
     if fit_model == "poly1":
         initial_values += [a0]
@@ -90,7 +90,7 @@ def get_bounds_and_initial_values(fit_model, conc, resp, bidirectional, verbose=
         # bounds = ((-val, val), (logc_min - 1, logc_max + 1), (0.3, 8))
         bounds = ((-1.2 * abs_a0, 1.2 * abs_a0), (conc_min / 10, conc_max * np.sqrt(10)), (0.3, 8))
         if fit_model == "gnls":
-            # Todo: constraint: la-ga >= minwidth = 1.5 is missing
+            # Todo: constraint: la-ga >= minwidth is missing
             # minwidth = Minimum allowed distance between gain ac50 and loss ac50 (in log10 units)
             initial_values += [mmed_conc/np.sqrt(10), 1.2]
             bounds += ((conc_min / 10, conc_max * np.sqrt(10)), (0.3, 8))

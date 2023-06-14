@@ -71,7 +71,7 @@ def mc5(df):
 def pipeline():
     aeid = config['aeid']
     start_time = starting(f"pipeline with assay id {aeid}")
-    # drop_tables(config["new_table_names"]) # uncomment if you want to remove the specified new tables from the db
+    # drop_tables(config["new_table_names"]) # uncomment if you want to remove the specified pipeline tables from the db
     ensure_all_new_db_tables_exist()
     df = mc4() if config["do_fit"] else pd.read_csv(config["export_path"] + f"mc4/{aeid}.csv")
     mc5(df)

@@ -12,9 +12,8 @@ def tcpl_obj(ps, conc, resp, fit_model, errfun="dt4"):
     # given the model at each concentration scaled by variance (err)
     pred = fit_model(ps=ps, x=conc)  # ps = parameter vector, get model values for each conc,
     err = np.exp(ps[-1])  # last parameter is the log of the error/variance
-    # err = ps[-1]
     # residuals = (resp - pred) / err
-    # Todo: try another density function
+    # Todo: try another density function, ask
     if errfun == "dt4":
         # degree of freedom parameter = 4, for Student’s t probability density function
         # t.logpdf(x, df, loc, scale) is identically equivalent to t.logpdf(y, df) / scale with y = (x - loc) / scale.

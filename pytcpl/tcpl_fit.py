@@ -58,7 +58,7 @@ def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=T
 
         out = {}
         for model in fit_models:
-            # Todo: it seems that to_fit is sometimes False
+            # Todo: to_fit is sometimes false, set breakpoint/print message
             to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
             out[model] = curve_fit(model, conc, resp, bidirectional, to_fit, verbose)
 

@@ -15,7 +15,7 @@ pytcpl/export/*
 pytcpl/profile/*
 !pytcpl/profile/.gitkeep
 
-#pytcpl/app.py
+pytcpl/app.py
 pytcpl/test.py
 
 

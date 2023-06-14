@@ -59,10 +59,6 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
 
     params = [pars[key] for key in get_params(fit_model)]
 
-    # Todo: recheck if right method is applied (also in R package), i.e. log variant
-    # if fit_model in ["hill", "gnls"]:
-    #     fit_model += "_"
-
     # negated minimized negative loglikelihood. Todo: recheck if everything is correct like this
     maxloglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
 

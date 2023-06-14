@@ -80,7 +80,7 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
         ac5 = acy(.05 * top, modpars, fit_model=fit_model)  # note: cnst model automatically returns NAs
         ac10 = acy(.1 * top, modpars, fit_model=fit_model)
         ac20 = acy(.2 * top, modpars, fit_model=fit_model)
-        ac50 = acy(.5 * top, modpars, fit_model=fit_model)  # Todo: check if remove from here?
+        ac50 = acy(.5 * top, modpars, fit_model=fit_model)  # Todo: check: remove from here?
         ac95 = acy(.95 * top, modpars, fit_model=fit_model)
         acc = acy(np.sign(top) * cutoff, modpars | {"top": top}, fit_model=fit_model)
         ac1sd = acy(np.sign(top) * onesd, modpars, fit_model=fit_model)
