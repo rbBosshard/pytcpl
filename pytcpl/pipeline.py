@@ -5,7 +5,7 @@ import pandas as pd
 
 from mc4_mthds import mc4_mthds
 from mc5_mthds import mc5_mthds
-from pytcpl.pipeline_helper import starting, elapsed, get_mc5_data, ensure_all_new_db_tables_exist, load_config, \
+from pipeline_helper import starting, elapsed, get_mc5_data, ensure_all_new_db_tables_exist, load_config, \
     export_data
 from tcpl_fit import tcpl_fit
 from tcpl_hit import tcpl_hit
