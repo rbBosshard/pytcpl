@@ -1,39 +1,20 @@
-# Add here new user
 pytcpl:
-  aeid: 5
-  test: 1
-  head: 20
-  parallelize: 1
-  n_jobs: -1
-  verbose: 0
-  profile: 1
-  do_fit: 1
-  store: 1
-  bidirectional: = 1
-  export_path: "export/"
-  new_table_names: ["mc4_", "mc4_agg_", "mc4_param_", "mc5_", "mc5_param_"]
-  fit_models: ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"]
-  # fit_models: ["cnst", "poly1"]
-  # fit_models: ["cnst", "poly1", "poly2", "exp2"]
-
-
+  aeid: 5 # assay id
+  test: 1 # 0,1 if test is 1 then only the first few chemicals specified by head are processed
+  head: 20 # number of chemicals loaded if test = 1
+  parallelize: 1 # 0,1 use for debug parallelize = 0, else 1
+  n_jobs: -1 # parallel joblib jobs, #threads, max = -1
+  verbose: 0 # print verbosity 0,1,2
+  profile: 1 # 0,1 profile performance
+  do_fit: 1 # 0,1 do curve-fit else load from csv export folder
+  store: 1 # store dataframes to csv
+  bidirectional: = 1 # 0,1 bidirectional fit, up/down
+  export_path: "export/" # export folder
+  new_table_names: ["mc4_", "mc4_agg_", "mc4_param_", "mc5_", "mc5_param_"] # use new tables for this pipeline
+  fit_models: ["cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls"] # fit models
 
 
 # Login specific
-bossh:
-  database:
-    username: root
-    password: root
-    host: localhost
-    port: 3306
-    db: invitrodb_v3o5
-robin:
-  database:
-    username: robin
-    password: robin
-    host: localhost
-    port: 3306
-    db: invitrodb_v3o5
 kasia:
   database:
     username: kasia
@@ -55,3 +36,19 @@ lili:
     host: localhost
     port: 3306
     db: invitrodb_v3o5
+robin:
+  database:
+    username: robin
+    password: robin
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+bossh:
+  database:
+    username: root
+    password: root
+    host: localhost
+    port: 3306
+    db: invitrodb_v3o5
+
+# Add here new user
