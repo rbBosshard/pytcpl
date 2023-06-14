@@ -66,4 +66,8 @@ def ensure_all_new_db_tables_exist():
 
 
 def export_data(dat, path, folder, id):
-    dat.to_csv(path + f"{folder}/{id}.csv")
+    full_folder_path = path + folder
+    isExist = os.path.exists(full_folder_path)
+    if not isExist:
+        os.makedirs(path)
+    dat.to_csv(f"full_folder_path/{id}.csv")
