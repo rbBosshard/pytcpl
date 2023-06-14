@@ -2,14 +2,20 @@ __pycache__
 .idea/
 .lprof/
 pytcpl.egg-info/
-dist/
+
+dist/*
+dist/.gitkeep
+
+docs/*
+docs/.gitkeep
+
 pytcpl/export/*
 !pytcpl/export/.gitkeep
+
 pytcpl/profile/*
 !pytcpl/profile/.gitkeep
-pytcpl/tables/*
-pytcpl/app/*
 
+#pytcpl/app.py
 pytcpl/test.py
 
 
