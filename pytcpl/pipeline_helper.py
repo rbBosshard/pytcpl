@@ -70,4 +70,4 @@ def export_data(dat, path, folder, id):
     isExist = os.path.exists(full_folder_path)
     if not isExist:
         os.makedirs(full_folder_path)
-    dat.to_csv(f"full_folder_path/{id}.csv")
+    dat.to_csv(f"{full_folder_path}/{id}.csv")
