@@ -2,9 +2,9 @@ pytcpl:
   # aeid: assay id
   aeid: 5
   # test: 0,1 if test is 1 then only the first few chemicals specified by head are processed
-  test: 1
-  # head: number of chemicals loaded if test = 1
-  head: 20
+  test: 0
+  # head: number of lvl 3 datapoints processed if test = 1
+  head: 100
   # parallelize: 0,1 use for debug parallelize = 0, else 1
   parallelize: 1
   # n_jobs: parallel joblib jobs, #threads, max = -1

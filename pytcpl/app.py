@@ -74,6 +74,7 @@ def load_new_sample(aeid, direction):
 
 def check_reset():
     if "spid_row" not in st.session_state:
+        print("reset to start sample")
         reset_spid_row()
 
 
