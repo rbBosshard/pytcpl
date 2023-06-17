@@ -55,7 +55,7 @@ def determine_fitc(res):
             (res['fit_model'] == 'none')
         ],
         [36, 37, 38, 40, 41, 42, 13, 15, 2],
-        default=np.nan
+        default=None
     )
 
 
@@ -137,5 +137,6 @@ def get_nested_mc4(mc4, parallelize, n_jobs=-1):
     else:  # Serial: For debugging
         nested_mc4 = df.groupby('m4id').apply(lambda x: tcpl_fit_nest(
             pd.DataFrame({'model': x['model'], 'model_param': x['model_param'],
-                          'model_val': x['model_val']}))).reset_index(name='params')
+                          'model_val': x['model_val']})))
+        nested_mc4 = nested_mc4.reset_index(name='params')
     return nested_mc4

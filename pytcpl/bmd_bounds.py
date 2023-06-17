@@ -55,7 +55,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     if bmd is None:
         bmd = acy(bmr, pars, fit_model=fit_model)
     if not np.isfinite(bmd):
-        return np.nan
+        return None
 
     params = [pars[key] for key in get_params(fit_model)]
 
@@ -69,7 +69,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
         ys = np.array([bmd_obj(x, fit_model=fit_model, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
                                onesp=onesidedp, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
-            return np.nan
+            return None
         bmdrange = np.array([np.max(xs[ys >= 0]), bmd])
 
     elif which_bound == "upper":
@@ -81,7 +81,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
         ys = np.array([bmd_obj(x, fit_model=fit_model, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
                                onesp=onesidedp, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
-            return np.nan
+            return None
         bmdrange = np.array([bmd, np.min(xs[ys >= 0])])
 
     try:
@@ -89,7 +89,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
         return optimize.root_scalar(bmd_obj, bracket=bmdrange,
                                     args=(fit_model, bmr, conc, resp, pars, maxloglik, onesidedp, 2)).root
     except ValueError:
-        return np.nan
+        return None
 
 
 def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):

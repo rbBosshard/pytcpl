@@ -56,7 +56,7 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
     if cutoff != 0 and "top" in locals():
         top_over_cutoff = np.abs(top) / cutoff
     else:
-        top_over_cutoff = np.nan
+        top_over_cutoff = None
 
     if fit_model == "none":
         hitcall = 0
@@ -71,9 +71,9 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
     if np.isnan(hitcall):
         hitcall = 0
 
-    ac50 = np.nan
-    ac95 = np.nan
-    bmd = np.nan
+    ac50 = None
+    ac95 = None
+    bmd = None
     bmr = onesd * bmr_scale  # magic bmr is default 1.349
     if hitcall > 0:
         # fill ac's; can put after hit logic

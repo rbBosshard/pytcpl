@@ -50,7 +50,7 @@ def drop_tables(table_names_list):
     drop_stmt = f"DROP TABLE {tables};"
     tcpl_query(drop_stmt)
 
-    print(f"Done >> {elapsed(start_time)}")
+    print(f"Done >> {elapsed(start_time)}\n")
 
 
 def ensure_all_new_db_tables_exist():
@@ -62,12 +62,12 @@ def ensure_all_new_db_tables_exist():
             ddl_query = f.read()
             tcpl_query(ddl_query)
 
-    print(f"Done >> {elapsed(start_time)}")
+    print(f"Done >> {elapsed(start_time)}\n")
 
 
 def export_data(dat, path, folder, id):
     full_folder_path = path + folder
-    isExist = os.path.exists(full_folder_path)
-    if not isExist:
+    is_exist = os.path.exists(full_folder_path)
+    if not is_exist:
         os.makedirs(full_folder_path)
-    dat.to_csv(f"{full_folder_path}/{id}.csv")
+    dat.to_csv(f"{full_folder_path}/{id}.csv", index=False)

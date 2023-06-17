@@ -36,7 +36,7 @@ def update(aeid):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', marker=dict(color="black", symbol="circle-open", size = 10), name="response"))
     fit_models = list(fitparams.keys())
-    # add_verticla_lines(conc, fig)
+    # add_vertical_lines(conc, fig)
 
     pars_dict = {}
     for m, model in enumerate(fit_models):
@@ -56,7 +56,7 @@ def update(aeid):
     return fig, pars_dict
 
 
-def add_verticla_lines(conc, fig):
+def add_vertical_lines(conc, fig):
     uconc = np.unique(conc)
     for i in range(uconc.size):
         fig.add_vline(x=float(np.log10(uconc[i])), line_dash="dash", line_width=1, opacity=.5,)

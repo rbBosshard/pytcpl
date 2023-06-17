@@ -11,15 +11,17 @@ def tcpl_obj(ps, conc, resp, fit_model, errfun="dt4"):
     # Objective function is the sum of log-likelihood of response
     # given the model at each concentration scaled by variance (err)
     pred = fit_model(ps=ps, x=conc)  # ps = parameter vector, get model values for each conc,
-    err = np.exp(ps[-1])  # last parameter is the log of the error/variance
+    err = np.exp(ps[-1]) or np.finfo(np.float64).eps  # last parameter is the log of the error/variance
     # residuals = (resp - pred) / err
-    # Todo: try another density function, ask
     if errfun == "dt4":
         # degree of freedom parameter = 4, for Student’s t probability density function
         # t.logpdf(x, df, loc, scale) is identically equivalent to t.logpdf(y, df) / scale with y = (x - loc) / scale.
-        ll = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=err) - np.log(err))
+        # ll = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=err) - np.log(err))
+        # ll = np.sum(t.logpdf(x=resp, df=4, loc=pred))
+        ll = np.sum(norm.logpdf(x=resp, loc=pred))
     else:  # errfun == "dnorm":
         ll = np.sum(norm.logpdf(x=resp, loc=pred, scale=err) - np.log(err))
 
     neg_ll = -1 * ll
     return neg_ll  # negative log likelihood scaled by variance
+

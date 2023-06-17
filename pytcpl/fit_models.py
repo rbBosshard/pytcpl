@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 
@@ -61,7 +63,13 @@ def gnls(ps, x):
 
 def hill(ps, x):
     tp, ga, p = ps[:3]
-    return tp / (1 + (ga / x) ** p)
+    warnings.filterwarnings("error", category=RuntimeWarning)
+    out = None
+    try:
+        out = tp / (1 + (ga / x) ** p)
+        return out
+    except Exception as err:
+        print(err)
 
 
 def poly1(ps, x):

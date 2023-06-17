@@ -1,19 +1,19 @@
 pytcpl:
   # aeid: assay id
   aeid: 5
-  # test: 0,1 if test is 1 then only the first few chemicals specified by head are processed
-  test: 0
-  # head: number of lvl 3 datapoints processed if test = 1
-  head: 100
+  # test: if test is 0 then all chemicals are processed else # = test chemicals
+  test: 2
   # parallelize: 0,1 use for debug parallelize = 0, else 1
-  parallelize: 1
+  parallelize: 0
   # n_jobs: parallel joblib jobs, #threads, max = -1
   n_jobs: -1
   # do_fit: 0,1 do curve-fit else load from csv export folder
   do_fit: 1
   # fit_models: Fit models
   fit_models: [ "cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill", "gnls" ]
-  # verbose: print verbosity 0,1,2
+#  fit_models: [ "cnst", "poly1", "poly2", "pow", "exp2", "exp3", "exp4", "exp5", "hill"]
+#  fit_models: [ "cnst", "hill", "gnls"]
+  # verbose: print verbosity 0,1,2,3
   verbose: 0
   # profile: 0,1 profile performance
   profile: 1

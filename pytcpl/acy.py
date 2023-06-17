@@ -13,15 +13,15 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         if 'tp' in locals() and locals()["tp"] and abs(y) >= abs(locals()["tp"]):
             if verbose:
                 print("y (specified activity response) is greater than tp in function acy, returning NA")
-            return np.nan
+            return None
         if 'top' in locals() and locals()["top"] and abs(y) >= abs(locals()["top"]):
             if verbose:
                 print("y (specified activity response) is greater than top in function acy, returning NA")
-            return np.nan
+            return None
         if 'tp' in locals() and locals()["tp"] and y * locals()["tp"] < 0:
             if verbose:
                 print("y (specified activity response) is wrong sign in function acy, returning NA")
-            return np.nan
+            return None
 
     if fit_model == "poly1":
         return y / locals()["a"]
@@ -53,7 +53,7 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
             if verbose:
                 print("toploc could not be found numerically")
             topval = locals()["tp"]
-            toploc = np.nan
+            toploc = None
         else:
             topval = get_fit_model("gnls")(list(args), toploc)
 
@@ -65,7 +65,7 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         if abs(y) > abs(topval):
             if verbose:
                 print("y is greater than gnls top in function acy, returning NA")
-            return np.nan
+            return None
 
         if y == topval:
             return toploc
@@ -77,9 +77,9 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         args = (y, locals()["tp"], locals()["ga"], locals()["p"], locals()["la"], locals()["q"])
         bracket = [toploc, 1e5] if getloss else [1e-8, toploc]
         output = root_scalar(acgnlsobj, bracket=bracket, args=args).root
-        return output or np.nan
+        return output or None
 
-    return np.nan
+    return None
 
 
 

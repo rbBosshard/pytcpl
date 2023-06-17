@@ -6,20 +6,42 @@ import pandas as pd
 
 from query_db import tcpl_query, get_sqlalchemy_engine
 from tcpl_load_data import tcpl_load_data
+import concurrent.futures
+from joblib import Parallel, delayed
+import tqdm
+import multiprocessing
+
+mc4_name = "mc4_"
+mc4_param_name = "mc4_param_"
+mc4_agg_name = "mc4_agg_"
+mc5_name = "mc5_"
+mc5_param_name = "mc5_param_"
+
+
+def tcpl_fit_unnest(output):
+    try:
+        output = ast.literal_eval(output) if isinstance(output, str) else output  # Either from csv or db
+    except Exception as e:
+        print(e)
+    model_names = list(output.keys())
+    res = {}
+    for m in model_names:
+        d = output[m]
+        res[m] = {name: val for name, val in d.items() if name not in ["pars", "sds", "modl"]}
+        res[m].update(d["pars"])
+
+    rows = [{"model": m, "model_param": p, "model_val": val} for m in model_names for p, val in
+            res[m].items()]
+
+    out = pd.DataFrame.from_records(rows, columns=["model", "model_param", "model_val"])
+
+    return out
+
 
 
 def tcpl_write_data(id, dat, lvl, verbose):
-    mc4_name = "mc4_"
-    mc4_param_name = "mc4_param_"
-    mc4_agg_name = "mc4_agg_"
-    mc5_name = "mc5_"
-    mc5_param_name = "mc5_param_"
-
-    # Check for valid inputs
     if lvl not in [4, 5]:
         raise ValueError("Invalid lvl input - must be an integer 4 or 5.")
-
-
 
     # Delete old data in cascade
     if lvl <= 4:
@@ -61,33 +83,24 @@ def tcpl_write_data(id, dat, lvl, verbose):
         else:
             bmed = pd.DataFrame()
 
-
-        def tcpl_fit_unnest(output):
-            output = ast.literal_eval(output) if isinstance(output, str) else output  # Either from csv or db
-            model_names = list(output.keys())
-            res = {}
-            for m in model_names:
-                d = output[m]
-                res[m] = {name: val for name, val in d.items() if name not in ["pars", "sds", "modl"]}
-                res[m].update(d["pars"])
-
-            rows = [{"model": m, "model_param": p, "model_val": val} for m in model_names for p, val in
-                    res[m].items()]
-            return pd.DataFrame.from_records(rows, columns=["model", "model_param", "model_val"])
-
         # unnest fit params
         unnested_param = pd.concat([pd.DataFrame(tcpl_fit_unnest(x)) for x in param['fitparams']], keys=param['m4id'],
                                    names=['m4id']).reset_index()
+
         unnested_param = unnested_param.set_index("m4id")
         param = param.set_index("m4id")
         dat1 = param.join(unnested_param, how="left")
         dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
+
         tcpl_append(dat_param, mc4_param_name, False)
         tcpl_append(onesd, mc4_param_name, False)
         tcpl_append(bmed, mc4_param_name, False)
 
         # get l3 dat for agg columns
-        dat_agg = dat[['aeid', 'm4id']].assign(m3id=dat['m3ids'])
+        m3id_ = dat['m3ids']
+        if isinstance(m3id_.iloc[0], str):
+            m3id_ = m3id_.apply(lambda x: ast.literal_eval(x))
+        dat_agg = dat[['aeid', 'm4id']].assign(m3id=m3id_)
         dat_agg = dat_agg.set_index('m4id')
         dat_agg = dat_agg.explode('m3id')
         dat_agg = dat_agg.reset_index()
@@ -119,11 +132,11 @@ def tcpl_write_data(id, dat, lvl, verbose):
         l3_dat = l3_dat.set_index("m3id")
         dat_agg = dat_agg.join(l3_dat, how="left")
         dat_agg = dat_agg.reset_index()
-        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name, False)  # lazy
+        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name, False)
 
     elif lvl == 5:
-        tcpl_append(dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]],
-            tbl=mc5_name, verbose=False)
+        tcpl_append(dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(),
+                    tbl=mc5_name, verbose=False)
         qstring = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN ({id});"
         m5id_map = tcpl_query(query=qstring)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
@@ -131,21 +144,33 @@ def tcpl_write_data(id, dat, lvl, verbose):
         dat = dat.join(m5id_map, how="left").reset_index()
         tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name, verbose=False)
 
+def process_and_write_chunk(chunk, tbl):
+    engine = get_sqlalchemy_engine()
+    try:
+        chunk.to_sql(tbl, engine, if_exists='append', index=False)
+    except Exception as err:
+        print(err)
+        pass
 
 def tcpl_append(dat, tbl, verbose):
-    engine = get_sqlalchemy_engine()
-    with engine.begin() as connection:
-        try:
-            num_rows_affected = dat.to_sql(name=tbl, con=connection, if_exists="append", index=False)
-            if verbose:
-                print(f"Append to {tbl} >> {num_rows_affected} affected rows")
-        except Exception as err:
-            print(err)
-    return num_rows_affected
+    try:
+        if(len(dat) < 1000):
+            engine = get_sqlalchemy_engine()
+            dat.to_sql(tbl, engine, if_exists='append', index=False)
+        else:
+            chunk_size = 5000  # 5000 best
+            chunks = [dat[i:i + chunk_size] for i in range(0, len(dat), chunk_size)]
+            # num_rows_affected = Parallel(n_jobs=-1)(delayed(process_and_write_chunk)(chunk, tbl) for chunk in chunks)
+            num_rows_affected = [process_and_write_chunk(chunk, tbl) for chunk in chunks]
+            # with multiprocessing.Pool() as pool:
+            #     pool.starmap(process_and_write_chunk, [(chunk, tbl) for chunk in chunks])
+    except Exception as err:
+        print(err)
+        pass
 
 
 def tcpl_delete(tbl, id, verbose):
-    qstring = f"DELETE FROM {tbl} WHERE aeid in ({id});"
+    qstring = f"DELETE FROM {tbl} WHERE aeid = {id};"
     if verbose:
         print(qstring)
     tcpl_query(qstring)
