@@ -8,6 +8,7 @@ from pipeline_helper import get_mc5_data, load_config
 from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
 
+# Run command `streamlit run pytcpl/app.py`
 
 def powspace(start, stop, power, num):
     start = np.power(start, 1/float(power))
@@ -16,18 +17,42 @@ def powspace(start, stop, power, num):
 
 # Load data initially or when id changes, and cache the result
 @st.cache_data
-def fetch_data(id):
+def fetch_data():
     check_reset()
+    id = st.session_state.aeid
     dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
     grouped = dat.groupby(['aeid', 'spid'])
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
+    mc4 = mc4.head(config["test"])
     nested_mc4 = get_nested_mc4(get_mc5_data(id), parallelize=True, n_jobs=-1)
     return mc4, nested_mc4
 
 
-def update(aeid):
-    mc4, nested_mc4 = fetch_data(aeid)
+def update():
+    mc4, nested_mc4 = fetch_data()
     check_reset()
+    spid = st.session_state.spid
+    print(spid)
+    trigger = st.session_state.trigger
+    if spid in mc4['spid'].values and trigger == "spid":
+        st.session_state.spid_row = mc4[mc4['spid'] == spid].index[0]
+        st.write(f"spid: {spid}")
+    elif trigger == "new_sample":
+        dir = st.session_state.direction
+        if dir == "next":
+            new_spid_row = st.session_state.spid_row + 1
+        elif dir == "previous":
+            new_spid_row = st.session_state.spid_row - 1
+        else:
+            new_spid_row = st.session_state.spid_row
+            
+        st.session_state.spid_row = new_spid_row % nested_mc4.shape[0]
+        spid = mc4.iloc[st.session_state.spid_row]["spid"]
+        st.session_state.spid  = spid
+        st.write(f"spid: {spid}")
+    else:
+        st.write(f"spid: NOT FOUND")
+        return
     spid_row = st.session_state.spid_row
     print(spid_row)
     fitparams = nested_mc4.iloc[spid_row]["params"]
@@ -62,47 +87,49 @@ def add_vertical_lines(conc, fig):
         fig.add_vline(x=float(np.log10(uconc[i])), line_dash="dash", line_width=1, opacity=.5,)
 
 
-def load_new_sample(aeid, direction):
-    check_reset()
-    _, nested_mc4 = fetch_data(aeid)
-    if direction == "next":
-        new_spid_row = st.session_state.spid_row + 1
-    else:
-        new_spid_row = st.session_state.spid_row - 1
-    st.session_state.spid_row = new_spid_row % nested_mc4.shape[0]
+def load_new_sample(direction):
+    st.session_state.direction = direction
+    st.session_state.trigger = "new_sample"
 
 
 def check_reset():
     if "spid_row" not in st.session_state:
         print("reset to start sample")
         reset_spid_row()
+    if "direction" not in st.session_state:
+        st.session_state.direction = "stay"
+    if "trigger" not in st.session_state:
+        st.session_state.trigger = "new_sample"
+    if "spid" not in st.session_state:
+        st.session_state.spid = ""
 
 
 def reset_spid_row():
     st.session_state["spid_row"] = 0
 
 
-st.set_page_config(
-    page_title="Viz pytcpl",
-    page_icon="✅",
-    # layout="wide",
+def filter_spid():
+   st.session_state.trigger = "spid"
+    
+    
+st.set_page_config(page_title="Viz pytcpl", # page_icon="✅", layout="wide",
 )
 
+config = load_config()["pytcpl"]
+st.title("Curve-fit Visualization")
+st.session_state.aeid = int(st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
+st.session_state.spid = st.text_input(label="Filter sample id (spid)", on_change=filter_spid)
+col1, col2 = st.columns(2)
+with col1:
+    st.button("Previous sample", on_click=load_new_sample, args=("previous",))
+with col2:
+    st.button("Next sample", on_click=load_new_sample, args=("next",))
 
-def main():
-    config = load_config()["pytcpl"]
-    st.title("Curve-fit Visualization")
-    aeid = int(st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
-    col1, col2 = st.columns(2)
-    with col1:
-        st.button("Previous sample", on_click=load_new_sample, args=(aeid, "previous",))
-    with col2:
-        st.button("Next sample", on_click=load_new_sample, args=(aeid, "next",))
-    fig, pars_dict = update(aeid)
+try:
+    fig, pars_dict = update()
     st.plotly_chart(fig)
     st.json(pars_dict)
+except:
+    st.write("No data found")
 
 
-if __name__ == '__main__':
-    main()
-    # Run command `streamlit run pytcpl/app.py`

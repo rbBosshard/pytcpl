@@ -2,7 +2,7 @@ pytcpl:
   # aeid: assay id
   aeid: 5
   # test: if test is 0 then all chemicals are processed else # = test chemicals
-  test: 2
+  test: 5
   # parallelize: 0,1 use for debug parallelize = 0, else 1
   parallelize: 0
   # n_jobs: parallel joblib jobs, #threads, max = -1
