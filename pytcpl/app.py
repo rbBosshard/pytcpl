@@ -9,7 +9,9 @@ from pipeline_helper import get_mc5_data, load_config
 from query_db import tcpl_query
 from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
-from acy import acy
+import time
+
+from pipeline_helper import starting, elapsed
 
 
 # Run command `streamlit run pytcpl/app.py`
@@ -23,15 +25,23 @@ def powspace(start, stop, power, num):
 # Load data initially or when id changes, and cache the result
 @st.cache_data
 def fetch_data(id):
+    start = starting("Fetch data")
     check_reset()
+    print(elapsed(start))
     dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
+    print(elapsed(start))
     grouped = dat.groupby(['aeid', 'spid'])
+    print(elapsed(start))
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
+    print(elapsed(start))
     mc4 = mc4.head(config["test"]) if config["test"] else mc4
+    print(elapsed(start))
     nested_mc4 = get_nested_mc4(get_mc5_data(id), parallelize=True, n_jobs=-1)
+    print(elapsed(start))
 
     # hitcall data
     df = tcpl_load_data(lvl=6, fld='aeid', ids=id)
+    print(elapsed(start))
     d = {str(m5id): group for m5id, group in df.groupby("m4id")}
 
     return mc4, nested_mc4, d
@@ -78,8 +88,8 @@ def add_title(fig, d):
     with st.expander("Details"):
         st.write(f"spid: {st.session_state.spid}")
         st.write(f"Chemical: {chnm}")
+        st.write(f"[{dsstox_substance_id}](https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id})")
         st.write(f"CASN: {casn}")
-        st.write(f"DSSTOX_SID: {dsstox_substance_id}")
         st.write(f"Assay Endpoint: {assay_component_endpoint_name}")
         st.write(f"{assay_component_endpoint_desc}")
 
@@ -99,67 +109,53 @@ def add_curves(conc, fig, fitparams, d):
         pars = list(params["pars"].values())
         pars_dict[model] = list(pars)
         pars = np.array(pars)
-        x = powspace(np.min(conc), np.max(conc), 100, 200)
+        x = powspace(np.min(conc), np.max(conc), 100, 500)
         y = np.array(get_fit_model(model)(pars, x))
         color = px.colors.qualitative.Bold[m]
+        if model != d['modl'] and model != "none":
+             fig.add_trace(
+                go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
+                        name=model, line=dict(width=2, dash = 'dash')))
         
-        if model == d['modl']:
+        elif model == d['modl']:
             fig.add_trace(
             go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
                        name=f"{model} (BEST FIT)", line=dict(width=3)))
             
-            try:
-                    # fig.add_hline(y=d['top'], line_dash="dash", opacity=.5, annotation_position="top left",
-                    #             annotation_text=f"curve-top {d['modl']}")
-                    fig.add_annotation(
-                        x=np.log10(acy(d['top'], params["pars"], model)),
-                        y=d['top'],
-                        text=f"curve-top {d['modl']}",
-                    )
-            except Exception as e:
-                print(f"top {e}")
+            if d['hitcall'] >= 0.1:
+                potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
+                for p in potencies:
+                    if p in d:
+                        fig.add_vline(x=np.log10(d[p]), opacity=.5,
+                                    annotation_position="top",
+                                    annotation_text=f"{p}", layer="below")
+                        
+                efficacies = ["top", "bmr"]
+                for e in efficacies:
+                    if e in d:
+                        fig.add_hline(y=d[e], opacity=.5,
+                                    annotation_position="bottom left",
+                                    annotation_text=f"{e}", layer="below")
+                        
 
-            
-            if d['hitcall'] > 0.1:
-                try:
-                    fig.add_vline(x=round(np.log10(d['ac10']), 2), line_dash="dash", opacity=.5,
-                                annotation_position="bottom",
-                                annotation_text=f"ac10")
-                except Exception as e:
-                    print(f"ac10 {e}")
+        else:  # model == "none"
+           pass
 
-                try:
-                    fig.add_vline(x=round(np.log10(d['ac50']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
-                            annotation_text=f"ac50")
-                except Exception as e:
-                    print(f"ac50 {e}")
-
-        else:
-            fig.add_trace(
-                go.Scatter(x=np.log10(x), y=y, opacity=.7, legendgroup=model, marker=dict(color=color), mode='lines',
-                        name=model, line=dict(width=2, dash = 'dash')))
-        fig.update_layout(legend=dict(groupclick="toggleitem"))
-
+   
     cutoff = round(d['coff'], 2)
+    fig.add_hline(y=cutoff, line_color= "LightSkyBlue")
 
-    fig.add_annotation(
-            x=0,
-            y=cutoff,
-            text="efficacy cutoff",
-            xref="paper",
+    fig.add_hrect(
+        y0=-cutoff,
+        y1=cutoff,
+        fillcolor='LightSkyBlue',
+        opacity=0.4,
+        layer='below',
+        line=dict(width=0),
+        annotation_text="efficacy cutoff", annotation_position="top left",
     )
 
-    fig.add_shape(
-            type='rect',
-            xref='paper', yref='y',
-            x0=0, y0=-cutoff,
-            x1=1, y1=cutoff,
-            fillcolor='LightSkyBlue',
-            opacity=0.4,
-            layer='below',
-            line=dict(width=0)
-    )
-    
+    fig.update_layout(legend=dict(groupclick="toggleitem"))
     return pars_dict
 
 

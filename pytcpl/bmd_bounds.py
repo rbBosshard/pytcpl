@@ -131,7 +131,7 @@ def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
             ps["ga"] = bmd * (ps["tp"] / bmr - 1) ** (1 / ps["p"])
         elif partype == 3:
             ps["p"] = np.log(ps["tp"] / bmr - 1) / np.log(ps["ga"] / bmd)
-    if fit_model == "gnls":
+    elif fit_model == "gnls":
         if partype == 1:
             ps["tp"] = bmr * ((1 + (ps["ga"] / bmd) ** ps["p"]) * (1 + (bmd / ps["la"]) ** ps["q"]))
         elif partype == 2:

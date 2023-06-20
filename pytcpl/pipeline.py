@@ -30,7 +30,7 @@ def mc4():
     print(f"Loaded L3 with ({df.shape[0]} rows) >> {elapsed(start_time)}")
 
     get_bmad = tcpl_mthd_load(lvl=4, aeid=aeid)
-    for mthd in get_bmad['mthd']:
+    for mthd in list(get_bmad['mthd'].values)+['onesd.aeid.lowconc.twells']:
         df = mc4_mthds(mthd)(df)
 
     fit_models = config["fit_models"]

@@ -88,12 +88,15 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
         bmd = acy(np.sign(top) * bmr, modpars, fit_model=fit_model)
 
         # get bmdl and bmdu
-        bmdl = bmd_bounds(fit_model,
-                          bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                          bmd=bmd, which_bound="lower")
-        bmdu = bmd_bounds(fit_model,
-                          bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                          bmd=bmd, which_bound="upper")
+        try:
+            bmdl = bmd_bounds(fit_model,
+                              bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                              bmd=bmd, which_bound="lower")
+            bmdu = bmd_bounds(fit_model,
+                              bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                              bmd=bmd, which_bound="upper")
+        except Exception as e:
+            print(f"bmd_bounds: {e}")
 
         # apply bmd min
         if bmd_low_bnd is not None and not np.isnan(bmd):
