@@ -76,8 +76,10 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
 
         args = (y, locals()["tp"], locals()["ga"], locals()["p"], locals()["la"], locals()["q"])
         bracket = [toploc, 1e5] if getloss else [1e-8, toploc]
-        output = root_scalar(acgnlsobj, bracket=bracket, args=args).root
-        return output or None
+        try:
+            return root_scalar(acgnlsobj, bracket=bracket, args=args).root
+        except:
+            return None
 
     return None
 

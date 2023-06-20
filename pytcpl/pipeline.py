@@ -11,7 +11,7 @@ from tcpl_fit import tcpl_fit
 from tcpl_hit import tcpl_hit
 from tcpl_load_data import tcpl_load_data
 from tcpl_mthd_load import tcpl_mthd_load
-from tcpl_prep_otpt import tcpl_prep_otpt
+from tcpl_prep_output import tcpl_prep_output
 from tcpl_subset_chid import tcpl_subset_chid
 from tcpl_write_data import tcpl_write_data
 
@@ -73,7 +73,7 @@ def export():
     aeid = config['aeid']
     start_time = starting(f"Export {aeid}")
     df = tcpl_load_data(lvl=5, fld="aeid", ids=aeid, verbose=config["verbose"])
-    df = tcpl_prep_otpt(df)
+    df = tcpl_prep_output(df)
     df = tcpl_subset_chid(dat=df, flag=False)
     export_data(df, path=config["export_path"], folder="out", id=aeid)
     print(f"Done export >> {elapsed(start_time)}\n")

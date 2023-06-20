@@ -63,9 +63,8 @@ def wrapper_tcpl_hit_core(coff, nested_mc4, parallelize, n_jobs):
     if parallelize:
         test = Parallel(n_jobs=n_jobs)(
             delayed(tcpl_hit_core)(
-                params=row['params'], conc=np.array(row.conc), resp=np.array(row.resp),
-                bmed=row['bmed'], cutoff=coff, onesd=row['onesd']
-            ) for _, row in nested_mc4.iterrows()
+                params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
+                onesd=row.onesd, bmed=row.bmed) for _, row in nested_mc4.iterrows()
         )
         res = pd.concat([nested_mc4, pd.DataFrame(test)], axis=1)
 
@@ -73,8 +72,7 @@ def wrapper_tcpl_hit_core(coff, nested_mc4, parallelize, n_jobs):
         test = (
             nested_mc4.assign(df=lambda row: [
                 tcpl_hit_core(params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
-                              onesd=row.onesd,
-                              bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
+                              onesd=row.onesd, bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
         )
 
         res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)

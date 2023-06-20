@@ -1,11 +1,11 @@
-from tcpl_prep_otpt import tcpl_prep_otpt
+from tcpl_prep_output import tcpl_prep_output
 
 
 def tcpl_subset_chid(dat, flag=False):
     if "m5id" not in dat.columns:
         raise ValueError("'dat' must be a DataFrame with level 5 data.")
     if "casn" not in dat.columns:
-        dat = tcpl_prep_otpt(dat)
+        dat = tcpl_prep_output(dat)
 
     dat["hitc"] = dat["hitc"] >= 0.9
     dat["chit"] = dat.groupby(["aeid", "chid"])["hitc"].transform(lambda x: x.mean() >= 0.5)

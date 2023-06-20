@@ -6,10 +6,7 @@ from query_db import tcpl_query
 from tcpl_load_data import prep_field
 
 
-def tcpl_prep_otpt(dat, ids=None):
-    if not isinstance(dat, pd.DataFrame):
-        raise ValueError("'dat' must be a DataFrame.")
-        
+def tcpl_prep_output(dat, ids=None):
     dnames = dat.columns.tolist()
     
     if ids is None:
@@ -45,7 +42,6 @@ def tcpl_prep_otpt(dat, ids=None):
             # Add conc units
             conc_unit_mapping = tcpl_load_conc_unit(dat["spid"].unique())
             dat = pd.merge(dat, conc_unit_mapping, on="spid", how="left")
-            
     return dat
 
 
@@ -62,7 +58,6 @@ def tcpl_load_conc_unit(spid):
 
     spid_str = '","'.join(str(id) for id in spid)
     qstring = qformat.format(spid_str)
-
     dat = tcpl_query(query=qstring)
 
     if dat.shape[0] == 0:
@@ -121,7 +116,6 @@ def tcpl_load_chem(field=None, val=None, exact=True, include_spid=True):
     qstring = _chem_q(field=field, val=val, exact=exact)
 
     dat = tcpl_query(query=qstring)
-    dat = pd.DataFrame(dat)
 
     if dat.shape[0] == 0:
         print("Warning: The given {}(s) are not in the tcpl database.".format(field))

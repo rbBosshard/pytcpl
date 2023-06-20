@@ -54,7 +54,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     # calculate bmd, if necessary
     if bmd is None:
         bmd = acy(bmr, pars, fit_model=fit_model)
-    if not np.isfinite(bmd):
+    if bmd is None or not np.isfinite(bmd):
         return None
 
     params = [pars[key] for key in get_params(fit_model)]

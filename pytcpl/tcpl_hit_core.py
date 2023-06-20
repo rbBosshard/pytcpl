@@ -37,8 +37,9 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
             # never choose constant as winner for continuous hitcalls
             nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
             fit_model = min(nocnstaics, key=nocnstaics.get)
-            caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
-            if np.isnan(caikwt):
+            try:
+                caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
+            except:
                 term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
                 if term == np.inf:
                     caikwt = 0

@@ -11,12 +11,14 @@ from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
 from acy import acy
 
+
 # Run command `streamlit run pytcpl/app.py`
 
 def powspace(start, stop, power, num):
-    start = np.power(start, 1/float(power))
-    stop = np.power(stop, 1/float(power))
+    start = np.power(start, 1 / float(power))
+    stop = np.power(stop, 1 / float(power))
     return np.power(np.linspace(start, stop, num=num), power)
+
 
 # Load data initially or when id changes, and cache the result
 @st.cache_data
@@ -25,7 +27,7 @@ def fetch_data(id):
     dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
     grouped = dat.groupby(['aeid', 'spid'])
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
-    mc4 = mc4.head(config["test"]) if  config["test"] else mc4
+    mc4 = mc4.head(config["test"]) if config["test"] else mc4
     nested_mc4 = get_nested_mc4(get_mc5_data(id), parallelize=True, n_jobs=-1)
 
     # hitcall data
@@ -46,16 +48,17 @@ def update():
     conc, d, fitparams, resp = get_row_data(hit_data, mc4, nested_mc4)
 
     fig = go.Figure()
-   
+
     add_title(fig, d)
 
     fig.add_trace(
-        go.Scatter(x=np.log10(conc), y=resp, mode='markers', marker=dict(color="black", symbol="x-thin-open", size=10),
-                   name="response"))
-    
+        go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse", marker=dict(color="black", symbol="x-thin-open", size=10),
+                   name="response", showlegend=False))
+
     cutoff = round(d['coff'], 2)
-    fig.add_hline(y=cutoff, line_dash="dash", opacity=.5, annotation_position="top left",
+    fig.add_hline(y=cutoff, opacity=.5, annotation_position="top left",
                   annotation_text=f"efficacy cutoff: {cutoff}")
+    
 
     return fig, add_curves(conc, fig, fitparams, d)
 
@@ -63,18 +66,31 @@ def update():
 def add_title(fig, d):
     try:
         casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
-    except:
+    except Exception as e:
+        print(e)
         return
-    fig.update_layout(height=600)
+    fig.update_layout(height=600, width=1400)
     # fig.update_layout(hovermode="x unified")
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
-    qstring = f"SELECT normalized_data_type FROM assay_component_endpoint WHERE aeid = {st.session_state.aeid};"
-    normalized_data_type = tcpl_query(qstring).iloc[0]["normalized_data_type"]
+    qstring = f"SELECT * FROM assay_component_endpoint WHERE aeid = {st.session_state.aeid};"
+    assay_component_endpoint = tcpl_query(qstring).iloc[0]
+    normalized_data_type = assay_component_endpoint["normalized_data_type"]
+    assay_component_endpoint_name = assay_component_endpoint["assay_component_endpoint_name"]
+    assay_component_endpoint_desc = assay_component_endpoint["assay_component_endpoint_desc"]
+
+    with st.expander("Details"):
+        st.write(f"spid: {st.session_state.spid}")
+        st.write(f"Chemical: {chnm}")
+        st.write(f"CASN: {casn}")
+        st.write(f"DSSTOX_SID: {dsstox_substance_id}")
+        st.write(f"Assay Endpoint: {assay_component_endpoint_name}")
+        st.write(f"{assay_component_endpoint_desc}")
+
     fig.update_layout(
-        title=f"SPID: {st.session_state.spid}       CASN: {casn}       DSSTOX_SID: {dsstox_substance_id}<br>Chemical: {chnm}<br>Best fit model: {d['modl']}<br>Hit-call: {round(d['hitcall'], 7)}",
+        title=f"Assay Endpoint: <i>{assay_component_endpoint_name}</i><br>Chemical: <i>{chnm}</i><br>Best Model Fit: <i>{d['modl']}</i>, hitcall: <i>{round(d['hitcall'], 7)}</i>",
         margin=dict(t=150),
-        xaxis_title="Concentration (uM)",
+        xaxis_title="log10(Concentration) μM",
         yaxis_title=str(normalized_data_type),
     )
 
@@ -90,29 +106,49 @@ def add_curves(conc, fig, fitparams, d):
         modl = np.array(get_fit_model(model)(pars, np.array(conc)))
         x = powspace(np.min(conc) / 3, np.max(conc) * 1.5, 100, 200)
         y = np.array(get_fit_model(model)(pars, x))
-        color = px.colors.qualitative.Light24[m]
-        # fig.add_trace(go.Scatter(x=np.log10(conc), y=modl, legendgroup=model, marker=dict(color=color, symbol="x"),
-        #                          mode='markers', name=model, showlegend=False))
-        fig.add_trace(
-            go.Scatter(x=np.log10(x), y=y, opacity=.7, legendgroup=model, marker=dict(color=color), mode='lines', name=model))
+        color = px.colors.qualitative.Bold[m]
+        
         if model == d['modl']:
+            fig.add_trace(
+            go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
+                       name=f"{model} (BEST FIT)", line=dict(width=3)))
             
-            top = round(d['top'], 2)
-            
-            fig.add_hline(y=top, line_dash="dash", opacity=.5, annotation_position="top left",
-                          annotation_text=f"curve-top best fit: {top}")
-            
-            fig.add_vline(x=np.log10(acy(top, params["pars"], model)), line_dash="dash", opacity=.5, annotation_position="bottom",
-                          annotation_text=f"actop")
-            
-            fig.add_vline(x=round(np.log10(d['ac10']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
-                          annotation_text=f"ac10")
-            
-            fig.add_vline(x=round(np.log10(d['ac50']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
-                          annotation_text=f"ac50")
-            
-            # fig.add_vline(x=round(np.log10(d['ac95']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
-            #               annotation_text=f"ac95")
+            try:
+                    fig.add_hline(y=d['top'], line_dash="dash", opacity=.5, annotation_position="top left",
+                                annotation_text=f"curve-top {d['modl']}")
+            except Exception as e:
+                print(f"top {e}")
+
+            if d['hitcall'] > 0.1:
+                # try:
+                #     fig.add_vline(x=np.log10(acy(d['top'], params["pars"], model)), line_dash="dash", opacity=.5,
+                #                 annotation_position="bottom",
+                #                 annotation_text=f"actop")
+                # except Exception as e:
+                #     print(f"actop {e}")
+
+                try:
+                    fig.add_vline(x=round(np.log10(d['ac10']), 2), line_dash="dash", opacity=.5,
+                                annotation_position="bottom",
+                                annotation_text=f"ac10")
+                except Exception as e:
+                    print(f"ac10 {e}")
+
+                try:
+                    fig.add_vline(x=round(np.log10(d['ac50']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
+                            annotation_text=f"ac50")
+                except Exception as e:
+                    print(f"ac50 {e}")
+
+                # fig.add_vline(x=round(np.log10(d['ac95']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
+                #               annotation_text=f"ac95")
+
+        else:
+            fig.add_trace(
+                go.Scatter(x=np.log10(x), y=y, opacity=.7, legendgroup=model, marker=dict(color=color), mode='lines',
+                        name=model, line=dict(width=2, dash = 'dash')))
+        fig.update_layout(legend=dict(groupclick="toggleitem"))
+
     return pars_dict
 
 
@@ -136,7 +172,6 @@ def get_chem_info(spid):
     chnm = chem['chnm']
     dsstox_substance_id = chem['dsstox_substance_id']
     return casn, chnm, dsstox_substance_id
-
 
 
 def set_spid(mc4, nested_mc4, trigger):
@@ -182,17 +217,18 @@ def reset_spid_row():
 
 
 def filter_spid():
-   st.session_state.trigger = "spid"
-    
-    
-st.set_page_config(page_title="Viz pytcpl", # page_icon="✅", layout="wide",
-)
+    st.session_state.trigger = "spid"
+
+
+st.set_page_config(page_title="Curve surfer",  page_icon="✅", layout="wide",
+                   )
 
 config = load_config()["pytcpl"]
-st.title("Curve-fit Visualization")
-st.session_state.aeid = int(st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
+# st.title("Curve surfer")
+st.session_state.aeid = int(
+    st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
 st.session_state.spid = st.text_input(label="Filter sample id (spid)", on_change=filter_spid)
-col1, col2  = st.columns(2)
+col1, col2 = st.columns(2)
 with col1:
     st.button("Previous sample", on_click=load_new_sample, args=("previous",))
 with col2:
@@ -201,9 +237,7 @@ with col2:
 try:
     fig, pars_dict = update()
     st.plotly_chart(fig)
-    st.json(pars_dict)
+    # st.json(pars_dict)
 except Exception as e:
     print(e)
     st.write("No data found")
-
-
