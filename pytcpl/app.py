@@ -54,10 +54,6 @@ def update():
     fig.add_trace(
         go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse", marker=dict(color="black", symbol="x-thin-open", size=10),
                    name="response", showlegend=False))
-
-    cutoff = round(d['coff'], 2)
-    fig.add_hline(y=cutoff, opacity=.5, annotation_position="top left",
-                  annotation_text=f"efficacy cutoff: {cutoff}")
     
 
     return fig, add_curves(conc, fig, fitparams, d)
@@ -103,8 +99,7 @@ def add_curves(conc, fig, fitparams, d):
         pars = list(params["pars"].values())
         pars_dict[model] = list(pars)
         pars = np.array(pars)
-        modl = np.array(get_fit_model(model)(pars, np.array(conc)))
-        x = powspace(np.min(conc) / 3, np.max(conc) * 1.5, 100, 200)
+        x = powspace(np.min(conc), np.max(conc), 100, 200)
         y = np.array(get_fit_model(model)(pars, x))
         color = px.colors.qualitative.Bold[m]
         
@@ -114,19 +109,18 @@ def add_curves(conc, fig, fitparams, d):
                        name=f"{model} (BEST FIT)", line=dict(width=3)))
             
             try:
-                    fig.add_hline(y=d['top'], line_dash="dash", opacity=.5, annotation_position="top left",
-                                annotation_text=f"curve-top {d['modl']}")
+                    # fig.add_hline(y=d['top'], line_dash="dash", opacity=.5, annotation_position="top left",
+                    #             annotation_text=f"curve-top {d['modl']}")
+                    fig.add_annotation(
+                        x=np.log10(acy(d['top'], params["pars"], model)),
+                        y=d['top'],
+                        text=f"curve-top {d['modl']}",
+                    )
             except Exception as e:
                 print(f"top {e}")
 
+            
             if d['hitcall'] > 0.1:
-                # try:
-                #     fig.add_vline(x=np.log10(acy(d['top'], params["pars"], model)), line_dash="dash", opacity=.5,
-                #                 annotation_position="bottom",
-                #                 annotation_text=f"actop")
-                # except Exception as e:
-                #     print(f"actop {e}")
-
                 try:
                     fig.add_vline(x=round(np.log10(d['ac10']), 2), line_dash="dash", opacity=.5,
                                 annotation_position="bottom",
@@ -140,15 +134,32 @@ def add_curves(conc, fig, fitparams, d):
                 except Exception as e:
                     print(f"ac50 {e}")
 
-                # fig.add_vline(x=round(np.log10(d['ac95']), 2), line_dash="dash", opacity=.5, annotation_position="bottom",
-                #               annotation_text=f"ac95")
-
         else:
             fig.add_trace(
                 go.Scatter(x=np.log10(x), y=y, opacity=.7, legendgroup=model, marker=dict(color=color), mode='lines',
                         name=model, line=dict(width=2, dash = 'dash')))
         fig.update_layout(legend=dict(groupclick="toggleitem"))
 
+    cutoff = round(d['coff'], 2)
+
+    fig.add_annotation(
+            x=0,
+            y=cutoff,
+            text="efficacy cutoff",
+            xref="paper",
+    )
+
+    fig.add_shape(
+            type='rect',
+            xref='paper', yref='y',
+            x0=0, y0=-cutoff,
+            x1=1, y1=cutoff,
+            fillcolor='LightSkyBlue',
+            opacity=0.4,
+            layer='below',
+            line=dict(width=0)
+    )
+    
     return pars_dict
 
 
