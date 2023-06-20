@@ -75,6 +75,16 @@ def tcpl_load_data(lvl, fld, ids, verbose=False):
             f"WHERE {mc4_name}.m4id = {mc5_name}.m4id "
             f"AND {mc5_name}.m5id = {mc5_param_name}.m5id "
         )
+
+    elif lvl == 6:
+        tbls = [f"{mc5_name}", f"{mc5_param_name}"]
+        qformat = (
+                    f"SELECT m4id, {mc5_param_name}.*, modl, coff "
+                    f"FROM {mc5_name} "
+                    f"JOIN {mc5_param_name} "
+                    f"ON {mc5_name}.m5id = {mc5_param_name}.m5id "
+                    )
+
     else:
         raise ValueError("lvl not supported")
 
