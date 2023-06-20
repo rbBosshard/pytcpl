@@ -1,4 +1,5 @@
 import cProfile
+import os
 
 import numpy as np
 import pandas as pd
@@ -6,7 +7,7 @@ import pandas as pd
 from mc4_mthds import mc4_mthds
 from mc5_mthds import mc5_mthds
 from pipeline_helper import starting, elapsed, get_mc5_data, ensure_all_new_db_tables_exist, load_config, \
-    export_data, drop_tables
+    export_data, drop_tables, ROOT_DIR
 from tcpl_fit import tcpl_fit
 from tcpl_hit import tcpl_hit
 from tcpl_load_data import tcpl_load_data
@@ -84,7 +85,7 @@ def pipeline():
     start_time = starting(f"pipeline with assay id {aeid}")
     # drop_tables(config["new_table_names"]) # uncomment if you want to remove the specified pipeline tables from the db
     ensure_all_new_db_tables_exist()
-    df = mc4() if config["do_fit"] else pd.read_csv(config["export_path"] + f"mc4/{aeid}.csv")
+    df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"] + f"mc4/{aeid}.csv"))
     # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
     print(elapsed(start_time))
     mc5(df)
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     if config["profile"]:
         with cProfile.Profile() as pr:
             pipeline()
-        pr.dump_stats(f'profile/pipeline.prof')
+        pr.dump_stats(os.path.join(ROOT_DIR, f'profile/pipeline.prof') )
         print("Profiling complete")  # Use `snakeviz pytcpl/profile/pipeline.prof` to view profile in browser
     else:
         pipeline()

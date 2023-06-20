@@ -9,8 +9,6 @@ from pipeline_helper import get_mc5_data, load_config
 from query_db import tcpl_query
 from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
-import time
-
 from pipeline_helper import starting, elapsed
 
 
@@ -27,31 +25,37 @@ def powspace(start, stop, power, num):
 def fetch_data(id):
     start = starting("Fetch data")
     check_reset()
-    print(elapsed(start))
     dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
-    print(elapsed(start))
     grouped = dat.groupby(['aeid', 'spid'])
-    print(elapsed(start))
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
+    mc4 = mc4.head(config["test"]) if config["test"] and config["aeid"] == id else mc4
+    df = get_mc5_data(id)
+    nested_mc4 = get_nested_mc4(df, parallelize=True, n_jobs=-1) # heavy lifting
     print(elapsed(start))
-    mc4 = mc4.head(config["test"]) if config["test"] else mc4
-    print(elapsed(start))
-    nested_mc4 = get_nested_mc4(get_mc5_data(id), parallelize=True, n_jobs=-1)
-    print(elapsed(start))
+    df = tcpl_load_data(lvl=6, fld='aeid', ids=id)  # hitcall data
+    # d = {str(m5id): group for m5id, group in df.groupby("m4id")}
+    return mc4, nested_mc4, df
 
-    # hitcall data
-    df = tcpl_load_data(lvl=6, fld='aeid', ids=id)
-    print(elapsed(start))
-    d = {str(m5id): group for m5id, group in df.groupby("m4id")}
-
-    return mc4, nested_mc4, d
 
 
 def update():
     mc4, nested_mc4, hit_data = fetch_data(st.session_state.aeid)  # needs input for unique caching
     check_reset()
+    hitcall_rows = hit_data[hit_data["hit_param"] == 'hitcall'].reset_index()
+    
+    if st.session_state.option == "hitcall desc":
+        hitcall_rows_sorted = hitcall_rows.sort_values(by="hit_val", ascending=False)
+    elif st.session_state.option == "hitcall asc":
+        hitcall_rows_sorted = hitcall_rows.sort_values(by="hit_val", ascending=True)
+    else:
+        hitcall_rows_sorted = hitcall_rows
 
-    spid = set_spid(mc4, nested_mc4, st.session_state.trigger)
+    m4ids = hitcall_rows_sorted["m4id"]
+    m4ids = m4ids.values.tolist()
+
+    st.session_state.m4id = m4ids[st.session_state.spid_row]
+
+    spid = get_spid(mc4, nested_mc4, st.session_state.trigger)
     if spid is None:
         return
 
@@ -123,20 +127,21 @@ def add_curves(conc, fig, fitparams, d):
                        name=f"{model} (BEST FIT)", line=dict(width=3)))
             
             if d['hitcall'] >= 0.1:
-                potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
+                # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
+                potencies = ["acc", "ac50"]
                 for p in potencies:
                     if p in d:
                         fig.add_vline(x=np.log10(d[p]), opacity=.5,
-                                    annotation_position="top",
+                                    annotation_position="bottom left",
                                     annotation_text=f"{p}", layer="below")
                         
-                efficacies = ["top", "bmr"]
+                # efficacies = ["top", "bmr"]
+                efficacies = ["top"]
                 for e in efficacies:
                     if e in d:
                         fig.add_hline(y=d[e], opacity=.5,
                                     annotation_position="bottom left",
-                                    annotation_text=f"{e}", layer="below")
-                        
+                                    annotation_text=f"{e}", layer="below")          
 
         else:  # model == "none"
            pass
@@ -160,15 +165,18 @@ def add_curves(conc, fig, fitparams, d):
 
 
 def get_row_data(hit_data, mc4, nested_mc4):
-    spid_row = st.session_state.spid_row
-    df = hit_data[str(nested_mc4.iloc[spid_row]["m4id"])]
+    m4id = st.session_state.m4id
+    df = hit_data.loc[hit_data["m4id"]==m4id]
     d = {}
     d["modl"] = df["modl"].iloc[0]
     d["coff"] = df["coff"].iloc[0]
     d.update(pd.Series(df.hit_val.values, index=df.hit_param).to_dict())
-    fitparams = nested_mc4.iloc[spid_row]["params"]
-    conc = mc4['concentration_unlogged'].iloc[spid_row]
-    resp = np.array(mc4['response'].iloc[spid_row])
+    fitparams = nested_mc4.loc[nested_mc4["m4id"]==m4id]["params"].iloc[0]
+    qstring = f"SELECT * FROM mc4_ WHERE m4id = {m4id};"
+    mc4_row = tcpl_query(qstring)
+    mc4_row_spid = mc4_row["spid"].iloc[0]
+    conc = mc4[mc4["spid"] == mc4_row_spid]['concentration_unlogged'].iloc[0]
+    resp = np.array(mc4[mc4["spid"] == mc4_row_spid]['response'].iloc[0])
     return conc, d, fitparams, resp
 
 
@@ -181,7 +189,7 @@ def get_chem_info(spid):
     return casn, chnm, dsstox_substance_id
 
 
-def set_spid(mc4, nested_mc4, trigger):
+def get_spid(mc4, nested_mc4, trigger):
     spid = st.session_state.spid
     if spid in mc4['spid'].values and trigger == "spid":
         st.session_state.spid_row = mc4[mc4['spid'] == spid].index[0]
@@ -203,13 +211,13 @@ def set_spid(mc4, nested_mc4, trigger):
 
 
 def load_new_sample(direction):
+    check_reset()
     st.session_state.direction = direction
     st.session_state.trigger = "new_sample"
 
 
 def check_reset():
     if "spid_row" not in st.session_state:
-        print("reset to start sample")
         reset_spid_row()
     if "direction" not in st.session_state:
         st.session_state.direction = "stay"
@@ -217,10 +225,15 @@ def check_reset():
         st.session_state.trigger = "new_sample"
     if "spid" not in st.session_state:
         st.session_state.spid = ""
+    if "m4id" not in st.session_state:
+        st.session_state.m4id = ""
+    if "option" not in st.session_state:
+        st.session_state.option = "hitcall desc"
 
 
 def reset_spid_row():
-    st.session_state["spid_row"] = 0
+    print("reset to start sample")
+    st.session_state.spid_row = 0
 
 
 def filter_spid():
@@ -235,11 +248,17 @@ config = load_config()["pytcpl"]
 st.session_state.aeid = int(
     st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
 st.session_state.spid = st.text_input(label="Filter sample id (spid)", on_change=filter_spid)
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     st.button("Previous sample", on_click=load_new_sample, args=("previous",))
 with col2:
     st.button("Next sample", on_click=load_new_sample, args=("next",))
+with col3:
+    st.session_state.option = st.selectbox(
+        "Sort by",
+        ("hitcall desc", "hitcall asc", "random"),
+        on_change=reset_spid_row,
+    )
 
 try:
     fig, pars_dict = update()

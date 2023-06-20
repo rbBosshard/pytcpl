@@ -7,6 +7,7 @@ from query_db import tcpl_query
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.yaml')
+DDL_PATH = os.path.join(ROOT_DIR, 'DDLs')
 
 def load_config():
     with open(os.path.join(CONFIG_PATH)) as file:
@@ -56,8 +57,7 @@ def drop_tables(table_names_list):
 def ensure_all_new_db_tables_exist():
     start_time = starting(f"Ensure that all tables exist")
 
-    ddl_directory = 'DDLs'
-    for ddl_file in os.scandir(ddl_directory):
+    for ddl_file in os.scandir(DDL_PATH):
         with open(ddl_file, 'r') as f:
             ddl_query = f.read()
             tcpl_query(ddl_query)

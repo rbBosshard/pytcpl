@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-from pytcpl.fit_models import get_params
+from fit_models import get_params
 from tcpl_fit_helper import fit_curve
 
 from tqdm import tqdm
