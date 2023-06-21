@@ -113,7 +113,11 @@ def add_curves(conc, fig, fitparams, d):
         pars = list(params["pars"].values())
         pars_dict[model] = list(pars)
         pars = np.array(pars)
-        x = powspace(np.min(conc), np.max(conc), 100, 500)
+
+        min_val = np.min(conc) 
+        min_val = min_val if d['hitcall'] <= 0 else min(min_val, d['ac50'])
+
+        x = powspace(min_val, np.max(conc), 100, 500)
         y = np.array(get_fit_model(model)(pars, x))
         color = px.colors.qualitative.Bold[m]
         if model != d['modl'] and model != "none":
@@ -126,12 +130,12 @@ def add_curves(conc, fig, fitparams, d):
             go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
                        name=f"{model} (BEST FIT)", line=dict(width=3)))
             
-            if d['hitcall'] >= 0.1:
+            if d['hitcall'] > 0.0:
                 # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
                 potencies = ["acc", "ac50"]
                 for p in potencies:
                     if p in d:
-                        fig.add_vline(x=np.log10(d[p]), opacity=.5,
+                        fig.add_vline(x=np.log10(d[p]), line_color=color, line_width=2,
                                     annotation_position="bottom left",
                                     annotation_text=f"{p}", layer="below")
                         
@@ -139,7 +143,7 @@ def add_curves(conc, fig, fitparams, d):
                 efficacies = ["top"]
                 for e in efficacies:
                     if e in d:
-                        fig.add_hline(y=d[e], opacity=.5,
+                        fig.add_hline(y=d[e], line_color=color, line_width=2,
                                     annotation_position="bottom left",
                                     annotation_text=f"{e}", layer="below")          
 

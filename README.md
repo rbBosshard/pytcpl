@@ -21,7 +21,7 @@ as its backend database.
 
 #### Config file for pipeline and database login
 - `pytcpl/config/config.yaml`
-- Note: pipeline works only for single assay at once. 
+- Note: pipeline works only for single assay at once! 
 - Todo: Input a list of assay ids (aeid) to run multiple assays.
 
 #### Run main pipeline script:

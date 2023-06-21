@@ -74,8 +74,12 @@ def export():
     aeid = config['aeid']
     start_time = starting(f"Export {aeid}")
     df = tcpl_load_data(lvl=5, fld="aeid", ids=aeid, verbose=config["verbose"])
+    df = df.drop(columns=["hit_param", "hit_val"])
+    df = df.drop_duplicates()
     df = tcpl_prep_output(df)
     df = tcpl_subset_chid(dat=df, flag=False)
+    df = df[['dsstox_substance_id', "hitc"]]
+    df = df.rename(columns={"dsstox_substance_id": "dtxsid"})
     export_data(df, path=config["export_path"], folder="out", id=aeid)
     print(f"Done export >> {elapsed(start_time)}\n")
 
@@ -85,10 +89,11 @@ def pipeline():
     start_time = starting(f"pipeline with assay id {aeid}")
     # drop_tables(config["new_table_names"]) # uncomment if you want to remove the specified pipeline tables from the db
     ensure_all_new_db_tables_exist()
-    df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"] + f"mc4/{aeid}.csv"))
+    df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"], "mc4", f"{aeid}.csv"))
     # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
     print(elapsed(start_time))
-    mc5(df)
+    if config["do_hit"]:
+        mc5(df)
     export()
     print(f"Pipeline done >> {elapsed(start_time)}\n")
 

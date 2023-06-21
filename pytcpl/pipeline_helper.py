@@ -66,7 +66,7 @@ def ensure_all_new_db_tables_exist():
 
 
 def export_data(dat, path, folder, id):
-    full_folder_path = path + folder
+    full_folder_path = os.path.join(ROOT_DIR, path, folder)
     is_exist = os.path.exists(full_folder_path)
     if not is_exist:
         os.makedirs(full_folder_path)

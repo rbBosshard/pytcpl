@@ -94,7 +94,8 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
                               bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
                               bmd=bmd, which_bound="upper")
         except Exception as e:
-            print(f"bmd_bounds: {e}")
+            # print(f"bmd_bounds: {e}")
+            pass
 
         # apply bmd min
         if bmd_low_bnd is not None and not np.isnan(bmd):
