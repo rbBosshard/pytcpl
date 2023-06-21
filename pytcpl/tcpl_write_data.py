@@ -1,15 +1,10 @@
 import ast
 import os
-import time
 
 import pandas as pd
 
 from query_db import tcpl_query, get_sqlalchemy_engine
 from tcpl_load_data import tcpl_load_data
-import concurrent.futures
-from joblib import Parallel, delayed
-import tqdm
-import multiprocessing
 
 mc4_name = "mc4_"
 mc4_param_name = "mc4_param_"

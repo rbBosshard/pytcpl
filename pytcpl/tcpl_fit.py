@@ -1,14 +1,9 @@
-import json
-
 import numpy as np
-import pandas as pd
 from joblib import Parallel, delayed
+from tqdm import tqdm
 
 from fit_models import get_params
 from tcpl_fit_helper import fit_curve
-
-from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
 
 
 def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, n_jobs=-1, test=0, verbose=False):

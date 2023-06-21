@@ -4,7 +4,6 @@ import time
 import mysql.connector as mysql
 import pandas as pd
 import yaml
-import os
 from sqlalchemy import create_engine, text
 
 

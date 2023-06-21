@@ -89,7 +89,7 @@ def pipeline():
     # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
     print(elapsed(start_time))
     mc5(df)
-    # export()
+    export()
     print(f"Pipeline done >> {elapsed(start_time)}\n")
 
 

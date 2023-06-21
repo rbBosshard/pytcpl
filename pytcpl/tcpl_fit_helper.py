@@ -1,13 +1,9 @@
-import json
-
 import numpy as np
-from scipy.optimize import minimize, LinearConstraint
+from scipy.optimize import minimize
+
 from acy import acy
-from tcpl_obj_fn import tcpl_obj
-from fit_models import get_params
 from fit_models import get_fit_model
-import autograd
-from numdifftools import Jacobian, Hessian
+from tcpl_obj_fn import tcpl_obj
 
 
 def fit_curve(fit_model, conc, resp, bidirectional, out, verbose):
@@ -17,7 +13,6 @@ def fit_curve(fit_model, conc, resp, bidirectional, out, verbose):
     args = (conc, resp, get_fit_model(fit_model))
 
     try:
-        # bounds=bounds, method='L-BFGS-B', constraints=linear_constraints,
         fit = minimize(tcpl_obj, x0=initial_values, bounds=bounds, constraints=linear_constraints, args=args)
 
         if verbose > 1:

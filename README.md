@@ -1,10 +1,12 @@
-### pytcpl: A lite Python version of  [tcpl: An R package for processing high-throughput chemical screening data](https://github.com/USEPA/CompTox-ToxCast-tcpl)
+### pytcpl: A lite Python version of [tcpl: An R package for processing high-throughput chemical screening data](https://github.com/USEPA/CompTox-ToxCast-tcpl)
 
 Welcome to the GitHub repository for the pytcpl package.
 
-The pytcpl package provides a set of tools for processing and 
-modeling high-throughput and high-content chemical screening data 
-of the US EPA ToxCast program. 
+Pytcpl is a streamlined Python package that incorporates the ***mc4*** and ***mc5*** levels of
+[tcpl](https://github.com/USEPA/CompTox-ToxCast-tcpl), 
+providing concentration-response curve fitting functionality akin to [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2).
+It utilizes the [Invitrodb version 3.5 release](https://cfpub.epa.gov/si/si_public_record_Report.cfm?dirEntryId=355484&Lab=CCTE)
+as its backend database.
 
 #### Use conda environment (optional)
 - `conda create --name pytcpl`
