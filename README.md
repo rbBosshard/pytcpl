@@ -19,19 +19,21 @@ as its backend database.
 #### Navigate into python package
 - `cd pytcpl`
 
-#### Config file for pipeline and database login
-- `pytcpl/config/config.yaml`
-- Note: pipeline works only for single assay at once! 
-- Todo: Input a list of assay ids (aeid) to run multiple assays.
-
 #### Run main pipeline script:
 - `python pytcpl/pipeline.py`
+- uses config file: `pytcpl/config/config.yaml` (contains database login)
+- Note: pipeline works only for single assay at once! 
+- Todo: Input a list of assay ids (aeid) to run multiple assays.
 
 #### Visualize curve-fits per assay/chemical pair
 - `streamlit run pytcpl/app.py --server.address="localhost"`
 - a web app should open in browser
 - works of course only for assays that you already run through pipeline
 - [Streamlit website](https://streamlit.io/)
+
+#### Run ML for single assay id
+- jupyter notebook: `ml.ipynb`
+- uses config file: `pytcpl/config/config_ml.yaml`
 
 
 ### This part is only relevant for development!
