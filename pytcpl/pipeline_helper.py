@@ -6,11 +6,11 @@ import yaml
 from query_db import tcpl_query
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.yaml')
+CONFIG_PATH = os.path.join(ROOT_DIR, 'config', 'config.yaml')
 DDL_PATH = os.path.join(ROOT_DIR, 'DDLs')
 
 def load_config():
-    with open(os.path.join(CONFIG_PATH)) as file:
+    with open(CONFIG_PATH, 'r') as file:
         config = yaml.safe_load(file)
     return config
 

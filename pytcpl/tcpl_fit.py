@@ -1,6 +1,7 @@
 import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import pandas as pd
 
 from fit_models import get_params
 from tcpl_fit_helper import fit_curve
@@ -40,6 +41,9 @@ def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=T
         return out
 
     dat = preprocess(dat)
+    # Filter out rows with NaN values in the concentration column
+    dat = dat[dat.concentration_unlogged.apply(lambda x: not any(pd.isna(x)))]
+
     dat = dat.head(test) if test else dat  # work only with subset if test > 1
 
     fitparams = []
@@ -72,9 +76,9 @@ def preprocess(dat):
         bmed=('bmed', lambda x: 0 if x.isnull().values.all() else np.max(x)),
         resp_min=('resp', np.min),
         max_mean=('rmns', np.max),
-        max_mean_conc=('rmns', lambda x: dat.logc[x.idxmax()]),
+        max_mean_conc=('rmns', lambda x: dat.logc[x.idxmax()] if not np.isnan(np.max(x)) else np.nan),
         max_med=('rmds', np.max),
-        max_med_conc=('rmds', lambda x: dat.logc[x.idxmax()]),
+        max_med_conc=('rmds', lambda x: dat.logc[x.idxmax()] if not np.isnan(np.max(x)) else np.nan),
         logc_max=('logc', np.max),
         logc_min=('logc', np.min),
         nconc=('logc', 'nunique'),

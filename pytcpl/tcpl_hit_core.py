@@ -38,11 +38,15 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
             try:
                 caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
             except:
-                term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
-                if term == np.inf:
+                try:
+                    term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
+                    if term == np.inf:
+                        caikwt = 0
+                    else:
+                        caikwt = 1 / (1 + term)
+                except Exception as e:
+                    print(f"Error caikwt: {e}")
                     caikwt = 0
-                else:
-                    caikwt = 1 / (1 + term)
 
         # if the fit_model is not reported as 'none', obtain model information
         if fit_model != "none":

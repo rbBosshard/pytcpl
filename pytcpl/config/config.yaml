@@ -1,6 +1,6 @@
 pytcpl:
   # aeid: assay id
-  aeid: 100
+  aeid: 5
   # test: if test is 0 then all chemicals are processed else # = test chemicals
   test: 0
   # parallelize: 0,1 use for debug parallelize = 0, else 1

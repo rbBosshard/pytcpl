@@ -91,10 +91,10 @@ def pipeline():
     ensure_all_new_db_tables_exist()
     df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"], "mc4", f"{aeid}.csv"))
     # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
-    print(elapsed(start_time))
-    if config["do_hit"]:
-        mc5(df)
-    export()
+    # print(elapsed(start_time))
+    # if config["do_hit"]:
+    #     mc5(df)
+    # export()
     print(f"Pipeline done >> {elapsed(start_time)}\n")
 
 

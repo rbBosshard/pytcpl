@@ -1,10 +1,10 @@
 import numpy as np
-from scipy.optimize import minimize
+# from scipy.optimize import minimize
 
 from acy import acy
-from fit_models import get_fit_model
+from fit_models import get_fit_model, get_params
 from tcpl_obj_fn import tcpl_obj
-
+from lmfit import Parameters, minimize, fit_report
 
 def fit_curve(fit_model, conc, resp, bidirectional, out, verbose):
 

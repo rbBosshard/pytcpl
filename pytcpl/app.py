@@ -12,6 +12,7 @@ from tcpl_load_data import tcpl_load_data
 from pipeline_helper import starting, elapsed
 
 # Run command `streamlit run pytcpl/app.py`
+# Ensure test = 0 in config.yaml
 
 
 def powspace(start, stop, power, num):
@@ -91,14 +92,15 @@ def add_title(fig, d):
 
     with st.expander("Details"):
         st.write(f"spid: {st.session_state.spid}")
-        st.write(f"Chemical: {chnm}")
-        st.write(f"[{dsstox_substance_id}](https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id})")
-        st.write(f"CASN: {casn}")
+        st.write(f"Chemical: {chnm if chnm else 'N/A'}")
+        link = f"[{dsstox_substance_id}](https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id})" if dsstox_substance_id else "N/A"
+        st.write(f"DSSTOX Substance ID: {link}")
+        st.write(f"CASN: {casn if casn else 'N/A'}")
         st.write(f"Assay Endpoint: {assay_component_endpoint_name}")
         st.write(f"{assay_component_endpoint_desc}")
 
     fig.update_layout(
-        title=f"Assay Endpoint: <i>{assay_component_endpoint_name}</i><br>Chemical: <i>{chnm}</i><br>Best Model Fit: <i>{d['modl']}</i>, hitcall: <i>{round(d['hitcall'], 7)}</i>",
+        title=f"Assay Endpoint: <i>{assay_component_endpoint_name}</i><br>Chemical: <i>{chnm if chnm else 'N/A'}</i><br>Best Model Fit: <i>{d['modl']}</i>, hitcall: <i>{round(d['hitcall'], 7)}</i>",
         margin=dict(t=150),
         xaxis_title="log10(Concentration) μM",
         yaxis_title=str(normalized_data_type),
@@ -185,7 +187,18 @@ def get_row_data(hit_data, mc4, nested_mc4):
 
 
 def get_chem_info(spid):
-    chid = tcpl_query(query=f"SELECT chid FROM sample WHERE spid = '{str(spid)}';").iloc[0]['chid']
+    try:
+        chid = tcpl_query(query=f"SELECT chid FROM sample WHERE spid = '{str(spid)}';").iloc[0]['chid']
+    except:
+        try:
+            chid = tcpl_query(query=f"SELECT chid FROM chemical WHERE chnm = '{str(spid)}';").iloc[0]['chid']
+        except:
+            try:
+                chid = tcpl_query(query=f"SELECT chid FROM chemical WHERE chnm LIKE '%{str(spid)}%';").iloc[0]['chid']
+            except Exception as e:
+                print(f"Error on spid {spid}: {e}")
+                return None, None, None
+
     chem = tcpl_query(query=f"SELECT * FROM chemical WHERE chid = {str(chid)};").iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
