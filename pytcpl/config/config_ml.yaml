@@ -1,0 +1,53 @@
+aeid: 784 # Assay id
+
+random_state: 9 # For reproducibility (observed high variance)
+
+train_test_split_ratio: 0.2
+
+grid_search_cv_scoring: f1
+
+ignore_warnings: True
+
+apply:
+  smote: 0
+
+# Don't forget to import all the classifiers
+# and transformers you want to use
+classifiers:
+  - name: SVC
+    steps:
+      - name: SVC
+
+  - name: KNeighborsClassifier
+    steps:
+      - name: PCA
+      - name: KNeighborsClassifier
+      
+  - name:  GaussianNB
+    steps:
+      - name: PCA
+      - name: GaussianNB
+
+  - name: AdaBoostClassifier
+    steps:
+      # - name: PCA
+      - name: AdaBoostClassifier
+  
+  - name: RandomForestClassifier
+    steps:
+      # - name: PCA
+      - name: RandomForestClassifier
+        args:
+          n_estimators: [100, 150] # default = 100
+
+  - name: XGBClassifier
+    steps:
+      # - name: PCA
+      - name: XGBClassifier
+        args:
+          n_estimators: [100, 150] # default = 100
+  
+  - name: MLPClassifier
+    steps:
+      - name: PCA
+      - name: MLPClassifier
