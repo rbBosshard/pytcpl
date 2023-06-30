@@ -16,6 +16,8 @@ pytcpl/export/*
 pytcpl/profile/*
 !pytcpl/profile/.gitkeep
 
+pytcpl/input/*
+
 pytcpl/test.py
 
 
