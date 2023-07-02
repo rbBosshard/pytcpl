@@ -12,7 +12,7 @@ from tcpl_load_data import tcpl_load_data
 from pipeline_helper import starting, elapsed
 
 # Run command `streamlit run pytcpl/app.py`
-# Ensure test = 0 in config.yaml
+# Ensure: test = 0 in config.yaml
 
 
 def powspace(start, stop, power, num):
