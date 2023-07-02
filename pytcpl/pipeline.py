@@ -12,8 +12,7 @@ from tcpl_fit import tcpl_fit
 from tcpl_hit import tcpl_hit
 from tcpl_load_data import tcpl_load_data
 from tcpl_mthd_load import tcpl_mthd_load
-from tcpl_prep_output import tcpl_prep_output
-from tcpl_subset_chid import tcpl_subset_chid
+from tcpl_output import tcpl_output
 from tcpl_write_data import tcpl_write_data
 
 
@@ -70,18 +69,22 @@ def mc5(df):
     print("Done mc5\n")
 
 
-def export():
+def export(export=True):
     aeid = config['aeid']
     start_time = starting(f"Export {aeid}")
     df = tcpl_load_data(lvl=5, fld="aeid", ids=aeid, verbose=config["verbose"])
-    df = df.drop(columns=["hit_param", "hit_val"])
-    df = df.drop_duplicates()
-    df = tcpl_prep_output(df)
-    df = tcpl_subset_chid(dat=df, flag=False)
-    df = df[['dsstox_substance_id', "hitc"]]
+    # After dropping these columns, remaining rows are no longer unique -> drop duplicates
+    df = df.drop(columns=["hit_param", "hit_val"]) 
+    df = df.drop_duplicates() 
+    df = tcpl_output(df)
+    df = df.dropna()
     df = df.rename(columns={"dsstox_substance_id": "dtxsid"})
-    export_data(df, path=config["export_path"], folder="out", id=aeid)
-    print(f"Done export >> {elapsed(start_time)}\n")
+    # Todo: Add a parameter to specify which columns to keep (only export subset of columns)
+    if export:
+        df_export = df[['dtxsid', "chit"]]
+        export_data(df_export, path=config["export_path"], folder="out", id=aeid)
+        print(f"Done export >> {elapsed(start_time)}\n")
+    return df
 
 
 def pipeline():
@@ -89,12 +92,12 @@ def pipeline():
     start_time = starting(f"pipeline with assay id {aeid}")
     # drop_tables(config["new_table_names"]) # uncomment if you want to remove the specified pipeline tables from the db
     ensure_all_new_db_tables_exist()
-    df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"], "mc4", f"{aeid}.csv"))
-    # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
+    # df = mc4() if config["do_fit"] else pd.read_csv(os.path.join(ROOT_DIR, config["export_path"], "mc4", f"{aeid}.csv"))
+    # # tcpl_write_data(id=aeid, dat=df, lvl=4, verbose=config["verbose"])
     # print(elapsed(start_time))
     # if config["do_hit"]:
     #     mc5(df)
-    # export()
+    export()
     print(f"Pipeline done >> {elapsed(start_time)}\n")
 
 
