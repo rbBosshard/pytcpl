@@ -7,25 +7,24 @@ from tcpl_hit_core import tcpl_hit_core
 from tcpl_load_data import tcpl_load_data
 
 
-def tcpl_hit(mc4, coff, parallelize=False, n_jobs=-1, verbose=False):
-    nested_mc4 = get_nested_mc4(mc4, parallelize, n_jobs)
+def tcpl_hit(mc4, fit_strategy, coff, parallelize=False, n_jobs=-1):
+    nested_mc4 = get_nested_mc4(mc4, fit_strategy, parallelize, n_jobs)
     l4_agg = tcpl_load_data(lvl='agg', fld='m4id', ids=list(nested_mc4['m4id'].values))
     nested_mc4 = get_nested_mc4_df(l4_agg, mc4, nested_mc4)
-    res = wrapper_tcpl_hit_core(coff, nested_mc4, parallelize, n_jobs)
+    res = wrapper_tcpl_hit_core(fit_strategy, coff, nested_mc4, parallelize, n_jobs)
     res['coff_upper'] = 1.2 * coff
     res['coff_lower'] = 0.8 * coff
-    res = pd.merge(res, mc4[['m4id', 'logc_min', 'logc_max']].drop_duplicates(), on='m4id', how='left')
-    determine_fitc(res)
+    res = pd.merge(res, mc4[['m4id']].drop_duplicates(), on='m4id', how='left')
     mc5 = build_mc5(mc4, res)
     return mc5
 
 
 def build_mc5(mc4, res):
     mc5 = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on=['m4id'], how='left')
-    mc5 = mc5[['m4id', 'aeid', 'fit_model', 'hitcall', 'fitc', 'cutoff']].rename(
+    mc5 = mc5[['m4id', 'aeid', 'fit_model', 'hitcall', 'cutoff']].rename(
         columns={"fit_model": "modl", "hitcall": "hitc", "cutoff": "coff"}).assign(model_type=2)
     mc5_param = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on='m4id', how='left')
-    pivots = list(mc5_param.loc[:, 'top_over_cutoff':'bmd'].columns)
+    pivots = list(mc5_param.loc[:, 'cutoff':'bmd'].columns)
     mc5_param = mc5_param.melt(
         id_vars=['m4id', 'aeid'],  # Specify other columns to keep unchanged
         value_vars=pivots,  # Specify the columns to pivot
@@ -37,32 +36,10 @@ def build_mc5(mc4, res):
     return mc5
 
 
-def determine_fitc(res):
-    res['fitc'] = np.select(
-        [
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) <= res['coff_upper']) & (res['ac50'] <= res['logc_min']),
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) <= res['coff_upper']) & (res['ac50'] > res['logc_min']) & (
-                    res['ac95'] < res['logc_max']),
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) <= res['coff_upper']) & (res['ac50'] > res['logc_min']) & (
-                    res['ac95'] >= res['logc_max']),
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) > res['coff_upper']) & (res['ac50'] <= res['logc_min']),
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) > res['coff_upper']) & (res['ac50'] > res['logc_min']) & (
-                    res['ac95'] < res['logc_max']),
-            (res['hitcall'] >= 0.9) & (np.abs(res['top']) > res['coff_upper']) & (res['ac50'] > res['logc_min']) & (
-                    res['ac95'] >= res['logc_max']),
-            (res['hitcall'] < 0.9) & (np.abs(res['top']) < res['coff_lower']),
-            (res['hitcall'] < 0.9) & (np.abs(res['top']) >= res['coff_lower']),
-            (res['fit_model'] == 'none')
-        ],
-        [36, 37, 38, 40, 41, 42, 13, 15, 2],
-        default=None
-    )
-
-
-def wrapper_tcpl_hit_core(coff, nested_mc4, parallelize, n_jobs):
+def wrapper_tcpl_hit_core(fit_strategy, coff, nested_mc4, parallelize, n_jobs):
     if parallelize:
         test = Parallel(n_jobs=n_jobs)(
-            delayed(tcpl_hit_core)(
+            delayed(tcpl_hit_core)(fit_strategy=fit_strategy,
                 params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
                 onesd=row.onesd, bmed=row.bmed) for _, row in nested_mc4.iterrows()
         )
@@ -71,8 +48,8 @@ def wrapper_tcpl_hit_core(coff, nested_mc4, parallelize, n_jobs):
     else:
         test = (
             nested_mc4.assign(df=lambda row: [
-                tcpl_hit_core(params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
-                              onesd=row.onesd, bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
+                tcpl_hit_core(fit_strategy=fit_strategy, params=row.params, conc=np.array(row.conc),
+                              resp=np.array(row.resp), cutoff=coff, onesd=row.onesd, bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
         )
 
         res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)
@@ -112,7 +89,7 @@ def get_nested_mc4_df(l4_agg, mc4, nested_mc4):
     return nested_mc4
 
 
-def get_nested_mc4(mc4, parallelize, n_jobs=-1):
+def get_nested_mc4(mc4, fit_strategy, parallelize, n_jobs=-1):
     df = mc4[mc4['model'] != 'all']
     def tcpl_fit_nest(dat):
         modelnames = dat["model"].unique()
@@ -120,7 +97,7 @@ def get_nested_mc4(mc4, parallelize, n_jobs=-1):
         for m in modelnames:
             df = dat[dat["model"] == m].groupby("model_param")["model_val"].apply(lambda x: float(x.iloc[0]))
             dicts[m] = df.to_dict()
-            dicts[m]["pars"] = {x: dicts[m][x] for x in get_params(m)}
+            dicts[m]["pars"] = {x: dicts[m][x] for x in get_params(m, fit_strategy)}
         return dicts
 
     if parallelize:  # Parallel: Split the DataFrame into groups and apply the function in parallel

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import t, norm
 
 
-def tcpl_obj(ps, conc, resp, fit_model, errfun="dt4"):
+def tcpl_obj(ps, conc, resp, fit_model, fit_strategy, errfun="dt4"):
     # Optimization objective function is called "cost function" or "loss function"
     # and therefore, we want to minimize them, rather than maximize them,
     # hence the negative log likelihood is formed, wrapped with scipy.optimize.minimize()
@@ -10,7 +10,11 @@ def tcpl_obj(ps, conc, resp, fit_model, errfun="dt4"):
 
     # Objective function is the sum of log-likelihood of response
     # given the model at each concentration scaled by variance (err)
-    pred = fit_model(ps=ps, x=conc)  # ps = parameter vector, get model values for each conc,
+    if fit_strategy == "mle":
+        pred = fit_model(conc, *ps[:-1])
+    else:
+        pred = fit_model(conc, *ps)
+    # ps = parameter vector, get model values for each conc,
     err = np.exp(ps[-1]) or np.finfo(np.float64).eps  # last parameter is the log of the error/variance
     # residuals = (resp - pred) / err
     if errfun == "dt4":

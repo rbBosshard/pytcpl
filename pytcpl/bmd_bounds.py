@@ -7,7 +7,7 @@ from tcpl_obj_fn import tcpl_obj
 from fit_models import get_params, get_fit_model
 
 
-def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):
+def bmd_bounds(fit_strategy, fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):
     """
     BMD Bounds
 
@@ -57,17 +57,18 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     if bmd is None or not np.isfinite(bmd):
         return None
 
-    params = [pars[key] for key in get_params(fit_model)]
+    params = [pars[key] for key in get_params(fit_model, fit_strategy)]
 
     # negated minimized negative loglikelihood. Todo: recheck if everything is correct like this
-    maxloglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
+    maxloglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model),
+                          fit_strategy=fit_strategy)
 
     # search for bounds to ensure sign change
     bmdrange = None
     if which_bound == "lower":
         xs = 10 ** np.linspace(-5, np.log10(bmd), num=100)
         ys = np.array([bmd_obj(x, fit_model=fit_model, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
-                               onesp=onesidedp, partype=2) for x in xs])
+                               onesp=onesidedp, fit_strategy=fit_strategy, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
             return None
         bmdrange = np.array([np.max(xs[ys >= 0]), bmd])
@@ -79,7 +80,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
         else:
             xs = 10 ** np.linspace(np.log10(bmd), 5, num=100)
         ys = np.array([bmd_obj(x, fit_model=fit_model, bmr=bmr, conc=conc, resp=resp, ps=pars, mll=maxloglik,
-                               onesp=onesidedp, partype=2) for x in xs])
+                               onesp=onesidedp, fit_strategy=fit_strategy, partype=2) for x in xs])
         if not np.any(ys >= 0) or not np.any(ys < 0):
             return None
         bmdrange = np.array([bmd, np.min(xs[ys >= 0])])
@@ -92,7 +93,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
         return None
 
 
-def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
+def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, fit_strategy, partype=2):
     # implements the BMD substitutions in Appendix A of the Technical Report.
     # Changes one of the existing parameters to an explicit bmd parameter through
     # the magic of algebra.
@@ -160,8 +161,8 @@ def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
         elif partype == 3:
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
-    params = [ps[key] for key in get_params(fit_model)]
-    loglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
+    params = [ps[key] for key in get_params(fit_model, fit_strategy)]
+    loglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model), fit_strategy=fit_strategy)
 
     # for bmd bounds, we want the difference between the max log-likelihood and the
     # bounds log-likelihood to be equal to chi-squared at 1-2*onesp (typically .9)

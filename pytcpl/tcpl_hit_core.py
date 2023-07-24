@@ -5,7 +5,8 @@ from bmd_bounds import bmd_bounds
 from tcpl_hit_helper import hit_cont_inner, nest_select
 
 
-def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bmd_low_bnd=None, bmd_up_bnd=None):
+def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bmd_low_bnd=None,
+                  bmd_up_bnd=None):
     # Todo: ensure if fit_model == const then do not compute more than needed
     fitout = {}
     modpars = None
@@ -67,36 +68,29 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
         # compute continuous hitcall
         mll = len(modpars) - aics[fit_model] / 2
 
-        hitcall = hit_cont_inner(conc, resp, top, cutoff, fitout["er"],
-                                 ps=modpars, fit_model=fit_model,
-                                 caikwt=caikwt, mll=mll)
+        er = 1 if fit_strategy == "leastsq" else fitout["er"]
+        hitcall = hit_cont_inner(conc, resp, top, cutoff, er, ps=modpars, fit_strategy=fit_strategy,
+                                 fit_model=fit_model, caikwt=caikwt, mll=mll)
 
     if np.isnan(hitcall):
         hitcall = 0
 
     ac50 = None
-    ac95 = None
     bmd = None
     bmr = onesd * bmr_scale  # magic bmr is default 1.349
     if hitcall > 0:
         # fill ac's; can put after hit logic
-        ac5 = acy(.05 * top, modpars, fit_model=fit_model)  # note: cnst model automatically returns NAs
-        ac10 = acy(.1 * top, modpars, fit_model=fit_model)
-        ac20 = acy(.2 * top, modpars, fit_model=fit_model)
-        ac50 = acy(.5 * top, modpars, fit_model=fit_model)  # Todo: check: remove from here?
-        ac95 = acy(.95 * top, modpars, fit_model=fit_model)
+        ac50 = acy(.5 * top, modpars, fit_model=fit_model)
         acc = acy(np.sign(top) * cutoff, modpars | {"top": top}, fit_model=fit_model)
         ac1sd = acy(np.sign(top) * onesd, modpars, fit_model=fit_model)
         bmd = acy(np.sign(top) * bmr, modpars, fit_model=fit_model)
 
         # get bmdl and bmdu
         try:
-            bmdl = bmd_bounds(fit_model,
-                              bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                              bmd=bmd, which_bound="lower")
-            bmdu = bmd_bounds(fit_model,
-                              bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                              bmd=bmd, which_bound="upper")
+            bmdl = bmd_bounds(fit_strategy, fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp,
+                              onesidedp=0.05, bmd=bmd, which_bound="lower")
+            bmdu = bmd_bounds(fit_strategy, fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp,
+                              onesidedp=0.05, bmd=bmd, which_bound="upper")
         except Exception as e:
             # print(f"bmd_bounds: {e}")
             pass
@@ -128,9 +122,8 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
         locals().update(fitout["pars"])
 
     out = {}
-    name_list = ["n_gt_cutoff", "cutoff", "fit_model",
-                 "top_over_cutoff", "rmse", "a", "b", "tp", "p", "q", "ga", "la", "er", "bmr", "bmdl", "bmdu", "caikwt",
-                 "mll", "hitcall", "ac50", "ac50_loss", "top", "ac5", "ac10", "ac20", "ac95", "acc", "ac1sd", "bmd"]
+    name_list = ["fit_model", "cutoff", "bmr", "bmdl", "bmdu", "caikwt",
+                 "mll", "hitcall", "ac50", "top", "acc", "ac1sd", "bmd"]
 
     computed_vars = list(locals().keys())
     out_list = [x for x in name_list if x in computed_vars]
@@ -138,5 +131,5 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bm
     for name in out_list:
         out[name] = locals()[name]
 
-    out = {k: v for k, v in out.items() if v is not None}
+    out = {k: v for k, v in out.items() if v is not None or 'bmd'}
     return out

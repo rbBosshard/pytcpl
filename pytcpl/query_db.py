@@ -40,7 +40,7 @@ def get_db_conn():
         raise ConnectionError("Error connecting to MySQL: {}".format(error))
 
 
-def tcpl_query(query, verbose=False):
+def tcpl_query(query):
     try:
         if any(query.lower().startswith(x) for x in ["delete", "create", "drop"]):
             db_conn = get_db_conn()
@@ -51,8 +51,6 @@ def tcpl_query(query, verbose=False):
             engine = get_sqlalchemy_engine()
             start_time = time.time()
             df = pd.read_sql(text(query), con=engine.connect())
-            if verbose:
-                print(f"Query {query[:100]} >> {df.shape[0]} rows >> {str(time.time() - start_time)} seconds.")
             return df
     except Exception as e:
         print(f"Error querying MySQL: {e}")

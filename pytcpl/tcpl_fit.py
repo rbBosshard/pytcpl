@@ -2,29 +2,20 @@ import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
 import pandas as pd
-
+import concurrent.futures
 from fit_models import get_params
+from pytcpl.pipeline_helper import get_cutoff
 from tcpl_fit_helper import fit_curve
+from mc5_mthds import mc5_mthds
+from tcpl_mthd_load import tcpl_mthd_load
+
+from tcpl_fit_helper import generate_output
 
 
-def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=True, n_jobs=-1, test=0, verbose=False):
-    def fit_curve_wrapper(model, conc, cutoff, out, resp, rmds):
-        to_fit = len(rmds) >= 4 and (np.any(np.abs(rmds) >= cutoff) or force_fit or model == "cnst")
-        params = get_params(model)
-        out[model] = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
-                      **{p: None for p in ["success", "aic", "cov", "rme"]}}
-        if to_fit:
-            fit_curve(model, conc, resp, bidirectional, out[model], verbose)
-        else:
-            pass  # to_fit is sometimes false, set breakpoint/print message
-
+def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True, n_jobs=-1, test=0):
     def tcplfit_core(group):
         conc = np.array(group['concentration_unlogged'])
         resp = np.array(group['response'])
-        cutoff = group['bmad']
-
-        unique_conc = np.unique(conc)
-        rmds = np.array([np.median(resp[conc == c]) for c in unique_conc])
 
         if np.max(resp) == np.min(resp) and resp[0] == 0:
             print("all response values are 0: add epsilon (1e-6) to all response elements.")
@@ -32,11 +23,11 @@ def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=T
 
         out = {}
         for model in fit_models:
-            fit_curve_wrapper(model, conc, cutoff, out, resp, rmds)
+            params = get_params(model, fit_strategy)
+            out[model] = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
+                          **{p: None for p in ["success", "aic", "cov", "rme"]}}
 
-        # with ThreadPoolExecutor() as executor:
-        #     for model in fit_models:
-        #         executor.submit(fit_curve_wrapper, model, conc, cutoff, out, resp, rmds)
+            fit_curve(model, conc, resp, bidirectional, out[model], fit_strategy)
 
         return out
 
@@ -46,13 +37,65 @@ def tcpl_fit(dat, fit_models, bidirectional=True, force_fit=False, parallelize=T
 
     dat = dat.head(test) if test else dat  # work only with subset if test > 1
 
-    fitparams = []
+    # Filter
+    def process_row(row, cutoff, fit_strategy):
+        conc = row['concentration_unlogged']
+        resp = np.array(row['response'])
+        rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
+
+        out = {}
+        to_fit = rmds.size >= 4 and np.sum(np.abs(rmds) >= cutoff) > 0
+
+        model = 'cnst'
+        params = get_params(model, fit_strategy)
+        out[model] = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
+                      **{p: None for p in ["success", "aic", "cov", "rme"]}}
+
+        fit = [0] if fit_strategy == "mle" else []
+        generate_output(model, conc, resp, out[model], fit, fit_strategy)
+        return out, to_fit
+
     if parallelize:
+        fitparams_cnst, fits = map(list, zip(*Parallel(n_jobs=n_jobs)(
+            delayed(process_row)(row, get_cutoff(aeid=row['aeid'], bmad=row['bmad']),
+                                 fit_strategy) for _, row in
+            tqdm(dat.iterrows(), desc='Fitting curves progress: ')
+        )))
+
         fitparams = Parallel(n_jobs=n_jobs)(
-            delayed(tcplfit_core)(row) for _, row in tqdm(dat.iterrows(), desc='Fitting curves progress: '))
+            delayed(tcplfit_core)(row) for _, row in tqdm(dat[fits].iterrows(), desc='Fitting curves progress: '))
     else:  # Serial version for debugging
+        # Create empty lists to store the results
+        fitparams_cnst = []
+        fits = []
+        fitparams = []
+
+        # Sequential processing of the DataFrame 'dat'
         for _, row in tqdm(dat.iterrows(), desc='Fitting curves progress: '):
+            # Your existing code for processing each row goes here...
+            result, fit = process_row(row, get_cutoff(aeid=row['aeid'], bmad=row['bmad']),
+                                      fit_strategy)
+
+            fitparams_cnst.append(result)
+            fits.append(fit)
+        for _, row in tqdm(dat[fits].iterrows(), desc='Fitting curves progress: '):
             fitparams.append(tcplfit_core(row))
+
+    # create output array
+    masked = np.array([{} for _ in range(len(fitparams_cnst))])
+    masked[fits] = fitparams
+    fitparams = [
+        {**dict1, **dict2}
+        for dict1, dict2 in zip(fitparams_cnst, masked)
+    ]
+
+    # Create a log file to track the parameter estimates
+    with open("fit_results_log.txt", "w") as log_file:
+        for res in fitparams:
+            for model, params in res.items():
+                if model != 'cnst':
+                    params_str = ", ".join(map(str, list(params['pars'].values())))
+                    log_file.write(f"{model}: {params_str}\n")
 
     dat = dat.assign(fitparams=fitparams)
     return dat
@@ -63,32 +106,13 @@ def preprocess(dat):
         dat = dat.assign(bmed=None)
     if 'osd' not in dat.columns:
         dat = dat.assign(osd=None)
-    grouped = dat.groupby(['aeid', 'spid', 'logc'])
-    dat['rmns'] = grouped['resp'].transform(np.mean)
-    dat['rmds'] = grouped['resp'].transform(np.median)
-    dat['nconc'] = grouped['logc'].transform('count')
-    dat['med_rmds'] = dat['rmds'] >= (3 * dat['bmad'])
     grouped = dat.groupby(['aeid', 'spid'])
     dat = grouped.agg(
         bmad=('bmad', np.min),
-        resp_max=('resp', np.max),
         osd=('osd', np.min),
         bmed=('bmed', lambda x: 0 if x.isnull().values.all() else np.max(x)),
-        resp_min=('resp', np.min),
-        max_mean=('rmns', np.max),
-        max_mean_conc=('rmns', lambda x: dat.logc[x.idxmax()] if not np.isnan(np.max(x)) else np.nan),
-        max_med=('rmds', np.max),
-        max_med_conc=('rmds', lambda x: dat.logc[x.idxmax()] if not np.isnan(np.max(x)) else np.nan),
-        logc_max=('logc', np.max),
-        logc_min=('logc', np.min),
-        nconc=('logc', 'nunique'),
-        npts=('resp', 'count'),
-        nrep=('nconc', np.median),
-        nmed_gtbl=('med_rmds', lambda x: np.sum(x) / grouped['nconc'].first().iloc[0]),
         concentration_unlogged=('logc', lambda x: list(10 ** x)),
         response=('resp', list),
         m3ids=('m3id', list)
     ).reset_index()
-    grouped = dat.groupby('aeid')
-    dat['tmpi'] = grouped['m3ids'].transform(lambda x: np.arange(len(x), 0, -1))
     return dat

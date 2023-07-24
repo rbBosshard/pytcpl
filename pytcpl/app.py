@@ -11,6 +11,7 @@ from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
 from pipeline_helper import starting, elapsed
 
+
 # Run command `streamlit run pytcpl/app.py`
 # Ensure: test = 0 in config.yaml
 
@@ -31,19 +32,18 @@ def fetch_data(id):
     mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
     mc4 = mc4.head(config["test"]) if config["test"] and config["aeid"] == id else mc4
     df = get_mc5_data(id)
-    nested_mc4 = get_nested_mc4(df, parallelize=True, n_jobs=-1) # heavy lifting
+    nested_mc4 = get_nested_mc4(df, config["fit_strategy"], parallelize=True, n_jobs=-1)  # heavy lifting
     print(elapsed(start))
     df = tcpl_load_data(lvl=6, fld='aeid', ids=id)  # hitcall data
     # d = {str(m5id): group for m5id, group in df.groupby("m4id")}
     return mc4, nested_mc4, df
 
 
-
 def update():
-    mc4, nested_mc4, hit_data = fetch_data(st.session_state.aeid)  # needs input for unique caching
+    mc4, nesetd_mc4, hit_data = fetch_data(st.session_state.aeid)  # needs input for unique caching
     check_reset()
     hitcall_rows = hit_data[hit_data["hit_param"] == 'hitcall'].reset_index()
-    
+
     if st.session_state.option == "hitcall desc":
         hitcall_rows_sorted = hitcall_rows.sort_values(by="hit_val", ascending=False)
     elif st.session_state.option == "hitcall asc":
@@ -67,9 +67,9 @@ def update():
     add_title(fig, d)
 
     fig.add_trace(
-        go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse", marker=dict(color="black", symbol="x-thin-open", size=10),
+        go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
+                   marker=dict(color="black", symbol="x-thin-open", size=10),
                    name="response", showlegend=False))
-    
 
     return fig, add_curves(conc, fig, fitparams, d)
 
@@ -116,45 +116,44 @@ def add_curves(conc, fig, fitparams, d):
         pars_dict[model] = list(pars)
         pars = np.array(pars)
 
-        min_val = np.min(conc) 
+        min_val = np.min(conc)
         min_val = min_val if d['hitcall'] <= 0 else min(min_val, d['ac50'])
 
         x = powspace(min_val, np.max(conc), 100, 500)
-        y = np.array(get_fit_model(model)(pars, x))
+        y = np.array(get_fit_model(model)(x, *pars[:-1]))
         color = px.colors.qualitative.Bold[m]
         if model != d['modl'] and model != "none":
-             fig.add_trace(
+            fig.add_trace(
                 go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
-                        name=model, line=dict(width=2, dash = 'dash')))
-        
+                           name=model, line=dict(width=2, dash='dash')))
+
         elif model == d['modl']:
             fig.add_trace(
-            go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
-                       name=f"{model} (BEST FIT)", line=dict(width=3)))
-            
+                go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
+                           name=f"{model} (BEST FIT)", line=dict(width=3)))
+
             if d['hitcall'] > 0.0:
                 # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
                 potencies = ["acc", "ac50"]
                 for p in potencies:
                     if p in d:
                         fig.add_vline(x=np.log10(d[p]), line_color=color, line_width=2,
-                                    annotation_position="bottom left",
-                                    annotation_text=f"{p}", layer="below")
-                        
+                                      annotation_position="bottom left",
+                                      annotation_text=f"{p}", layer="below")
+
                 # efficacies = ["top", "bmr"]
                 efficacies = ["top"]
                 for e in efficacies:
                     if e in d:
                         fig.add_hline(y=d[e], line_color=color, line_width=2,
-                                    annotation_position="bottom left",
-                                    annotation_text=f"{e}", layer="below")          
+                                      annotation_position="bottom left",
+                                      annotation_text=f"{e}", layer="below")
 
         else:  # model == "none"
-           pass
+            pass
 
-   
-    cutoff = round(d['coff'], 2)
-    fig.add_hline(y=cutoff, line_color= "LightSkyBlue")
+    cutoff = d['coff']
+    fig.add_hline(y=cutoff, line_color="LightSkyBlue")
 
     fig.add_hrect(
         y0=-cutoff,
@@ -172,12 +171,12 @@ def add_curves(conc, fig, fitparams, d):
 
 def get_row_data(hit_data, mc4, nested_mc4):
     m4id = st.session_state.m4id
-    df = hit_data.loc[hit_data["m4id"]==m4id]
+    df = hit_data.loc[hit_data["m4id"] == m4id]
     d = {}
-    d["modl"] = df["modl"].iloc[0]
-    d["coff"] = df["coff"].iloc[0]
+    d["modl"] = df["modl"].iloc[0] # recompute?
+    d["coff"] = df["coff"].iloc[0] # new table?
     d.update(pd.Series(df.hit_val.values, index=df.hit_param).to_dict())
-    fitparams = nested_mc4.loc[nested_mc4["m4id"]==m4id]["params"].iloc[0]
+    fitparams = nested_mc4.loc[nested_mc4["m4id"] == m4id]["params"].iloc[0]
     qstring = f"SELECT * FROM mc4_ WHERE m4id = {m4id};"
     mc4_row = tcpl_query(qstring)
     mc4_row_spid = mc4_row["spid"].iloc[0]
@@ -257,7 +256,7 @@ def filter_spid():
     st.session_state.trigger = "spid"
 
 
-st.set_page_config(page_title="Curve surfer",  page_icon="✅", layout="wide",
+st.set_page_config(page_title="Curve surfer", page_icon="✅", layout="wide",
                    )
 
 config = load_config()["pytcpl"]

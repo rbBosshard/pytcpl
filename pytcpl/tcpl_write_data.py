@@ -34,36 +34,32 @@ def tcpl_fit_unnest(output):
 
 
 
-def tcpl_write_data(id, dat, lvl, verbose):
+def tcpl_write_data(id, dat, lvl):
     if lvl not in [4, 5]:
         raise ValueError("Invalid lvl input - must be an integer 4 or 5.")
 
     # Delete old data in cascade
     if lvl <= 4:
-        tcpl_delete(tbl=mc4_name, id=id, verbose=False)
-        tcpl_delete(tbl=mc4_agg_name, id=id, verbose=False)
-        tcpl_delete(tbl=mc4_param_name, id=id, verbose=False)
+        tcpl_delete(tbl=mc4_name, id=id)
+        tcpl_delete(tbl=mc4_agg_name, id=id)
+        tcpl_delete(tbl=mc4_param_name, id=id)
     if lvl <= 5:
-        tcpl_delete(tbl=mc5_name, id=id, verbose=False)
-        tcpl_delete(tbl=mc5_param_name, id=id, verbose=False)
+        tcpl_delete(tbl=mc5_name, id=id)
+        tcpl_delete(tbl=mc5_param_name, id=id)
 
-    if verbose:
-        print(f"Completed delete cascade for id: {id}")
-
-    dat["modified_by"] = os.getlogin()
+    # dat["modified_by"] = os.getlogin()
 
     if lvl == 4:
-        mc4_cols = ["aeid", "spid", "bmad", "resp_max", "resp_min", "max_mean", "max_mean_conc", "max_med",
-                    "max_med_conc", "logc_max", "logc_min", "nconc", "npts", "nrep", "nmed_gtbl", "tmpi", "modified_by"]
+        mc4_cols_slim = ["aeid", "spid", "bmad"]
         mc4_agg_cols = ["m" + str(i) + "id" for i in range(5)] + ["aeid"]
-        tcpl_append(dat[mc4_cols], mc4_name, False)
+        tcpl_append(dat[mc4_cols_slim], mc4_name)
 
-        qstring = f"SELECT m4id, aeid, tmpi FROM {mc4_name} WHERE aeid IN ({id})"
+        qstring = f"SELECT m4id, aeid FROM {mc4_name} WHERE aeid IN ({id})"
         m4id_map = tcpl_query(query=qstring)
+        dat = pd.concat([dat, m4id_map], axis=1)  # TODO: recheck, replaced tmpi
+        # Drop duplicated columns, keeping the first occurrence
+        dat = dat.loc[:, ~dat.columns.duplicated()]
 
-        m4id_map = m4id_map.set_index(["aeid", "tmpi"])
-        dat = dat.set_index(["aeid", "tmpi"])
-        dat = dat.join(m4id_map, how="left")
         dat.reset_index(inplace=True)
         param = dat[["m4id", "aeid", "fitparams"]]
 
@@ -87,9 +83,9 @@ def tcpl_write_data(id, dat, lvl, verbose):
         dat1 = param.join(unnested_param, how="left")
         dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
 
-        tcpl_append(dat_param, mc4_param_name, False)
-        tcpl_append(onesd, mc4_param_name, False)
-        tcpl_append(bmed, mc4_param_name, False)
+        tcpl_append(dat_param, mc4_param_name)
+        tcpl_append(onesd, mc4_param_name)
+        tcpl_append(bmed, mc4_param_name)
 
         # get l3 dat for agg columns
         m3id_ = dat['m3ids']
@@ -127,17 +123,17 @@ def tcpl_write_data(id, dat, lvl, verbose):
         l3_dat = l3_dat.set_index("m3id")
         dat_agg = dat_agg.join(l3_dat, how="left")
         dat_agg = dat_agg.reset_index()
-        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name, False)
+        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name)
 
     elif lvl == 5:
-        tcpl_append(dat=dat[["m4id", "aeid", "modl", "hitc", "fitc", "coff", "model_type", "modified_by"]].drop_duplicates(),
-                    tbl=mc5_name, verbose=False)
+        mc5_cols_slim = ["m4id", "aeid", "modl", "hitc", "coff"]
+        tcpl_append(dat=dat[mc5_cols_slim].drop_duplicates(), tbl=mc5_name)
         qstring = f"SELECT m5id, m4id, aeid FROM {mc5_name} WHERE aeid IN ({id});"
         m5id_map = tcpl_query(query=qstring)
         m5id_map = m5id_map.set_index(["aeid", "m4id"])
         dat = dat.set_index(["aeid", "m4id"])
         dat = dat.join(m5id_map, how="left").reset_index()
-        tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name, verbose=False)
+        tcpl_append(dat=dat[["m5id", "aeid", "hit_param", "hit_val"]], tbl=mc5_param_name)
 
 def process_and_write_chunk(chunk, tbl):
     engine = get_sqlalchemy_engine()
@@ -145,27 +141,21 @@ def process_and_write_chunk(chunk, tbl):
         chunk.to_sql(tbl, engine, if_exists='append', index=False)
     except Exception as err:
         print(err)
-        pass
 
-def tcpl_append(dat, tbl, verbose):
+def tcpl_append(dat, tbl):
     try:
-        if(len(dat) < 1000):
-            engine = get_sqlalchemy_engine()
-            dat.to_sql(tbl, engine, if_exists='append', index=False)
-        else:
-            chunk_size = 5000  # 5000 best
-            chunks = [dat[i:i + chunk_size] for i in range(0, len(dat), chunk_size)]
-            # num_rows_affected = Parallel(n_jobs=-1)(delayed(process_and_write_chunk)(chunk, tbl) for chunk in chunks)
-            num_rows_affected = [process_and_write_chunk(chunk, tbl) for chunk in chunks]
-            # with multiprocessing.Pool() as pool:
-            #     pool.starmap(process_and_write_chunk, [(chunk, tbl) for chunk in chunks])
+        # if(len(dat) < 1000):
+        engine = get_sqlalchemy_engine()
+        dat.to_sql(tbl, engine, if_exists='append', index=False)
+        # else:
+        #     chunk_size = 5000  # 5000 best
+        #     chunks = [dat[i:i + chunk_size] for i in range(0, len(dat), chunk_size)]
+        #     # num_rows_affected = Parallel(n_jobs=-1)(delayed(process_and_write_chunk)(chunk, tbl) for chunk in chunks)
+        #     num_rows_affected = [process_and_write_chunk(chunk, tbl) for chunk in chunks]
     except Exception as err:
         print(err)
-        pass
 
 
-def tcpl_delete(tbl, id, verbose):
+def tcpl_delete(tbl, id):
     qstring = f"DELETE FROM {tbl} WHERE aeid = {id};"
-    if verbose:
-        print(qstring)
     tcpl_query(qstring)

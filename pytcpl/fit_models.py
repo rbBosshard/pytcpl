@@ -18,71 +18,58 @@ def get_fit_model(fit_model):
     }.get(fit_model)
 
 
-def get_params(fit_model):
-    return dict(cnst=['er'],
-                poly1=['a', 'er'],
-                poly2=['a', 'b', 'er'],
-                pow=['a', 'p', 'er'],
-                exp2=['a', 'b', 'er'],
-                exp3=['a', 'b', 'p', 'er'],
-                exp4=['tp', 'ga', 'er'],
-                exp5=['tp', 'ga', 'p', 'er'],
-                hill=['tp', 'ga', 'p', 'er'],
-                gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
-                ).get(fit_model)
+def get_params(fit_model, fit_strategy):
+    params = dict(cnst=['er'],
+                  poly1=['a', 'er'],
+                  poly2=['a', 'b', 'er'],
+                  pow=['a', 'p', 'er'],
+                  exp2=['a', 'b', 'er'],
+                  exp3=['a', 'b', 'p', 'er'],
+                  exp4=['tp', 'ga', 'er'],
+                  exp5=['tp', 'ga', 'p', 'er'],
+                  hill=['tp', 'ga', 'p', 'er'],
+                  gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
+                  ).get(fit_model)
+
+    return params if fit_strategy == "mle" else params[:-1]
 
 
-def cnst(ps, x):
+def cnst(x):
     return np.zeros(len(x))
 
 
-def exp2(ps, x):
-    a, b = ps[:2]
-    return a * (np.exp(x / b) - 1)
-
-
-def exp3(ps, x):
-    a, b, p = ps[:3]
-    return a * (np.exp((x / b) ** p) - 1)
-
-
-def exp4(ps, x):
-    tp, ga = ps[:2]
-    return tp * (1 - 2 ** (-x / ga))
-
-
-def exp5(ps, x):
-    tp, ga, p = ps[:3]
-    return tp * (1 - 2 ** (-(x / ga) ** p))
-
-
-def gnls(ps, x):
-    tp, ga, p, la, q = ps[:5]
-    return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
-
-
-def hill(ps, x):
-    tp, ga, p = ps[:3]
-    warnings.filterwarnings("error", category=RuntimeWarning)
-    out = None
-    try:
-        out = tp / (1 + (ga / x) ** p)
-        return out
-    except Exception as err:
-        print(err)
-
-
-def poly1(ps, x):
-    a = ps[:1]
+def poly1(x, a):
     return a * x
 
 
-def poly2(ps, x):
-    a, b = ps[:2]
+def poly2(x, a, b):
     frac = x / b
     return a * (frac + frac ** 2)
 
 
-def pow_fn(ps, x):
-    a, p = ps[:2]
+def pow_fn(x, a, p):
     return a * x ** p
+
+
+def exp2(x, a, b):
+    return a * (np.exp(x / b) - 1)
+
+
+def exp3(x, a, b, p):
+    return a * (np.exp((x / b) ** p) - 1)
+
+
+def exp4(x, tp, ga):
+    return tp * (1 - 2 ** (-x / ga))
+
+
+def exp5(x, tp, ga, p):
+    return tp * (1 - 2 ** (-(x / ga) ** p))
+
+
+def gnls(x, tp, ga, p, la, q):
+    return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
+
+
+def hill(x, tp, ga, p):
+    return tp / (1 + (ga / x) ** p)
