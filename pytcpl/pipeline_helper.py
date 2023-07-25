@@ -1,5 +1,6 @@
 import os
 import time
+import numpy as np
 
 import yaml
 
@@ -46,6 +47,37 @@ def get_mc5_data(aeid):
 
     dat = tcpl_query(query)
     return dat
+
+
+def track_fitted_params():
+    tracked_models, tracked_parameters = read_log_file("fit_results_log.txt")
+    parameters = {}
+    for model, params in zip(tracked_models, tracked_parameters):
+        if model not in parameters:
+            parameters[model] = []
+        else:
+            parameters[model].append(params)
+    with open("tracking_results.txt", "w") as file:
+        for key, array in parameters.items():
+            average = np.median(array, 0)
+            file.write(f"{key} {average}\n")
+
+def get_my_data(aeid):
+    mc4_name = "mc4_"
+    mc4_param_name = "mc4_param_"
+    query = f"SELECT {mc4_name}.m4id," \
+            f"{mc4_name}.aeid," \
+            f"{mc4_param_name}.model," \
+            f"{mc4_param_name}.model_param," \
+            f"{mc4_param_name}.model_val " \
+            f"FROM {mc4_name} " \
+            f"JOIN {mc4_param_name} " \
+            f"ON {mc4_name}.m4id = {mc4_param_name}.m4id " \
+            f"WHERE {mc4_name}.aeid = {aeid};"
+
+    dat = tcpl_query(query)
+    return dat
+
 
 
 def drop_tables(table_names_list):

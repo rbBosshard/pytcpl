@@ -5,7 +5,7 @@ from bmd_bounds import bmd_bounds
 from tcpl_hit_helper import hit_cont_inner, nest_select
 
 
-def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd, bmr_scale=1.349, bmed=0, bmd_low_bnd=None,
+def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd=1, bmr_scale=1.349, bmed=0, bmd_low_bnd=None,
                   bmd_up_bnd=None):
     # Todo: ensure if fit_model == const then do not compute more than needed
     fitout = {}
@@ -53,7 +53,7 @@ def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd, bmr_scale=1.3
         if fit_model != "none":
             fitout = params[fit_model]
             top = fitout["top"]
-            rmse = fitout["rme"]
+            # rmse = fitout["rme"]
             modpars = fitout["pars"]
 
     n_gt_cutoff = np.sum(np.abs(resp) > cutoff)
@@ -68,7 +68,7 @@ def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd, bmr_scale=1.3
         # compute continuous hitcall
         mll = len(modpars) - aics[fit_model] / 2
 
-        er = 1 if fit_strategy == "leastsq" else fitout["er"]
+        er = 1 if fit_strategy == "leastsq" else fitout['pars']["er"]
         hitcall = hit_cont_inner(conc, resp, top, cutoff, er, ps=modpars, fit_strategy=fit_strategy,
                                  fit_model=fit_model, caikwt=caikwt, mll=mll)
 

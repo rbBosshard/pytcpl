@@ -22,10 +22,15 @@ pytcpl:
   store: 1
   # bidirectional: 0,1 bidirectional fit, up/down
   bidirectional: = 1
+  # do_export: 0,1
+  do_export: 1
   # export_path: Export folder
   export_path: export
+
+  out_cols: ["aeid", "spid", "fit_model", "cutoff", "hitcall", "ac50", "bmd", "top",
+            "concentration_unlogged", "response", "fitparams"]
   # new_table_names: New tables for this pipeline
-  new_table_names: [mc4_, mc4_agg_, mc4_param_, mc5_, mc5_param_]
+  new_table_names: [mc4_, mc4_agg_, mc4_param_, mc5_, mc5_param_, cutoffs, out]
 
 
 # Login specific

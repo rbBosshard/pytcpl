@@ -2,6 +2,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
 import pandas as pd
+import os
 import concurrent.futures
 from fit_models import get_params
 from pytcpl.pipeline_helper import get_cutoff
@@ -25,11 +26,15 @@ def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True
         for model in fit_models:
             params = get_params(model, fit_strategy)
             out[model] = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
-                          **{p: None for p in ["success", "aic", "cov", "rme"]}}
+                          **{p: None for p in ["aic"]}}
 
             fit_curve(model, conc, resp, bidirectional, out[model], fit_strategy)
 
         return out
+
+
+    if os.path.exists("fit_results_log.txt"):
+        os.remove("fit_results_log.txt")
 
     dat = preprocess(dat)
     # Filter out rows with NaN values in the concentration column
@@ -49,7 +54,7 @@ def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True
         model = 'cnst'
         params = get_params(model, fit_strategy)
         out[model] = {"pars": {p: None for p in params}, "sds": {p + "_sd": None for p in params}, "modl": [],
-                      **{p: None for p in ["success", "aic", "cov", "rme"]}}
+                      **{p: None for p in ["aic"]}}
 
         fit = [0] if fit_strategy == "mle" else []
         generate_output(model, conc, resp, out[model], fit, fit_strategy)
@@ -102,15 +107,15 @@ def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True
 
 
 def preprocess(dat):
-    if 'bmed' not in dat.columns:
-        dat = dat.assign(bmed=None)
-    if 'osd' not in dat.columns:
-        dat = dat.assign(osd=None)
+    # if 'bmed' not in dat.columns:
+    #     dat = dat.assign(bmed=None)
+    # if 'osd' not in dat.columns:
+    #     dat = dat.assign(osd=None)
     grouped = dat.groupby(['aeid', 'spid'])
     dat = grouped.agg(
         bmad=('bmad', np.min),
-        osd=('osd', np.min),
-        bmed=('bmed', lambda x: 0 if x.isnull().values.all() else np.max(x)),
+        # osd=('osd', np.min),
+        # bmed=('bmed', lambda x: 0 if x.isnull().values.all() else np.max(x)),
         concentration_unlogged=('logc', lambda x: list(10 ** x)),
         response=('resp', list),
         m3ids=('m3id', list)

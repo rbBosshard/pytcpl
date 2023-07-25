@@ -8,85 +8,26 @@ from tcpl_load_data import tcpl_load_data
 
 
 def tcpl_hit(mc4, fit_strategy, coff, parallelize=False, n_jobs=-1):
-    nested_mc4 = get_nested_mc4(mc4, fit_strategy, parallelize, n_jobs)
-    l4_agg = tcpl_load_data(lvl='agg', fld='m4id', ids=list(nested_mc4['m4id'].values))
-    nested_mc4 = get_nested_mc4_df(l4_agg, mc4, nested_mc4)
-    res = wrapper_tcpl_hit_core(fit_strategy, coff, nested_mc4, parallelize, n_jobs)
-    res['coff_upper'] = 1.2 * coff
-    res['coff_lower'] = 0.8 * coff
-    res = pd.merge(res, mc4[['m4id']].drop_duplicates(), on='m4id', how='left')
-    mc5 = build_mc5(mc4, res)
-    return mc5
-
-
-def build_mc5(mc4, res):
-    mc5 = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on=['m4id'], how='left')
-    mc5 = mc5[['m4id', 'aeid', 'fit_model', 'hitcall', 'cutoff']].rename(
-        columns={"fit_model": "modl", "hitcall": "hitc", "cutoff": "coff"}).assign(model_type=2)
-    mc5_param = pd.merge(res, mc4[['m4id', 'aeid']].drop_duplicates(), on='m4id', how='left')
-    pivots = list(mc5_param.loc[:, 'cutoff':'bmd'].columns)
-    mc5_param = mc5_param.melt(
-        id_vars=['m4id', 'aeid'],  # Specify other columns to keep unchanged
-        value_vars=pivots,  # Specify the columns to pivot
-        var_name="hit_param",  # Name for the new column containing column names
-        value_name="hit_val"  # Name for the new column containing column values
-    )
-    mc5_param = mc5_param.dropna(subset=['hit_val'])
-    mc5 = pd.merge(mc5, mc5_param, on=['m4id', 'aeid'], how='inner')
-    return mc5
-
-
-def wrapper_tcpl_hit_core(fit_strategy, coff, nested_mc4, parallelize, n_jobs):
     if parallelize:
         test = Parallel(n_jobs=n_jobs)(
             delayed(tcpl_hit_core)(fit_strategy=fit_strategy,
-                params=row.params, conc=np.array(row.conc), resp=np.array(row.resp), cutoff=coff,
-                onesd=row.onesd, bmed=row.bmed) for _, row in nested_mc4.iterrows()
+                                   params=row.fitparams, conc=np.array(row.concentration_unlogged),
+                                   resp=np.array(row.response), cutoff=coff) for _, row in mc4.iterrows()
         )
-        res = pd.concat([nested_mc4, pd.DataFrame(test)], axis=1)
+        res = pd.concat([mc4, pd.DataFrame(test)], axis=1)
 
     else:
         test = (
-            nested_mc4.assign(df=lambda row: [
-                tcpl_hit_core(fit_strategy=fit_strategy, params=row.params, conc=np.array(row.conc),
-                              resp=np.array(row.resp), cutoff=coff, onesd=row.onesd, bmed=row.bmed) for _, row in row.iterrows()]).drop(['conc', 'resp'], axis=1)
+            mc4.assign(df=lambda row: [
+                tcpl_hit_core(fit_strategy=fit_strategy, params=row.fitparams,
+                              conc=np.array(row.concentration_unlogged),
+                              resp=np.array(row.response), cutoff=coff)
+                for _, row in row.iterrows()]).drop(['concentration_unlogged', 'response'], axis=1)
         )
 
-        res = pd.concat([nested_mc4, pd.DataFrame(test['df'].tolist())], axis=1)
+        res = pd.concat([mc4, pd.DataFrame(test['df'].tolist())], axis=1)
 
     return res
-
-
-def get_nested_mc4_df(l4_agg, mc4, nested_mc4):
-    ids = list(l4_agg['m3id'].values)
-    # heavy operation if ids list is long, aggregate ids from 3 huge tables -> work with chunks
-    df_list = []
-    chunk_size = 10000
-    num_chunks = len(ids) // chunk_size
-    remaining_elements = len(ids) % chunk_size
-    for i in range(num_chunks):
-        start_index = i * chunk_size
-        end_index = start_index + chunk_size
-        df = tcpl_load_data(lvl=3, fld='m3id', ids=ids[start_index:end_index])
-        df_list.append(df)
-    if remaining_elements > 0:  # Handle the last chunk
-        start_index = num_chunks * chunk_size
-        end_index = start_index + remaining_elements
-        df = tcpl_load_data(lvl=3, fld='m3id', ids=ids[start_index:end_index])
-        df_list.append(df)
-    data = pd.concat(df_list)  # Concatenate all the DataFrames in the list
-
-    l3_dat = pd.merge(l4_agg, data, on=['aeid', 'm3id', 'm2id', 'm1id', 'm0id', 'spid', 'logc', 'resp'], how='left')
-    nested_mc4 = nested_mc4.merge(l3_dat.groupby("m4id").agg(conc=("logc", lambda x: list(10 ** x)),
-                                                             resp=("resp", lambda x: list(x))).reset_index(), on="m4id",
-                                  how="left")
-    nested_mc4 = nested_mc4.merge(
-        mc4.query('model_param == "onesd"')[["m4id", "model_val"]].rename(columns={"model_val": "onesd"}), on="m4id",
-        how="inner")
-    nested_mc4 = nested_mc4.merge(
-        mc4.query('model_param == "bmed"')[["m4id", "model_val"]].rename(columns={"model_val": "bmed"}), on="m4id",
-        how="inner")
-    return nested_mc4
 
 
 def get_nested_mc4(mc4, fit_strategy, parallelize, n_jobs=-1):

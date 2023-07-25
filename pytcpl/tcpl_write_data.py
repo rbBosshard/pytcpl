@@ -1,5 +1,6 @@
 import ast
 import os
+import json
 
 import pandas as pd
 
@@ -59,71 +60,79 @@ def tcpl_write_data(id, dat, lvl):
         dat = pd.concat([dat, m4id_map], axis=1)  # TODO: recheck, replaced tmpi
         # Drop duplicated columns, keeping the first occurrence
         dat = dat.loc[:, ~dat.columns.duplicated()]
-
         dat.reset_index(inplace=True)
-        param = dat[["m4id", "aeid", "fitparams"]]
+        # param = dat[["m4id", "aeid", "fitparams"]]
 
         # get one standard deviation to save in similar way to fit params
-        onesd = dat[["m4id", "aeid", "osd"]].rename(columns={"osd": "model_val"})
-        onesd["model"] = "all"
-        onesd["model_param"] = "onesd"
-        if "bmed" in dat.columns:
-            bmed = dat[["m4id", "aeid", "bmed"]].rename(columns={"bmed": "model_val"})
-            bmed["model"] = "all"
-            bmed["model_param"] = "bmed"
-        else:
-            bmed = pd.DataFrame()
+        # onesd = dat[["m4id", "aeid", "osd"]].rename(columns={"osd": "model_val"})
+        # onesd["model"] = "all"
+        # onesd["model_param"] = "onesd"
+        # if "bmed" in dat.columns:
+        #     bmed = dat[["m4id", "aeid", "bmed"]].rename(columns={"bmed": "model_val"})
+        #     bmed["model"] = "all"
+        #     bmed["model_param"] = "bmed"
+        # else:
+        #     bmed = pd.DataFrame()
 
         # unnest fit params
-        unnested_param = pd.concat([pd.DataFrame(tcpl_fit_unnest(x)) for x in param['fitparams']], keys=param['m4id'],
-                                   names=['m4id']).reset_index()
+        # unnested_param = pd.concat([pd.DataFrame(tcpl_fit_unnest(x)) for x in param['fitparams']], keys=param['m4id'],
+        #                            names=['m4id']).reset_index()
+        #
+        # unnested_param = unnested_param.set_index("m4id")
+        # param = param.set_index("m4id")
+        # dat1 = param.join(unnested_param, how="left")
+        # dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
 
-        unnested_param = unnested_param.set_index("m4id")
-        param = param.set_index("m4id")
-        dat1 = param.join(unnested_param, how="left")
-        dat_param = dat1[["aeid", "model", "model_param", "model_val"]].reset_index()
+        dat_out = dat[['aeid', 'spid', 'concentration_unlogged', 'response', 'fitparams']]
+        # dat_out_json = dat_out.copy()
+        # dat_out_json.loc[:, 'concentration_unlogged'] = dat_out_json['concentration_unlogged'].apply(json.dumps)
+        # dat_out_json.loc[:, 'response'] = dat_out_json['response'].apply(json.dumps)
+        # dat_out_json.loc[:, 'fitparams'] = dat_out_json['fitparams'].apply(json.dumps)
+        # tcpl_append(dat_out_json, "out")
+        return dat_out
 
-        tcpl_append(dat_param, mc4_param_name)
-        tcpl_append(onesd, mc4_param_name)
-        tcpl_append(bmed, mc4_param_name)
+        # tcpl_append(dat_param, mc4_param_name)
+        # tcpl_append(onesd, mc4_param_name)
+        # tcpl_append(bmed, mc4_param_name)
+
 
         # get l3 dat for agg columns
-        m3id_ = dat['m3ids']
-        if isinstance(m3id_.iloc[0], str):
-            m3id_ = m3id_.apply(lambda x: ast.literal_eval(x))
-        dat_agg = dat[['aeid', 'm4id']].assign(m3id=m3id_)
-        dat_agg = dat_agg.set_index('m4id')
-        dat_agg = dat_agg.explode('m3id')
-        dat_agg = dat_agg.reset_index()
-
-        ids = list(dat_agg['m3id'])
-        df_list = []
-        chunk_size = 10000
-        num_chunks = len(ids) // chunk_size
-        remaining_elements = len(ids) % chunk_size
-        for i in range(num_chunks):
-            # Create or obtain a DataFrame
-            start_index = i * chunk_size
-            end_index = start_index + chunk_size
-            df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
-            df_list.append(df)
-
-        # Handle the last chunk
-        if remaining_elements > 0:
-            start_index = num_chunks * chunk_size
-            end_index = start_index + remaining_elements
-            df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
-            df_list.append(df)
-
-        # Concatenate all the DataFrames in the list
-        l3_dat = pd.concat(df_list)
-
-        l3_dat = l3_dat[["m0id", "m1id", "m2id", "m3id"]]
-        dat_agg = dat_agg.set_index("m3id")
-        l3_dat = l3_dat.set_index("m3id")
-        dat_agg = dat_agg.join(l3_dat, how="left")
-        dat_agg = dat_agg.reset_index()
-        tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name)
+        # m3id_ = dat['m3ids']
+        # if isinstance(m3id_.iloc[0], str):
+        #     m3id_ = m3id_.apply(lambda x: ast.literal_eval(x))
+        # dat_agg = dat[['aeid', 'm4id']].assign(m3id=m3id_)
+        # dat_agg = dat_agg.set_index('m4id')
+        # dat_agg = dat_agg.explode('m3id')
+        # dat_agg = dat_agg.reset_index()
+        #
+        # ids = list(dat_agg['m3id'])
+        # df_list = []
+        # chunk_size = 10000
+        # num_chunks = len(ids) // chunk_size
+        # remaining_elements = len(ids) % chunk_size
+        # for i in range(num_chunks):
+        #     # Create or obtain a DataFrame
+        #     start_index = i * chunk_size
+        #     end_index = start_index + chunk_size
+        #     df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
+        #     df_list.append(df)
+        #
+        # # Handle the last chunk
+        # if remaining_elements > 0:
+        #     start_index = num_chunks * chunk_size
+        #     end_index = start_index + remaining_elements
+        #     df = tcpl_load_data(lvl=3, fld="m3id", ids=ids[start_index:end_index])
+        #     df_list.append(df)
+        #
+        # # Concatenate all the DataFrames in the list
+        # l3_dat = pd.concat(df_list)
+        #
+        # l3_dat = l3_dat[["m0id", "m1id", "m2id", "m3id"]]
+        # dat_agg = dat_agg.set_index("m3id")
+        # l3_dat = l3_dat.set_index("m3id")
+        # dat_agg = dat_agg.join(l3_dat, how="left")
+        # dat_agg = dat_agg.reset_index()
+        # tcpl_append(dat_agg[mc4_agg_cols], mc4_agg_name)
 
     elif lvl == 5:
         mc5_cols_slim = ["m4id", "aeid", "modl", "hitc", "coff"]
