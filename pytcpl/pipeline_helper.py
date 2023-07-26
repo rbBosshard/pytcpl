@@ -1,19 +1,19 @@
 import os
 import time
+
 import numpy as np
 import pandas as pd
-
 import yaml
 
-from pytcpl.query_db import tcpl_query
-from pytcpl.tcpl_write_data import tcpl_append
+from mc5_mthds import mc5_mthds
+from tcpl_write_data import tcpl_append
 from query_db import tcpl_query
 from tcpl_mthd_load import tcpl_mthd_load
-from mc5_mthds import mc5_mthds
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'config', 'config.yaml')
 DDL_PATH = os.path.join(ROOT_DIR, 'DDLs_slim')
+
 
 def load_config():
     with open(CONFIG_PATH, 'r') as file:
@@ -22,7 +22,7 @@ def load_config():
 
 
 def starting(pipeline_step):
-    print(f"Starting: {pipeline_step}..")
+    print(f"Starting: {pipeline_step}")
     return time.time()
 
 
@@ -34,6 +34,7 @@ def get_cutoff(aeid, bmad):
     assay_cutoff_methods = tcpl_mthd_load(lvl=5, aeid=aeid)["mthd"]
     cutoffs = [mc5_mthds(mthd, bmad) for mthd in assay_cutoff_methods]
     return max(cutoffs, default=0)
+
 
 def get_mc5_data(aeid):
     mc4_name = "mc4_"
@@ -65,39 +66,20 @@ def track_fitted_params():
             average = np.median(array, 0)
             file.write(f"{key} {average}\n")
 
-def get_my_data(aeid):
-    mc4_name = "mc4_"
-    mc4_param_name = "mc4_param_"
-    query = f"SELECT {mc4_name}.m4id," \
-            f"{mc4_name}.aeid," \
-            f"{mc4_param_name}.model," \
-            f"{mc4_param_name}.model_param," \
-            f"{mc4_param_name}.model_val " \
-            f"FROM {mc4_name} " \
-            f"JOIN {mc4_param_name} " \
-            f"ON {mc4_name}.m4id = {mc4_param_name}.m4id " \
-            f"WHERE {mc4_name}.aeid = {aeid};"
-
-    dat = tcpl_query(query)
-    return dat
-
-
 
 def drop_tables(table_names_list):
-    start_time = starting(f"Drop all tables")
     tables = ", ".join(table_names_list)
-    drop_stmt = f"DROP TABLE {tables};"
+    drop_stmt = f"DROP TABLE IF EXISTS {tables};"
     tcpl_query(drop_stmt)  # Permanently removes tables tables from db!
-    print(f"Done >> {elapsed(start_time)}\n")
+    print(f"Dropped all relavant tables!")
 
 
 def ensure_all_new_db_tables_exist():
-    start_time = starting(f"Ensure that all tables exist")
     for ddl_file in os.scandir(DDL_PATH):
         with open(ddl_file, 'r') as f:
             ddl_query = f.read()
             tcpl_query(ddl_query)
-    print(f"Done >> {elapsed(start_time)}\n")
+    print(f"Ensured that all tables exist!")
 
 
 def export_data(dat, path, folder, id):
@@ -140,5 +122,4 @@ def get_assay_info(aeid):
     qstring = f"SELECT * FROM assay_component WHERE acid = {acid};"
     assay_component = tcpl_query(qstring)
     assay_info_dict = pd.merge(assay_component_endpoint, assay_component, on='acid').iloc[0].to_dict()
-    key_positive_control = assay_info_dict["key_positive_control"]
-    return key_positive_control
+    return assay_info_dict["key_positive_control"], assay_info_dict["assay_component_endpoint_name"]

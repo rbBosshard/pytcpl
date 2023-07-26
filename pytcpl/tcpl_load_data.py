@@ -7,12 +7,6 @@ mc5_name = "mc5_"
 mc5_param_name = "mc5_param_"
 
 
-def tcpl_list_flds(tbl):
-    qformat = "DESCRIBE {tbl};"
-    query = tcpl_query(qformat.format(tbl=tbl))
-    return query["Field"].tolist()
-
-
 def tcpl_load_data(lvl, fld, ids):
     if lvl == 3:
         tbls = ["mc0", "mc1", "mc3"]
@@ -39,35 +33,15 @@ def tcpl_load_data(lvl, fld, ids):
                   f"WHERE mc3.m3id = {mc4_agg_name}.m3id " \
                   f"AND {mc4_name}.m4id = {mc4_agg_name}.m4id"
 
-    elif lvl == 4:
-        tbls = [f"{mc4_name}", f"{mc4_param_name}"]
-        select_cols = [f"{mc4_name}.m4id", f"{mc4_name}.aeid", "spid", "bmad",
-                       "model", "model_param", "model_val"]
-        qformat = f"SELECT {', '.join(select_cols)} " \
-                  f"FROM {mc4_param_name}, {mc4_name} " \
-                  f"WHERE {mc4_name}.m4id = {mc4_param_name}.m4id"
-
-    elif lvl == 5:
-        tbls = [f"{mc4_name}", f"{mc5_name}", f"{mc5_param_name}"]
-        select_cols = [f"{mc5_name}.m5id", f"{mc5_name}.m4id", f"{mc5_name}.aeid",
-            "spid", "bmad", "hitc", "modl", "coff", "hit_param", "hit_val"]
-
-        qformat = f"SELECT {', '.join(select_cols)} " \
-                  f"FROM {mc4_name}, {mc5_name}, {mc5_param_name} " \
-                  f"WHERE {mc4_name}.m4id = {mc5_name}.m4id " \
-                  f"AND {mc5_name}.m5id = {mc5_param_name}.m5id"
-
-    elif lvl == 6:
-        tbls = [f"{mc5_name}", f"{mc5_param_name}"]
-        select_cols = ["m4id", f"{mc5_param_name}.*", "modl", "coff"]
-        qformat = f"SELECT {', '.join(select_cols)} " \
-                  f"FROM {mc5_name} " \
-                  f"JOIN {mc5_param_name} " \
-                  f"ON {mc5_name}.m5id = {mc5_param_name}.m5id"
     else:
         raise ValueError("lvl not supported")
 
     def prep_field(fld, tbls):
+        def tcpl_list_flds(tbl):
+            qformat = "DESCRIBE {tbl};"
+            query = tcpl_query(qformat.format(tbl=tbl))
+            return query["Field"].tolist()
+
         # scope with the fully qualified table.field name to avoid ambiguity
         for table in tbls:
             if fld in tcpl_list_flds(table):

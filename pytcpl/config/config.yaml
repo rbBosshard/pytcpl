@@ -1,6 +1,6 @@
 pytcpl:
   # aeid: assay id
-  aeid: 784
+  aeid: 5
   # test: if test is 0 then all chemicals are processed else # = test chemicals
   test: 0
   # fit strategy: leastsq, mle
@@ -23,9 +23,9 @@ pytcpl:
   # export_path: Export folder
   export_path: export
 
-  out_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top, concentration_unlogged, response, fitparams]
+  output_cols: [id, aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top, concentration_unlogged, response, fitparams]
 
-  export_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top]
+  export_cols: [id, aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top]
 
   assay_info_keys: [acid, assay_component_endpoint_name, assay_component_endpoint_desc,
                       assay_function_type, normalized_data_type, analysis_direction,
@@ -34,7 +34,7 @@ pytcpl:
                       intended_target_family, intended_target_family_sub]
 
   # new_table_names: New tables for this pipeline
-  new_table_names: [mc4_, mc4_agg_, mc4_param_, mc5_, mc5_param_, cutoffs, out]
+  new_table_names: [mc4_, mc4_agg_, mc4_param_, mc5_, mc5_param_, cutoffs, output]
 
 
 # Login specific

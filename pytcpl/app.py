@@ -5,9 +5,8 @@ import streamlit as st
 import pandas as pd
 
 from fit_models import get_fit_model
-from pipeline_helper import get_mc5_data, load_config
+from pipeline_helper import load_config
 from query_db import tcpl_query
-from tcpl_hit import get_nested_mc4
 from tcpl_load_data import tcpl_load_data
 from pipeline_helper import starting, elapsed
 
@@ -27,31 +26,24 @@ def powspace(start, stop, power, num):
 def fetch_data(id):
     start = starting("Fetch data")
     check_reset()
-    dat = tcpl_load_data(lvl=3, fld='aeid', ids=id)
-    grouped = dat.groupby(['aeid', 'spid'])
-    mc4 = grouped.agg(concentration_unlogged=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
-    mc4 = mc4.head(config["test"]) if config["test"] and config["aeid"] == id else mc4
-    df = get_mc5_data(id)
-    nested_mc4 = get_nested_mc4(df, config["fit_strategy"], parallelize=True, n_jobs=-1)  # heavy lifting
+    qstring = f"SELECT * FROM output WHERE aeid = {st.session_state.aeid};"
+    dat = tcpl_query(query=qstring)
     print(elapsed(start))
-    df = tcpl_load_data(lvl=6, fld='aeid', ids=id)  # hitcall data
-    # d = {str(m5id): group for m5id, group in df.groupby("m4id")}
-    return mc4, nested_mc4, df
+    return dat
 
 
 def update():
-    mc4, nesetd_mc4, hit_data = fetch_data(st.session_state.aeid)  # needs input for unique caching
+    df = fetch_data(st.session_state.aeid)  # needs input for unique caching
     check_reset()
-    hitcall_rows = hit_data[hit_data["hit_param"] == 'hitcall'].reset_index()
 
     if st.session_state.option == "hitcall desc":
-        hitcall_rows_sorted = hitcall_rows.sort_values(by="hit_val", ascending=False)
+        df = df.sort_values(by="hitcall", ascending=False)
     elif st.session_state.option == "hitcall asc":
-        hitcall_rows_sorted = hitcall_rows.sort_values(by="hit_val", ascending=True)
+        df = df.sort_values(by="hitcall", ascending=True)
     else:
-        hitcall_rows_sorted = hitcall_rows
+        pass
 
-    m4ids = hitcall_rows_sorted["m4id"]
+    m4ids = df["id"]
     m4ids = m4ids.values.tolist()
 
     st.session_state.m4id = m4ids[st.session_state.spid_row]

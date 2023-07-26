@@ -1,5 +1,4 @@
 import os
-import time
 
 import mysql.connector as mysql
 import pandas as pd
@@ -27,29 +26,16 @@ def get_sqlalchemy_engine():
         return None
 
 
-def get_db_conn():
-    username, password, host, port, db = get_db_config()
-    try:
-        return mysql.connect(
-            host=host,
-            user=username,
-            password=password,
-            port=port,
-            database=db)
-    except mysql.Error as error:
-        raise ConnectionError("Error connecting to MySQL: {}".format(error))
-
-
 def tcpl_query(query):
     try:
         if any(query.lower().startswith(x) for x in ["delete", "create", "drop"]):
-            db_conn = get_db_conn()
+            user, pw, host, port, db = get_db_config()
+            db_conn = mysql.connect(host=host, user=user, password=pw, port=port, database=db)
             cursor = db_conn.cursor()
             cursor.execute(query)
             db_conn.commit()
         else:
             engine = get_sqlalchemy_engine()
-            start_time = time.time()
             df = pd.read_sql(text(query), con=engine.connect())
             return df
     except Exception as e:
