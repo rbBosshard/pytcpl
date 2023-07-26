@@ -1,19 +1,18 @@
+import os
+
 import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
-import pandas as pd
-import os
-import concurrent.futures
+
 from fit_models import get_params
 from pytcpl.pipeline_helper import get_cutoff
 from tcpl_fit_helper import fit_curve
-from mc5_mthds import mc5_mthds
-from tcpl_mthd_load import tcpl_mthd_load
-
 from tcpl_fit_helper import generate_output
 
 
-def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True, n_jobs=-1, test=0):
+def tcpl_fit(dat, fit_models, fit_strategy, key_positive_control, bidirectional=True, parallelize=True, n_jobs=-1,
+             test=0):
     def tcplfit_core(group):
         conc = np.array(group['concentration_unlogged'])
         resp = np.array(group['response'])
@@ -32,24 +31,37 @@ def tcpl_fit(dat, fit_models, fit_strategy, bidirectional=True, parallelize=True
 
         return out
 
-
     if os.path.exists("fit_results_log.txt"):
         os.remove("fit_results_log.txt")
 
     dat = preprocess(dat)
     # Filter out rows with NaN values in the concentration column
     dat = dat[dat.concentration_unlogged.apply(lambda x: not any(pd.isna(x)))]
+    # Truncate key_positive_control (often has too huge number of datapoints to store/handle).
+    # Custom function to filter concentrations and corresponding responses
+    def filter_concentrations_and_responses(row):
+        concentration_list = row['concentration_unlogged']
+        response_list = row['response']
 
+        if len(concentration_list) > 1000:
+            unique_concentrations = pd.unique(concentration_list)
+            # Calculate the median of responses over the unique concentrations
+            median_responses = [pd.Series(response_list)[concentration_list == c].median() for c in unique_concentrations]
+            return list(unique_concentrations), list(median_responses)
+        else:
+            return list(concentration_list), list(response_list)  # Keep the original lists
+
+    dat['concentration_unlogged'], dat['response'] = zip(*dat.apply(filter_concentrations_and_responses, axis=1))
     dat = dat.head(test) if test else dat  # work only with subset if test > 1
 
     # Filter
     def process_row(row, cutoff, fit_strategy):
-        conc = row['concentration_unlogged']
+        conc = np.array(row['concentration_unlogged'])
         resp = np.array(row['response'])
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
 
         out = {}
-        to_fit = rmds.size >= 4 and np.sum(np.abs(rmds) >= cutoff) > 0
+        to_fit = (rmds.size >= 4) and np.any(np.abs(rmds) >= cutoff)
 
         model = 'cnst'
         params = get_params(model, fit_strategy)

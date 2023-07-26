@@ -1,9 +1,12 @@
 import os
 import time
 import numpy as np
+import pandas as pd
 
 import yaml
 
+from pytcpl.query_db import tcpl_query
+from pytcpl.tcpl_write_data import tcpl_append
 from query_db import tcpl_query
 from tcpl_mthd_load import tcpl_mthd_load
 from mc5_mthds import mc5_mthds
@@ -121,3 +124,21 @@ def read_log_file(log_file):
                 models.append(model)
                 parameters.append(param_list)
     return models, parameters
+
+
+def store_cutoff(aeid, df):
+    bmad = df["bmad"].iloc[0]
+    cutoff = get_cutoff(aeid=aeid, bmad=bmad)
+    tcpl_append(pd.DataFrame({"aeid": [aeid], "bmad": [bmad], "cutoff": [cutoff]}), "cutoffs")
+    return cutoff
+
+
+def get_assay_info(aeid):
+    qstring = f"SELECT * FROM assay_component_endpoint WHERE aeid = {aeid};"
+    assay_component_endpoint = tcpl_query(qstring)
+    acid = assay_component_endpoint.iloc[0]["acid"]
+    qstring = f"SELECT * FROM assay_component WHERE acid = {acid};"
+    assay_component = tcpl_query(qstring)
+    assay_info_dict = pd.merge(assay_component_endpoint, assay_component, on='acid').iloc[0].to_dict()
+    key_positive_control = assay_info_dict["key_positive_control"]
+    return key_positive_control

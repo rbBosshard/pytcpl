@@ -4,30 +4,26 @@ from joblib import Parallel, delayed
 
 from fit_models import get_params
 from tcpl_hit_core import tcpl_hit_core
-from tcpl_load_data import tcpl_load_data
 
 
 def tcpl_hit(mc4, fit_strategy, coff, parallelize=False, n_jobs=-1):
     if parallelize:
-        test = Parallel(n_jobs=n_jobs)(
-            delayed(tcpl_hit_core)(fit_strategy=fit_strategy,
-                                   params=row.fitparams, conc=np.array(row.concentration_unlogged),
-                                   resp=np.array(row.response), cutoff=coff) for _, row in mc4.iterrows()
-        )
-        res = pd.concat([mc4, pd.DataFrame(test)], axis=1)
-
+        res = pd.DataFrame(Parallel(n_jobs=n_jobs)(
+            delayed(tcpl_hit_core)(
+                fit_strategy=fit_strategy,
+                params=row.fitparams,
+                conc=np.array(row.concentration_unlogged),
+                resp=np.array(row.response),
+                cutoff=coff
+            ) for _, row in mc4.iterrows()
+        ))
     else:
-        test = (
-            mc4.assign(df=lambda row: [
-                tcpl_hit_core(fit_strategy=fit_strategy, params=row.fitparams,
+        res = mc4.apply(lambda row: tcpl_hit_core(fit_strategy=fit_strategy, params=row.fitparams,
                               conc=np.array(row.concentration_unlogged),
-                              resp=np.array(row.response), cutoff=coff)
-                for _, row in row.iterrows()]).drop(['concentration_unlogged', 'response'], axis=1)
-        )
+                              resp=np.array(row.response), cutoff=coff), axis=1, result_type='expand')
 
-        res = pd.concat([mc4, pd.DataFrame(test['df'].tolist())], axis=1)
-
-    return res
+    mc4[res.columns] = res
+    return mc4
 
 
 def get_nested_mc4(mc4, fit_strategy, parallelize, n_jobs=-1):
