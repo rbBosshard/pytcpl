@@ -18,43 +18,37 @@ def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd=1, bmr_scale=1
     conc = np.array(conc)
     resp = np.array(resp)
 
-    if sum(~np.isnan(aics_values)) == 0:
-        # if all fits failed, use none for method
+    # use nested chisq to choose between poly1 and poly2, remove poly2 if it fails. pvalue hardcoded to .05
+    if "poly1" in aics_keys and "poly2" in aics_keys:
+        aics = nest_select(aics, "poly1", "poly2", dfdiff=1, pval=0.05)
+
+    # if all fits, except the constant fail, use none for the fit method
+    # when continuous hit calling is in use
+    if sum(item is not None for item in aics_values) == 1 and "cnst" in aics_keys:
         fit_model = "none"
     else:
-        # use nested chisq to choose between poly1 and poly2, remove poly2 if it fails.
-        # pvalue hardcoded to .05
-        if "poly1" in aics_keys and "poly2" in aics_keys:
-            aics = nest_select(aics, "poly1", "poly2", dfdiff=1, pval=0.05)
-
-        # if all fits, except the constant fail, use none for the fit method
-        # when continuous hit calling is in use
-        if sum(~np.isnan(aics_values)) == 1 and "cnst" in aics_keys:
-            fit_model = "none"
-        else:
-            # get AIC weights of winner (vs constant) for continuous hitcalls
-            # never choose constant as winner for continuous hitcalls
-            nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
-            fit_model = min(nocnstaics, key=nocnstaics.get)
+        # get AIC weights of winner (vs constant) for continuous hitcalls
+        # never choose constant as winner for continuous hitcalls
+        nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
+        fit_model = min(nocnstaics, key=nocnstaics.get)
+        try:
+            caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
+        except:
             try:
-                caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
-            except:
-                try:
-                    term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
-                    if term == np.inf:
-                        caikwt = 0
-                    else:
-                        caikwt = 1 / (1 + term)
-                except Exception as e:
-                    print(f"Error caikwt: {e}")
+                term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
+                if term == np.inf:
                     caikwt = 0
+                else:
+                    caikwt = 1 / (1 + term)
+            except Exception as e:
+                print(f"Error caikwt: {e}")
+                caikwt = 0
 
-        # if the fit_model is not reported as 'none', obtain model information
-        if fit_model != "none":
-            fitout = params[fit_model]
-            top = fitout["top"]
-            # rmse = fitout["rme"]
-            modpars = fitout["pars"]
+    # if the fit_model is not reported as 'none', obtain model information
+    if fit_model != "none":
+        fitout = params[fit_model]
+        top = fitout["top"]
+        modpars = fitout["pars"]
 
     n_gt_cutoff = np.sum(np.abs(resp) > cutoff)
     if cutoff != 0 and "top" in locals():
@@ -68,7 +62,7 @@ def tcpl_hit_core(fit_strategy, params, conc, resp, cutoff, onesd=1, bmr_scale=1
         # compute continuous hitcall
         mll = len(modpars) - aics[fit_model] / 2
 
-        er = 1 if fit_strategy == "leastsq" else fitout['pars']["er"]
+        er = fitout['pars']["er"]
         hitcall = hit_cont_inner(conc, resp, top, cutoff, er, ps=modpars, fit_strategy=fit_strategy,
                                  fit_model=fit_model, caikwt=caikwt, mll=mll)
 

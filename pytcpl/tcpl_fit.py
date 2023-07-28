@@ -53,17 +53,26 @@ def tcpl_fit(dat, fit_models, fit_strategy, cutoff, bidirectional=True, parallel
         resp = np.array(group['response'])
         out = {}
         for model in fit_models:
-            out[model] = {"pars": {p: None for p in get_params(model, fit_strategy)}, **{p: None for p in ["aic"]}}
-            fit_curve(model, conc, resp, bidirectional, out[model], fit_strategy)
+            get_out_skeleton(model, out)
+            try:
+                fit_curve(model, conc, resp, bidirectional, out[model], fit_strategy)
+            except Exception as e:
+                print(f"{model} >>> Error fit_curve: {e}")
         return out
+
+    def get_out_skeleton(model, out):
+        out[model] = {"pars": {p: None for p in get_params(model, fit_strategy)},
+                      **{p: None for p in ["aic", "modl", "rmse"]}}
 
     def process_row(row):
         conc = np.array(row['concentration_unlogged'])
         resp = np.array(row['response'])
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
         to_fit = (rmds.size >= 4) and np.any(np.abs(rmds) >= cutoff)
-        out = {'cnst': {'aic': None, 'pars': {'er': None}}}
-        fit_curve('cnst', conc, resp, bidirectional, out['cnst'], fit_strategy)
+        model = 'cnst'
+        out = {}
+        get_out_skeleton(model, out)
+        fit_curve(model, conc, resp, bidirectional, out[model], fit_strategy)
         return out, to_fit
 
     dat = preprocess(dat, test)
@@ -74,9 +83,7 @@ def tcpl_fit(dat, fit_models, fit_strategy, cutoff, bidirectional=True, parallel
     if parallelize:
         fitparams_cnst, fits = map(list, zip(*Parallel(n_jobs=n_jobs)(
             delayed(process_row)(row) for _, row in tqdm(dat.iterrows(), desc='Fit: '))))
-        fitparams = Parallel(n_jobs=n_jobs)(
-            delayed(tcplfit_core)(row) for _, row in tqdm(dat[fits].iterrows(), desc='Fit: '))
-    else:  # Serial version for debugging
+    else:
         fitparams_cnst = []
         fits = []
         fitparams = []
@@ -84,7 +91,13 @@ def tcpl_fit(dat, fit_models, fit_strategy, cutoff, bidirectional=True, parallel
             result, fit = process_row(row)
             fitparams_cnst.append(result)
             fits.append(fit)
-        for _, row in tqdm(dat[fits].iterrows(), desc='Fitting curves progress: '):
+
+    relevant_dat = dat[fits]
+    if parallelize:
+        fitparams = Parallel(n_jobs=n_jobs)(
+            delayed(tcplfit_core)(row) for _, row in tqdm(relevant_dat.iterrows(), desc='Fit: '))
+    else:  # Serial version for debugging
+        for _, row in tqdm(relevant_dat.iterrows(), desc='Fitting curves progress: '):
             fitparams.append(tcplfit_core(row))
 
     masked = np.array([{} for _ in range(len(fitparams_cnst))])

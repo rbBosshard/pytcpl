@@ -13,11 +13,12 @@ def get_fit_model(fit_model):
         'poly1': poly1,
         'poly2': poly2,
         'pow': pow_fn,
+        'expo': expo,
     }.get(fit_model)
 
 
 def get_params(fit_model, fit_strategy):
-    params = dict(cnst=['er'],
+    return dict(cnst=['a', 'er'],
                   poly1=['a', 'er'],
                   poly2=['a', 'b', 'er'],
                   pow=['a', 'p', 'er'],
@@ -27,12 +28,15 @@ def get_params(fit_model, fit_strategy):
                   exp5=['tp', 'ga', 'p', 'er'],
                   hill=['tp', 'ga', 'p', 'er'],
                   gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
+                  expo=['A', 'B', 'er'],
                   ).get(fit_model)
 
-    return params if fit_strategy == "mle" else params[:-1]
+
+def expo(x, A, B):
+    return A * np.exp(B * x)
 
 
-def cnst(x):
+def cnst(x, a):
     return np.zeros(len(x))
 
 

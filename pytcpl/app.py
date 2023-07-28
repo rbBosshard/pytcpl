@@ -2,13 +2,13 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import pandas as pd
+import json
 
 from fit_models import get_fit_model
 from pipeline_helper import load_config
 from query_db import tcpl_query
 from tcpl_load_data import tcpl_load_data
-from pipeline_helper import starting, elapsed
+from pipeline_helper import starting, elapsed, get_assay_info
 
 
 # Run command `streamlit run pytcpl/app.py`
@@ -43,30 +43,37 @@ def update():
     else:
         pass
 
-    m4ids = df["id"]
-    m4ids = m4ids.values.tolist()
+    ids = df["id"]
+    ids = ids.values.tolist()
 
-    st.session_state.m4id = m4ids[st.session_state.spid_row]
+    st.session_state.id = ids[st.session_state.spid_row]
 
-    spid = get_spid(mc4, nested_mc4, st.session_state.trigger)
+    spid = get_spid(df, st.session_state.trigger)
     if spid is None:
         return
+    
+    row = df[df["id"] == st.session_state.id]
 
-    conc, d, fitparams, resp = get_row_data(hit_data, mc4, nested_mc4)
+    row.loc[:, 'concentration_unlogged'] = row['concentration_unlogged'].apply(json.loads)
+    row.loc[:, 'response'] = row['response'].apply(json.loads)
+    row.loc[:, 'fitparams'] = row['fitparams'].apply(json.loads)
+    row = row.to_dict()
+    # Remove all nested dictionaries using dictionary comprehension
+    row = {key: value for key, nested_dict in row.items() for value in nested_dict.values()}   
 
     fig = go.Figure()
 
-    add_title(fig, d)
+    add_title(fig, row)
 
     fig.add_trace(
-        go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
+        go.Scatter(x=np.log10(row["concentration_unlogged"]), y=row["response"], mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
                    marker=dict(color="black", symbol="x-thin-open", size=10),
                    name="response", showlegend=False))
 
-    return fig, add_curves(conc, fig, fitparams, d)
+    return fig, add_curves(fig, row)
 
 
-def add_title(fig, d):
+def add_title(fig, row):
     try:
         casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
     except Exception as e:
@@ -76,11 +83,10 @@ def add_title(fig, d):
     # fig.update_layout(hovermode="x unified")
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
-    qstring = f"SELECT * FROM assay_component_endpoint WHERE aeid = {st.session_state.aeid};"
-    assay_component_endpoint = tcpl_query(qstring).iloc[0]
-    normalized_data_type = assay_component_endpoint["normalized_data_type"]
-    assay_component_endpoint_name = assay_component_endpoint["assay_component_endpoint_name"]
-    assay_component_endpoint_desc = assay_component_endpoint["assay_component_endpoint_desc"]
+    assay_infos = get_assay_info(st.session_state.aeid)
+    normalized_data_type = assay_infos["normalized_data_type"]
+    assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
+    assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
 
     with st.expander("Details"):
         st.write(f"spid: {st.session_state.spid}")
@@ -92,59 +98,67 @@ def add_title(fig, d):
         st.write(f"{assay_component_endpoint_desc}")
 
     fig.update_layout(
-        title=f"Assay Endpoint: <i>{assay_component_endpoint_name}</i><br>Chemical: <i>{chnm if chnm else 'N/A'}</i><br>Best Model Fit: <i>{d['modl']}</i>, hitcall: <i>{round(d['hitcall'], 7)}</i>",
+        title=(f"Assay Endpoint: <i>{assay_component_endpoint_name}</i>"
+               f"<br>Chemical: <i>{chnm if chnm else 'N/A'}</i><br>"
+               f"Best Model Fit: <i>{row['fit_model']}</i>, hitcall: <i>{round(row['hitcall'], 7)}</i>"),
         margin=dict(t=150),
         xaxis_title="log10(Concentration) μM",
         yaxis_title=str(normalized_data_type),
     )
 
 
-def add_curves(conc, fig, fitparams, d):
+def add_curves(fig, row):
+    fitparams = row['fitparams']
+    conc = row['concentration_unlogged']
     fit_models = list(fitparams.keys())
     pars_dict = {}
     for m, model in enumerate(fit_models):
-        params = fitparams[model]
-        pars = list(params["pars"].values())
-        pars_dict[model] = list(pars)
-        pars = np.array(pars)
-
+        params = fitparams[model]["pars"]
+        params = {param: value for param, value in params.items() if param in get_fit_model(model).__code__.co_varnames}
+        
         min_val = np.min(conc)
-        min_val = min_val if d['hitcall'] <= 0 else min(min_val, d['ac50'])
+        # min_val = min_val if row['hitcall'] >= 0 else min(min_val, row['ac50'])
 
         x = powspace(min_val, np.max(conc), 100, 500)
-        y = np.array(get_fit_model(model)(x, *pars[:-1]))
+        y = np.array(get_fit_model(model)(x, **params))
         color = px.colors.qualitative.Bold[m]
-        if model != d['modl'] and model != "none":
-            fig.add_trace(
-                go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
-                           name=model, line=dict(width=2, dash='dash')))
+        aic = {round(fitparams[model]['aic'], 2)}
+        rmse = {round(fitparams[model]['rmse'], 2)}
+        try:
+            if model != row['fit_model'] and model != "none":
+                fig.add_trace(
+                    go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
+                            name=f"{model} {aic} {rmse}", line=dict(width=2, dash='dash')))
 
-        elif model == d['modl']:
-            fig.add_trace(
-                go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
-                           name=f"{model} (BEST FIT)", line=dict(width=3)))
+            elif model == row['fit_model']:
+                fig.add_trace(
+                    go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
+                            name=f"{model} (BEST FIT) {aic} {rmse}", line=dict(width=3)))
 
-            if d['hitcall'] > 0.0:
-                # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
-                potencies = ["acc", "ac50"]
-                for p in potencies:
-                    if p in d:
-                        fig.add_vline(x=np.log10(d[p]), line_color=color, line_width=2,
-                                      annotation_position="bottom left",
-                                      annotation_text=f"{p}", layer="below")
+                if row['hitcall'] > 0.0:
+                    # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
+                    potencies = ["acc", "ac50"]
+                    for p in potencies:
+                        if p in row:
+                            fig.add_vline(x=np.log10(row[p]), line_color=color, line_width=2,
+                                        annotation_position="bottom left",
+                                        annotation_text=f"{p}", layer="below")
 
-                # efficacies = ["top", "bmr"]
-                efficacies = ["top"]
-                for e in efficacies:
-                    if e in d:
-                        fig.add_hline(y=d[e], line_color=color, line_width=2,
-                                      annotation_position="bottom left",
-                                      annotation_text=f"{e}", layer="below")
+                    # efficacies = ["top", "bmr"]
+                    efficacies = ["top"]
+                    for e in efficacies:
+                        if e in row:
+                            fig.add_hline(y=row[e], line_color=color, line_width=2,
+                                        annotation_position="bottom left",
+                                       annotation_text=f"{e}", layer="below")
 
+        except Exception as e:
+            print(f"{e}")
+            pass
         else:  # model == "none"
             pass
 
-    cutoff = d['coff']
+    cutoff = row['cutoff']
     fig.add_hline(y=cutoff, line_color="LightSkyBlue")
 
     fig.add_hrect(
@@ -159,22 +173,6 @@ def add_curves(conc, fig, fitparams, d):
 
     fig.update_layout(legend=dict(groupclick="toggleitem"))
     return pars_dict
-
-
-def get_row_data(hit_data, mc4, nested_mc4):
-    m4id = st.session_state.m4id
-    df = hit_data.loc[hit_data["m4id"] == m4id]
-    d = {}
-    d["modl"] = df["modl"].iloc[0] # recompute?
-    d["coff"] = df["coff"].iloc[0] # new table?
-    d.update(pd.Series(df.hit_val.values, index=df.hit_param).to_dict())
-    fitparams = nested_mc4.loc[nested_mc4["m4id"] == m4id]["params"].iloc[0]
-    qstring = f"SELECT * FROM mc4_ WHERE m4id = {m4id};"
-    mc4_row = tcpl_query(qstring)
-    mc4_row_spid = mc4_row["spid"].iloc[0]
-    conc = mc4[mc4["spid"] == mc4_row_spid]['concentration_unlogged'].iloc[0]
-    resp = np.array(mc4[mc4["spid"] == mc4_row_spid]['response'].iloc[0])
-    return conc, d, fitparams, resp
 
 
 def get_chem_info(spid):
@@ -197,10 +195,10 @@ def get_chem_info(spid):
     return casn, chnm, dsstox_substance_id
 
 
-def get_spid(mc4, nested_mc4, trigger):
+def get_spid(df, trigger):
     spid = st.session_state.spid
-    if spid in mc4['spid'].values and trigger == "spid":
-        st.session_state.spid_row = mc4[mc4['spid'] == spid].index[0]
+    if spid in df['spid'].values and trigger == "spid":
+        st.session_state.spid_row = df[df['spid'] == spid].index[0]
     elif trigger == "new_sample":
         dir = st.session_state.direction
         if dir == "next":
@@ -210,8 +208,8 @@ def get_spid(mc4, nested_mc4, trigger):
         else:
             new_spid_row = st.session_state.spid_row
 
-        st.session_state.spid_row = new_spid_row % nested_mc4.shape[0]
-        spid = mc4.iloc[st.session_state.spid_row]["spid"]
+        st.session_state.spid_row = new_spid_row % df.shape[0]
+        spid = df.iloc[st.session_state.spid_row]["spid"]
         st.session_state.spid = spid
     else:
         return None
@@ -233,8 +231,8 @@ def check_reset():
         st.session_state.trigger = "new_sample"
     if "spid" not in st.session_state:
         st.session_state.spid = ""
-    if "m4id" not in st.session_state:
-        st.session_state.m4id = ""
+    if "id" not in st.session_state:
+        st.session_state.id = ""
     if "option" not in st.session_state:
         st.session_state.option = "hitcall desc"
 

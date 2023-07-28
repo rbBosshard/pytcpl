@@ -15,13 +15,14 @@ from tcpl_write_data import tcpl_append
 
 config = load_config()["pytcpl"]
 
+import warnings
 # warnings.filterwarnings("ignore")
 # warnings.filterwarnings("error", category=RuntimeWarning)
 
 
 def pipeline():
     aeid = config['aeid']
-    key_positive_control, assay_component_endpoint_name = get_assay_info(aeid)
+    assay_component_endpoint_name = get_assay_info(aeid)["assay_component_endpoint_name"]
     start_time = starting(f"Starting pipeline with assay id {aeid} ({assay_component_endpoint_name})")
     drop_tables(config["new_table_names"])  # Uncomment if you want to remove the specified pipeline tables from the db
     ensure_all_new_db_tables_exist()
@@ -63,7 +64,9 @@ def pipeline():
 if __name__ == '__main__':
     if config["profile"]:
         with cProfile.Profile() as pr:
-            pipeline()
+            with warnings.catch_warnings(record=True) as caught_warnings:
+                warnings.filterwarnings("error")  # Raise warnings as exceptions
+                pipeline()
         pr.dump_stats(os.path.join(ROOT_DIR, f'profile/pipeline.prof') )
         print("Profiling complete")  # Use `snakeviz pytcpl/profile/pipeline.prof` to view profile in browser
     else:

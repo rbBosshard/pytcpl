@@ -60,8 +60,7 @@ def bmd_bounds(fit_strategy, fit_model, bmr, pars, conc, resp, onesidedp=0.05, b
     params = [pars[key] for key in get_params(fit_model, fit_strategy)]
 
     # negated minimized negative loglikelihood. Todo: recheck if everything is correct like this
-    maxloglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model),
-                          fit_strategy=fit_strategy)
+    maxloglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
 
     # search for bounds to ensure sign change
     bmdrange = None
@@ -162,7 +161,7 @@ def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, fit_strategy, party
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
     params = [ps[key] for key in get_params(fit_model, fit_strategy)]
-    loglik = -tcpl_obj(ps=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model), fit_strategy=fit_strategy)
+    loglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
 
     # for bmd bounds, we want the difference between the max log-likelihood and the
     # bounds log-likelihood to be equal to chi-squared at 1-2*onesp (typically .9)

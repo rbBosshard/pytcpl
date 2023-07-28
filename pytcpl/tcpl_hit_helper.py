@@ -54,7 +54,7 @@ def top_likelihood(fit_strategy, fit_model, cutoff, conc, resp, ps, top, mll):
         ps[0] = cutoff / (np.max(conc) ** ps[1])
 
     # get loglikelihood of top exactly at cutoff, use likelihood profile test
-    loglik = -tcpl_obj(ps=ps, conc=conc, resp=resp, fit_model=get_fit_model(fit_model), fit_strategy=fit_strategy)
+    loglik = -tcpl_obj(params=ps, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
     if abs(top) >= cutoff:
         out = (1 + chi2.cdf(2 * (mll - loglik), 1)) / 2
     else:

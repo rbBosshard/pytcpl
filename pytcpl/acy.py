@@ -71,7 +71,10 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         except:
             return None
 
-    return None
+    elif fit_model == "expo":
+        return np.log(y / locals()["A"]) / locals()["B"]
+
+
 
 
 

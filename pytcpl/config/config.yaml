@@ -1,6 +1,6 @@
 pytcpl:
   # aeid: assay id
-  aeid: 5
+  aeid: 784
   # test: if test is 0 then all chemicals are processed else # = test chemicals
   test: 0
   # fit strategy: leastsq, mle
@@ -13,19 +13,20 @@ pytcpl:
   do_fit: 1
   # do_hit: 0,1 do hit-calling else load from csv export folder
   do_hit: 1
+  threshold_num_dp:
   # fit_models: Fit models
-  fit_models: [cnst, poly1, poly2, pow, exp2, exp3, exp4, exp5, hill, gnls]
-#  fit_models: [cnst, exp4]
+#  fit_models: [cnst, poly1, poly2, pow, exp2, exp3, exp4, exp5, hill, gnls]
+  fit_models: [cnst, poly1, poly2, pow, exp4, exp5, hill, gnls]
   # profile: 0,1 profile performance
   profile: 1
   # bidirectional: 0,1 bidirectional fit, up/down
-  bidirectional: = 1
+  bidirectional: 1
   # export_path: Export folder
   export_path: export
 
-  output_cols: [id, aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top, concentration_unlogged, response, fitparams]
+  output_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top, concentration_unlogged, response, fitparams]
 
-  export_cols: [id, aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top]
+  export_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top]
 
   assay_info_keys: [acid, assay_component_endpoint_name, assay_component_endpoint_desc,
                       assay_function_type, normalized_data_type, analysis_direction,
@@ -34,7 +35,7 @@ pytcpl:
                       intended_target_family, intended_target_family_sub]
 
   # new_table_names: New tables for this pipeline
-  new_table_names: [mc4_, mc4_agg_, mc4_param_, mc5_, mc5_param_, cutoffs, output]
+  new_table_names: [cutoffs, output]
 
 
 # Login specific
