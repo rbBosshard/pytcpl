@@ -1,13 +1,13 @@
 import os
+import time
 
-import joblib
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from fit_models import get_params
-from pipeline_helper import track_fitted_params
+from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, custom_format, print_
 from tcpl_fit_helper import fit_curve
 
 
@@ -41,12 +41,15 @@ def tcpl_fit(dat, cutoff, config):
 
     dat = preprocess(dat, config["test"])
 
+    print_(f"{status('laptop')} Processing {dat.shape[0]} concentration-response series "
+           f"using {len(config['fit_models'])} different models:")
+    time.sleep(0.05)
     if os.path.exists("fit_results_log.txt"):
         os.remove("fit_results_log.txt")
 
-    desc = "Filtering: "
+    desc = get_msg_with_elapsed_time(f"{status('petri_dish')}    - First run (filtering):  ", color_only_time=False)
     total = dat.shape[0]
-    iterator = tqdm(dat.iterrows(), total=total, desc=desc)
+    iterator = tqdm(dat.iterrows(), total=total, desc=desc, bar_format=custom_format)
 
     if config["parallelize"]:
         fitparams_cnst, fits = map(list, zip(*Parallel(n_jobs=config['n_jobs'])(
@@ -62,8 +65,8 @@ def tcpl_fit(dat, cutoff, config):
 
     relevant_dat = dat[fits]
     total = relevant_dat.shape[0]
-    desc = "Fitting: "
-    iterator = tqdm(relevant_dat.iterrows(), total=total, desc=desc)
+    desc = get_msg_with_elapsed_time(f"{status('atom_symbol')}    - Second run (curve-fit): ", color_only_time=False)
+    iterator = tqdm(relevant_dat.iterrows(), total=total, desc=desc, bar_format=custom_format)
 
     if config['parallelize']:
         fitparams = Parallel(n_jobs=config['n_jobs'])(

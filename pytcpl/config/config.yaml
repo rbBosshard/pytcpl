@@ -45,9 +45,10 @@ db_login:
     password: robin
     port: 3306
     username: robin
+display_emoji: 1
 do_fit: 1
 do_hit: 1
-drop_new_tables: 0
+drop_new_tables: 1
 export_cols:
 - aeid
 - spid

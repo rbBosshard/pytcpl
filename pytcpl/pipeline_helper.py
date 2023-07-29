@@ -4,31 +4,58 @@ import time
 import numpy as np
 import pandas as pd
 import yaml
-import emoji
 
 from mc4_mthds import mc4_mthds
 from mc5_mthds import mc5_mthds
+from symbols import symbols_dict
 from tcpl_output import tcpl_output
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
 from tcpl_mthd_load import tcpl_mthd_load
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(ROOT_DIR, 'config', 'config.yaml')
-AEIDS_LIST_PATH = os.path.join(ROOT_DIR, 'config', 'aeids.txt')
+CONFIG_FOLDER_PATH = os.path.join(ROOT_DIR, 'config')
+CONFIG_FILE_PATH = os.path.join(CONFIG_FOLDER_PATH, 'config.yaml')
+AEIDS_LIST_PATH = os.path.join(ROOT_DIR, 'config', 'aeid_list.in')
 DDL_PATH = os.path.join(ROOT_DIR, 'DDLs_new')
 START_TIME = time.time()
+DISPLAY_EMOJI = True
 
-thumbs_up = emoji.emojize(":thumbs_up:")
-hourglass_not_done = emoji.emojize(":hourglass_not_done:")
-rocket = emoji.emojize(":rocket:")
+COLORS_DICT = {
+    "WHITE": "\033[37m",
+    "BLUE": "\033[34m",
+    "GREEN": "\033[32m",
+    "RED": "\033[31m",
+    "ORANGE": "\033[33m",
+    "VIOLET": "\033[35m",
+    "RESET": "\033[0m",
+}
+
+# Custom format for tqdm progress bar (using blue color)
+custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
+
+
+def text_to_blue(message):
+    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}"
+
+
+def text_to_green(message):
+    return f"{COLORS_DICT['GREEN']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
+
+
+def status(symbol, replacement=""):
+    return symbols_dict.get(symbol, "") if DISPLAY_EMOJI else replacement
 
 
 def launch(config, confg_path):
+    global DISPLAY_EMOJI
     aeid_list, aeid_list_path = read_aeids()
-    print(  f"Pytcpl started!\n"
-            f"Running pipeline for {len(aeid_list)} assay endpoints defined in {aeid_list_path}\n"
-            f"With configurations defined in {confg_path}")
+    DISPLAY_EMOJI = config['display_emoji']
+    print(  f"{status('balloon')} Hi :)\n\n"
+            f"{status('rocket')} Pytcpl launched!\n\n"
+            f"{status('gear')} Configuration located in {confg_path}\n\n"
+            f"{status('scroll')} Running pipeline for "
+            f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')\n")
     check_db(config)
     return aeid_list
 
@@ -38,15 +65,15 @@ def print_(msg):
     print(text)
 
 
-def get_msg_with_elapsed_time(msg):
-    text = f"{get_formatted_time_elapsed(START_TIME)} {msg}"
+def get_msg_with_elapsed_time(msg, color_only_time=True):
+    text = f"{get_formatted_time_elapsed(START_TIME, color_only_time)} {msg}"
     return text
 
 
 def load_config():
-    with open(CONFIG_PATH, 'r') as file:
+    with open(CONFIG_FILE_PATH, 'r') as file:
         config = yaml.safe_load(file)
-    return config, CONFIG_PATH
+    return config, CONFIG_FOLDER_PATH
 
 
 def prolog(new_aeid, config):
@@ -54,13 +81,14 @@ def prolog(new_aeid, config):
     config['aeid'] = new_aeid
 
     # Write the updated YAML content back to the file
-    with open(CONFIG_PATH, 'w') as file:
+    with open(CONFIG_FILE_PATH, 'w') as file:
         yaml.dump(config, file)
 
     assay_component_endpoint_name = get_assay_info(config['aeid'])['assay_component_endpoint_name']
 
-    print("\n" + "#" * 90 + "\n")
-    print_(f"Processing assay endpoint: {assay_component_endpoint_name} [id:{config['aeid']}]")
+    print("\n" + f"#-" * 55 + "\n")
+    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")
+    print_(f"{status('seedling')} Start new assay endpoint: {assay_info}")
 
 
 def check_db(config):
@@ -69,21 +97,23 @@ def check_db(config):
         tables = ", ".join(new_table_names)
         drop_stmt = f"DROP TABLE IF EXISTS {tables};"
         query_db(drop_stmt)  # Permanently removes tables from db!
-        print_("Dropped all relevant tables")
+        print(f"{status('broom')} Dropped all relevant tables")
     for ddl_file in os.scandir(DDL_PATH):
         with open(ddl_file, 'r') as f:
             ddl_query = f.read()
             query_db(ddl_query)
-    print(f"{thumbs_up} Verified the existence of required DB tables")
+    print(f"{status('thumbs_up')} Verified the existence of required DB tables")
 
 
-def get_formatted_time_elapsed(start_time):
-    color_code = 34
+def get_formatted_time_elapsed(start_time, blue=True):
     seconds = time.time() - start_time
     minutes = int(seconds)
     formatted_seconds = "{:.2f}".format(seconds - minutes)[2:]
-    elapsed_time_formatted = f"0:{minutes:02}:{formatted_seconds}"
-    return f"[{elapsed_time_formatted}s]"
+    elapsed_time_formatted = f"[0:{minutes:02}:{formatted_seconds}s]"
+    if DISPLAY_EMOJI and blue:
+        return text_to_blue(f"{elapsed_time_formatted}")
+    else:
+        return elapsed_time_formatted
 
 
 def get_efficacy_cutoff(aeid, bmad):
@@ -164,14 +194,14 @@ def get_assay_info(aeid):
 
 
 def load_raw_data_from_db(aeid):
-    print_("Loading raw data from DB...")
+    print_(f"{status('hourglass_not_done')} Fetching raw data from DB..")
     select_cols = ['mc3.m0id', 'mc3.m1id', 'mc3.m2id', 'm3id', 'spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
     qstring = f"SELECT {', '.join(select_cols)} " \
               f"FROM mc0, mc1, mc3 " \
               f"WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id " \
               f"AND aeid = {aeid};"
     df = query_db(query=qstring)
-    print_(f"Loaded {df.shape[0]} single datapoints")
+    print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
     return df
 
 
@@ -195,7 +225,7 @@ def read_aeids():
 
 
 def export_as_csv(config, dat):
-    print_("Exporting output data as CSV")
+    print_(f"{status('floppy_disk')} Exporting output data as csv")
     dat = dat[config['export_cols']]
     dat = tcpl_output(dat, config['aeid'])
     dat = dat.rename(columns={'dsstox_substance_id': 'dtxsid'})

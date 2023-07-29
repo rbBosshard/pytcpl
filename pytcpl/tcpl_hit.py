@@ -6,12 +6,14 @@ from tqdm import tqdm
 
 from acy import acy
 from bmd_bounds import bmd_bounds
+from pipeline_helper import get_msg_with_elapsed_time, status, custom_format, get_msg_with_elapsed_time
 from tcpl_hit_helper import nest_select, hit_cont_inner
 
 
 def tcpl_hit(df, cutoff, config):
     total = df.shape[0]
-    iterator = tqdm(df.iterrows(), desc='Hit-calling: ', total=total)
+    desc = get_msg_with_elapsed_time(f"{status('test_tube')}    - Third run (hit-call):   ", color_only_time=False)
+    iterator = tqdm(df.iterrows(), desc=desc, total=total, bar_format=custom_format)
 
     if config['parallelize']:
         res = pd.DataFrame(Parallel(n_jobs=config['n_jobs'])(
