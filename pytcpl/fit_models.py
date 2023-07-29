@@ -17,7 +17,7 @@ def get_fit_model(fit_model):
     }.get(fit_model)
 
 
-def get_params(fit_model, fit_strategy):
+def get_params(fit_model):
     return dict(cnst=['a', 'er'],
                   poly1=['a', 'er'],
                   poly2=['a', 'b', 'er'],

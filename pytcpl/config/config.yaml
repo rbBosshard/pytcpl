@@ -1,78 +1,86 @@
-pytcpl:
-  # aeid: assay id
-  aeid: 784
-  # test: if test is 0 then all chemicals are processed else # = test chemicals
-  test: 0
-  # fit strategy: leastsq, mle
-  fit_strategy: mle
-  # parallelize: 0,1 use for debug parallelize = 0, else 1
-  parallelize: 1
-  # n_jobs: parallel joblib jobs, #threads, max = -1
-  n_jobs: -1
-  # do_fit: 0,1 do curve-fit else load from csv export folder
-  do_fit: 1
-  # do_hit: 0,1 do hit-calling else load from csv export folder
-  do_hit: 1
-  threshold_num_dp:
-  # fit_models: Fit models
-#  fit_models: [cnst, poly1, poly2, pow, exp2, exp3, exp4, exp5, hill, gnls]
-  fit_models: [cnst, poly1, poly2, pow, exp4, exp5, hill, gnls]
-  # profile: 0,1 profile performance
-  profile: 1
-  # bidirectional: 0,1 bidirectional fit, up/down
-  bidirectional: 1
-  # export_path: Export folder
-  export_path: export
-
-  output_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top, concentration_unlogged, response, fitparams]
-
-  export_cols: [aeid, spid, fit_model, cutoff, hitcall, ac50, bmd, top]
-
-  assay_info_keys: [acid, assay_component_endpoint_name, assay_component_endpoint_desc,
-                      assay_function_type, normalized_data_type, analysis_direction,
-                      burst_assay, key_positive_control, signal_direction,
-                      intended_target_type, intended_target_type_sub,
-                      intended_target_family, intended_target_family_sub]
-
-  # new_table_names: New tables for this pipeline
-  new_table_names: [cutoffs, output]
-
-
-# Login specific
-kasia:
-  database:
-    username: kasia
-    password: kasia
-    host: localhost
-    port: 3306
+aeid: '5'
+assay_info_keys:
+- acid
+- assay_component_endpoint_name
+- assay_component_endpoint_desc
+- assay_function_type
+- normalized_data_type
+- analysis_direction
+- burst_assay
+- key_positive_control
+- signal_direction
+- intended_target_type
+- intended_target_type_sub
+- intended_target_family
+- intended_target_family_sub
+bidirectional: 1
+db_login:
+  bossh:
     db: invitrodb_v3o5
-eliza:
-  database:
-    username: eliza
-    password: eliza
     host: localhost
-    port: 3306
-    db: invitrodb_v3o5
-lili:
-  database:
-    username: lili
-    password: lili
-    host: localhost
-    port: 3306
-    db: invitrodb_v3o5
-robin:
-  database:
-    username: robin
-    password: robin
-    host: localhost
-    port: 3306
-    db: invitrodb_v3o5
-bossh:
-  database:
-    username: root
     password: root
-    host: localhost
     port: 3306
+    username: root
+  eliza:
     db: invitrodb_v3o5
-
-# Add here new user
+    host: localhost
+    password: eliza
+    port: 3306
+    username: eliza
+  kasia:
+    db: invitrodb_v3o5
+    host: localhost
+    password: kasia
+    port: 3306
+    username: kasia
+  lil:
+    db: invitrodb_v3o5
+    host: localhost
+    password: lili
+    port: 3306
+    username: lili
+  robin:
+    db: invitrodb_v3o5
+    host: localhost
+    password: robin
+    port: 3306
+    username: robin
+do_fit: 1
+do_hit: 1
+drop_new_tables: 0
+export_cols:
+- aeid
+- spid
+- fit_model
+- cutoff
+- hitcall
+- ac50
+- bmd
+- top
+export_path: export
+fit_models:
+- cnst
+- poly1
+- hill
+fit_strategy: mle
+n_jobs: -1
+new_table_names:
+- cutoffs
+- output
+output_cols:
+- aeid
+- spid
+- fit_model
+- cutoff
+- hitcall
+- ac50
+- bmd
+- top
+- concentration_unlogged
+- response
+- fitparams
+parallelize: 1
+profile: 1
+test: 0
+threshold_num_dp: 1000
+track_fitted_params: 1

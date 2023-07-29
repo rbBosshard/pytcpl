@@ -1,25 +1,152 @@
+import joblib
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from tqdm import tqdm
 
-from tcpl_hit_core import tcpl_hit_core
+from acy import acy
+from bmd_bounds import bmd_bounds
+from tcpl_hit_helper import nest_select, hit_cont_inner
 
 
-def tcpl_hit(mc4, fit_strategy, coff, parallelize=False, n_jobs=-1):
-    if parallelize:
-        res = pd.DataFrame(Parallel(n_jobs=n_jobs)(
+def tcpl_hit(df, cutoff, config):
+    total = df.shape[0]
+    iterator = tqdm(df.iterrows(), desc='Hit-calling: ', total=total)
+
+    if config['parallelize']:
+        res = pd.DataFrame(Parallel(n_jobs=config['n_jobs'])(
             delayed(tcpl_hit_core)(
-                fit_strategy=fit_strategy,
                 params=row.fitparams,
                 conc=np.array(row.concentration_unlogged),
                 resp=np.array(row.response),
-                cutoff=coff
-            ) for _, row in mc4.iterrows()
+                cutoff=cutoff
+            ) for _, row in iterator
         ))
     else:
-        res = mc4.apply(lambda row: tcpl_hit_core(fit_strategy=fit_strategy, params=row.fitparams,
-                              conc=np.array(row.concentration_unlogged),
-                              resp=np.array(row.response), cutoff=coff), axis=1, result_type='expand')
+        res = df.progress(lambda row: tcpl_hit_core(params=row.fitparams, conc=np.array(row.concentration_unlogged),
+                                                  resp=np.array(row.response), cutoff=cutoff), axis=1, result_type='expand')
 
-    mc4[res.columns] = res
-    return mc4
+    df[res.columns] = res
+    return df
+
+
+def tcpl_hit_core(params, conc, resp, cutoff, onesd=1, bmr_scale=1.349, bmed=0, bmd_low_bnd=None, bmd_up_bnd=None):
+    # Todo: ensure if fit_model == const then do not compute more than needed
+    fitout = {}
+    modpars = None
+    modelnames = params.keys()
+    aics = {m: params[m]["aic"] for m in modelnames}
+
+    aics_values = list(aics.values())
+    aics_keys = list(aics.keys())
+    conc = np.array(conc)
+    resp = np.array(resp)
+
+    # use nested chisq to choose between poly1 and poly2, remove poly2 if it fails. pvalue hardcoded to .05
+    if "poly1" in aics_keys and "poly2" in aics_keys:
+        aics = nest_select(aics, "poly1", "poly2", dfdiff=1, pval=0.05)
+
+    # if all fits, except the constant fail, use none for the fit method
+    # when continuous hit calling is in use
+    if sum(item is not None for item in aics_values) == 1 and "cnst" in aics_keys:
+        fit_model = "none"
+    else:
+        # get AIC weights of winner (vs constant) for continuous hitcalls
+        # never choose constant as winner for continuous hitcalls
+        nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
+        fit_model = min(nocnstaics, key=nocnstaics.get)
+        try:  # Todo: RuntimeWarning: invalid value encountered in scalar divide
+            caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
+        except:
+            try:
+                term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
+                if term == np.inf:
+                    caikwt = 0
+                else:
+                    caikwt = 1 / (1 + term)
+            except Exception as e:
+                print(f"Error caikwt: {e}")
+                caikwt = 0
+
+    # if the fit_model is not reported as 'none', obtain model information
+    if fit_model != "none":
+        fitout = params[fit_model]
+        top = fitout["top"]
+        modpars = fitout["pars"]
+
+    n_gt_cutoff = np.sum(np.abs(resp) > cutoff)
+    if cutoff != 0 and "top" in locals():
+        top_over_cutoff = np.abs(top) / cutoff
+    else:
+        top_over_cutoff = None
+
+    if fit_model == "none":
+        hitcall = 0
+    else:
+        # compute continuous hitcall
+        mll = len(modpars) - aics[fit_model] / 2
+
+        er = fitout['pars']["er"]
+        hitcall = hit_cont_inner(conc, resp, top, cutoff, er, ps=modpars, fit_model=fit_model, caikwt=caikwt, mll=mll)
+
+    if np.isnan(hitcall):
+        hitcall = 0
+
+    ac50 = None
+    bmd = None
+    bmr = onesd * bmr_scale  # magic bmr is default 1.349
+    if hitcall > 0:
+        # fill ac's; can put after hit logic
+        ac50 = acy(.5 * top, modpars, fit_model=fit_model)
+        acc = acy(np.sign(top) * cutoff, modpars | {"top": top}, fit_model=fit_model)
+        ac1sd = acy(np.sign(top) * onesd, modpars, fit_model=fit_model)
+        bmd = acy(np.sign(top) * bmr, modpars, fit_model=fit_model)
+
+        # get bmdl and bmdu
+        try:
+            bmdl = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                              bmd=bmd, which_bound="lower")
+            bmdu = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+                              bmd=bmd, which_bound="upper")
+        except Exception as e:
+            # print(f"bmd_bounds: {e}")
+            pass
+
+        # apply bmd min
+        if bmd_low_bnd is not None and not np.isnan(bmd):
+            min_conc = np.min(conc)
+            min_bmd = min_conc * bmd_low_bnd
+            if bmd < min_bmd:
+                bmd_diff = min_bmd - bmd
+                # shift all bmd to the right
+                bmd += bmd_diff
+                bmdl += bmd_diff
+                bmdu += bmd_diff
+
+        # apply bmd max
+        if bmd_up_bnd is not None and not np.isnan(bmd):
+            max_conc = np.max(conc)
+            max_bmd = max_conc * bmd_up_bnd
+            if bmd > max_bmd:
+                # shift all bmd to the left
+                bmd_diff = bmd - max_bmd
+                bmd -= bmd_diff
+                bmdl -= bmd_diff
+                bmdu -= bmd_diff
+
+    locals().update(fitout)
+    if "pars" in fitout:
+        locals().update(fitout["pars"])
+
+    out = {}
+    name_list = ["fit_model", "cutoff", "bmr", "bmdl", "bmdu", "caikwt",
+                 "mll", "hitcall", "ac50", "top", "acc", "ac1sd", "bmd"]
+
+    computed_vars = list(locals().keys())
+    out_list = [x for x in name_list if x in computed_vars]
+
+    for name in out_list:
+        out[name] = locals()[name]
+
+    out = {k: v for k, v in out.items() if v is not None or 'bmd'}
+    return out

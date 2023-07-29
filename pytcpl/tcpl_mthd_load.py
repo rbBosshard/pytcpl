@@ -1,4 +1,4 @@
-from query_db import tcpl_query
+from query_db import query_db
 
 
 def tcpl_mthd_load(lvl, aeid):
@@ -8,4 +8,4 @@ def tcpl_mthd_load(lvl, aeid):
               f"FROM {', '.join(tbls)} " \
               f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
               f"AND aeid IN ({aeid});"
-    return tcpl_query(query=qstring)
+    return query_db(query=qstring)

@@ -12,7 +12,7 @@ def get_db_config():
     with open(CONFIG_PATH, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         login_name = os.getlogin()
-        config_db = config[login_name]['database']
+        config_db = config["db_login"][login_name]
         return config_db['username'], config_db['password'], config_db['host'], config_db['port'], config_db['db']
 
 
@@ -26,7 +26,7 @@ def get_sqlalchemy_engine():
         return None
 
 
-def tcpl_query(query):
+def query_db(query):
     try:
         if any(query.lower().startswith(x) for x in ["delete", "create", "drop"]):
             user, pw, host, port, db = get_db_config()

@@ -5,7 +5,7 @@ from tcpl_obj_fn import tcpl_obj
 from fit_models import get_fit_model
 
 
-def hit_cont_inner(conc, resp, top, cutoff, er, ps, fit_strategy, fit_model, caikwt, mll):
+def hit_cont_inner(conc, resp, top, cutoff, er, ps, fit_model, caikwt, mll):
     # Each P represents the odds of the curve being a hit according to different criteria; multiply all Ps to get hit odds overall
     if fit_model == "none":
         return 0
@@ -26,13 +26,13 @@ def hit_cont_inner(conc, resp, top, cutoff, er, ps, fit_strategy, fit_model, cai
     # p3 = pnorm((top - cutoff) / topsd)  # odds of top above cutoff
     ps = list(ps.values())
     ps = np.array([p for p in ps if not None])
-    p3 = top_likelihood(fit_strategy, fit_model, cutoff, conc, resp, ps, top, mll)
+    p3 = top_likelihood(fit_model, cutoff, conc, resp, ps, top, mll)
     # multiply three probabilities
     hit_p = p1 * p2 * p3
     return hit_p
 
 
-def top_likelihood(fit_strategy, fit_model, cutoff, conc, resp, ps, top, mll):
+def top_likelihood(fit_model, cutoff, conc, resp, ps, top, mll):
     # reparameterize so that top is exactly at cutoff
     if fit_model == "exp2":
         ps[0] = cutoff / (np.exp(np.max(conc) / ps[1]) - 1)

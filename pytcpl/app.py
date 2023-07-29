@@ -1,14 +1,14 @@
+import json
+
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import json
 
 from fit_models import get_fit_model
+from pipeline_helper import get_assay_info, print_
 from pipeline_helper import load_config
-from query_db import tcpl_query
-from tcpl_load_data import tcpl_load_data
-from pipeline_helper import starting, elapsed, get_assay_info
+from query_db import query_db
 
 
 # Run command `streamlit run pytcpl/app.py`
@@ -23,12 +23,12 @@ def powspace(start, stop, power, num):
 
 # Load data initially or when id changes, and cache the result
 @st.cache_data
-def fetch_data(id):
-    start = starting("Fetch data")
+def fetch_data(aeid):  # aeid parameter used to handle correct caching
+    print_(f"Fetch data from DB with assay ID {aeid}...")
     check_reset()
     qstring = f"SELECT * FROM output WHERE aeid = {st.session_state.aeid};"
-    dat = tcpl_query(query=qstring)
-    print(elapsed(start))
+    dat = query_db(query=qstring)
+    print_(f"Data fetched: {dat.shape[0]} rows.")
     return dat
 
 
@@ -177,18 +177,18 @@ def add_curves(fig, row):
 
 def get_chem_info(spid):
     try:
-        chid = tcpl_query(query=f"SELECT chid FROM sample WHERE spid = '{str(spid)}';").iloc[0]['chid']
+        chid = query_db(query=f"SELECT chid FROM sample WHERE spid = '{str(spid)}';").iloc[0]['chid']
     except:
         try:
-            chid = tcpl_query(query=f"SELECT chid FROM chemical WHERE chnm = '{str(spid)}';").iloc[0]['chid']
+            chid = query_db(query=f"SELECT chid FROM chemical WHERE chnm = '{str(spid)}';").iloc[0]['chid']
         except:
             try:
-                chid = tcpl_query(query=f"SELECT chid FROM chemical WHERE chnm LIKE '%{str(spid)}%';").iloc[0]['chid']
+                chid = query_db(query=f"SELECT chid FROM chemical WHERE chnm LIKE '%{str(spid)}%';").iloc[0]['chid']
             except Exception as e:
                 print(f"Error on spid {spid}: {e}")
                 return None, None, None
 
-    chem = tcpl_query(query=f"SELECT * FROM chemical WHERE chid = {str(chid)};").iloc[0]
+    chem = query_db(query=f"SELECT * FROM chemical WHERE chid = {str(chid)};").iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
     dsstox_substance_id = chem['dsstox_substance_id']
@@ -238,7 +238,6 @@ def check_reset():
 
 
 def reset_spid_row():
-    print("reset to start sample")
     st.session_state.spid_row = 0
 
 
