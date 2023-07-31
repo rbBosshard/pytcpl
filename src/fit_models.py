@@ -19,17 +19,17 @@ def get_fit_model(fit_model):
 
 def get_params(fit_model):
     return dict(cnst=['a', 'er'],
-                  poly1=['a', 'er'],
-                  poly2=['a', 'b', 'er'],
-                  pow=['a', 'p', 'er'],
-                  exp2=['a', 'b', 'er'],
-                  exp3=['a', 'b', 'p', 'er'],
-                  exp4=['tp', 'ga', 'er'],
-                  exp5=['tp', 'ga', 'p', 'er'],
-                  hill=['tp', 'ga', 'p', 'er'],
-                  gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
-                  expo=['A', 'B', 'er'],
-                  ).get(fit_model)
+                poly1=['a', 'er'],
+                poly2=['a', 'b', 'er'],
+                pow=['a', 'p', 'er'],
+                exp2=['a', 'b', 'er'],
+                exp3=['a', 'b', 'p', 'er'],
+                exp4=['tp', 'ga', 'er'],
+                exp5=['tp', 'ga', 'p', 'er'],
+                hill=['tp', 'ga', 'p', 'er'],
+                gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
+                expo=['A', 'B', 'er'],
+                ).get(fit_model)
 
 
 def expo(x, A, B):

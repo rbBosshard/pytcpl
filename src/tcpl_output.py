@@ -8,7 +8,7 @@ def tcpl_output(dat, aeid):
     dat = pd.merge(dat, tcpl_load_unit(aeid), on="aeid")
     dat = pd.merge(tcpl_load_chem("spid", dat["spid"].unique()), dat, on="spid", how="right")
     dat = pd.merge(dat, tcpl_load_conc_unit(dat["spid"].unique()), on="spid", how="left")
-    
+
     # Subset chemicals with multiple samples!
     def subset_chemicals(dat):
         # A chid can have more than one spid. Use consensus hit (chit) logic: mean

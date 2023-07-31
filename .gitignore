@@ -7,8 +7,3 @@ pytcpl.egg-info/
 dist/*
 dist/.gitkeep
 
-docs/*
-docs/.gitkeep
-
-input/*
-input/.gitkeep

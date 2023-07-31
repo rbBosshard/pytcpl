@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.optimize import root_scalar
+
 from fit_models import get_fit_model
+
 
 def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=False):
     # unpack parameter dictionary into local variables
@@ -15,7 +17,7 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
         if 'top' in locals() and locals()["top"] and abs(y) >= abs(locals()["top"]):
             return None
         if 'tp' in locals() and locals()["tp"] and y * locals()["tp"] < 0:
-           return None
+            return None
 
     if fit_model == "poly1":
         return y / locals()["a"]
@@ -73,8 +75,3 @@ def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=Fals
 
     elif fit_model == "expo":
         return np.log(y / locals()["A"]) / locals()["B"]
-
-
-
-
-

@@ -7,35 +7,13 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from constants import symbols_dict
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
-from symbols import symbols_dict
+from constants import COLORS_DICT, CONFIG_FOLDER_PATH, CONFIG_FILE_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    EXPORT_CSV_FOLDER_PATH, LOG_FOLDER_PATH, START_TIME, DISPLAY_EMOJI
 from tcpl_output import tcpl_output
-
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FOLDER_PATH = os.path.join(ROOT_DIR, '../config')
-CONFIG_FILE_PATH = os.path.join(CONFIG_FOLDER_PATH, 'config.yaml')
-AEIDS_LIST_PATH = os.path.join(CONFIG_FOLDER_PATH, 'aeid_list.in')
-DDL_PATH = os.path.join(CONFIG_FOLDER_PATH, 'DDL')
-EXPORT_FOLDER_PATH = os.path.join(ROOT_DIR, '../export')
-EXPORT_CSV_FOLDER_PATH = os.path.join(EXPORT_FOLDER_PATH, 'export_csv')
-LOG_FOLDER_PATH = os.path.join(EXPORT_FOLDER_PATH, 'logs')
-START_TIME = time.time()
-DISPLAY_EMOJI = True
-
-COLORS_DICT = {
-    "WHITE": "\033[37m",
-    "BLUE": "\033[34m",
-    "GREEN": "\033[32m",
-    "RED": "\033[31m",
-    "ORANGE": "\033[33m",
-    "VIOLET": "\033[35m",
-    "RESET": "\033[0m",
-}
-
-# Custom format for tqdm progress bar (using blue color)
-custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
 
 
 def status(symbol, replacement=""):
@@ -54,11 +32,11 @@ def launch(config, confg_path):
     # disable verbose output if --unicode passed as runtime argument
     DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['apply_fancy_logging']
 
-    print(  f"{status('balloon')} Hi :)\n\n"
-            f"{status('rocket')} Pytcpl launched!\n\n"
-            f"{status('gear')} Configuration located in {confg_path}\n\n"
-            f"{status('scroll')} Running pipeline for "
-            f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')\n")
+    print(f"{status('balloon')} Hi :)\n\n"
+          f"{status('rocket')} Pytcpl launched!\n\n"
+          f"{status('gear')} Configuration located in {confg_path}\n\n"
+          f"{status('scroll')} Running pipeline for "
+          f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')\n")
     check_db(config)
     return aeid_list
 
@@ -72,7 +50,7 @@ def load_config():
 def prolog(new_aeid, config):
     # print boundary
     print("\n" + f"#-" * 55 + "\n")
-    
+
     # Update the specific key with the new value
     config['aeid'] = new_aeid
 
@@ -81,7 +59,7 @@ def prolog(new_aeid, config):
         yaml.dump(config, file)
 
     assay_component_endpoint_name = get_assay_info(config['aeid'])['assay_component_endpoint_name']
-    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")   
+    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")
     print_(f"{status('seedling')} Start new assay endpoint: {assay_info}")
 
 
@@ -214,11 +192,7 @@ def export_as_csv(config, df):
 
 
 def text_to_blue(message):
-    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}"
-
-
-def text_to_green(message):
-    return f"{COLORS_DICT['GREEN']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
+    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
 
 
 def get_formatted_time_elapsed(start_time, blue=True):

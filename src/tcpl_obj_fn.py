@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import t, norm
+from scipy.stats import t
 
 
 def tcpl_obj(params, conc, resp, fit_model, errfun="dt4"):
@@ -19,12 +19,9 @@ def tcpl_obj(params, conc, resp, fit_model, errfun="dt4"):
     # log_likelihood = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=scale))
     # return -log_likelihood  # negative log likelihood scaled by variance
 
-
     try:
         log_likelihood = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=scale))
     except Exception as e:
         print(f"{fit_model} {e}")
         log_likelihood = np.sum(t.logpdf(x=resp, df=4, loc=pred, scale=scale))
     return -log_likelihood  # negative log likelihood scaled by variance
-
-

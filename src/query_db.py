@@ -5,14 +5,14 @@ import pandas as pd
 import yaml
 from sqlalchemy import create_engine, text
 
+from constants import CONFIG_FOLDER_PATH
+
 
 def get_db_config():
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CONFIG_PATH = os.path.join(ROOT_DIR, '../config/db_login.yaml')
-    with open(CONFIG_PATH, "r") as f:
+    with open(os.path.join(CONFIG_FOLDER_PATH, 'config_db.yaml'), "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         login_name = os.getlogin()
-        config_db = config["db_login"][login_name]
+        config_db = config[login_name]
         return config_db['username'], config_db['password'], config_db['host'], config_db['port'], config_db['db']
 
 

@@ -1,0 +1,30 @@
+bossh:
+  db: invitrodb_v3o5
+  host: localhost
+  password: root
+  port: 3306
+  username: root
+eliza:
+  db: invitrodb_v3o5
+  host: localhost
+  password: eliza
+  port: 3306
+  username: eliza
+kasia:
+  db: invitrodb_v3o5
+  host: localhost
+  password: kasia
+  port: 3306
+  username: kasia
+lil:
+  db: invitrodb_v3o5
+  host: localhost
+  password: lili
+  port: 3306
+  username: lili
+robin:
+  db: invitrodb_v3o5
+  host: localhost
+  password: robin
+  port: 3306
+  username: robin

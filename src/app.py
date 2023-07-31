@@ -51,7 +51,7 @@ def update():
     spid = get_spid(df, st.session_state.trigger)
     if spid is None:
         return
-    
+
     row = df[df["id"] == st.session_state.id]
 
     row.loc[:, 'concentration_unlogged'] = row['concentration_unlogged'].apply(json.loads)
@@ -59,14 +59,15 @@ def update():
     row.loc[:, 'fitparams'] = row['fitparams'].apply(json.loads)
     row = row.to_dict()
     # Remove all nested dictionaries using dictionary comprehension
-    row = {key: value for key, nested_dict in row.items() for value in nested_dict.values()}   
+    row = {key: value for key, nested_dict in row.items() for value in nested_dict.values()}
 
     fig = go.Figure()
 
     add_title(fig, row)
 
     fig.add_trace(
-        go.Scatter(x=np.log10(row["concentration_unlogged"]), y=row["response"], mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
+        go.Scatter(x=np.log10(row["concentration_unlogged"]), y=row["response"], mode='markers', legendgroup="Response",
+                   legendgrouptitle_text="Repsonse",
                    marker=dict(color="black", symbol="x-thin-open", size=10),
                    name="response", showlegend=False))
 
@@ -115,7 +116,7 @@ def add_curves(fig, row):
     for m, model in enumerate(fit_models):
         params = fitparams[model]["pars"]
         params = {param: value for param, value in params.items() if param in get_fit_model(model).__code__.co_varnames}
-        
+
         min_val = np.min(conc)
         # min_val = min_val if row['hitcall'] >= 0 else min(min_val, row['ac50'])
 
@@ -128,12 +129,12 @@ def add_curves(fig, row):
             if model != row['fit_model'] and model != "none":
                 fig.add_trace(
                     go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
-                            name=f"{model} {aic} {rmse}", line=dict(width=2, dash='dash')))
+                               name=f"{model} {aic} {rmse}", line=dict(width=2, dash='dash')))
 
             elif model == row['fit_model']:
                 fig.add_trace(
                     go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
-                            name=f"{model} (BEST FIT) {aic} {rmse}", line=dict(width=3)))
+                               name=f"{model} (BEST FIT) {aic} {rmse}", line=dict(width=3)))
 
                 if row['hitcall'] > 0.0:
                     # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
@@ -141,16 +142,16 @@ def add_curves(fig, row):
                     for p in potencies:
                         if p in row:
                             fig.add_vline(x=np.log10(row[p]), line_color=color, line_width=2,
-                                        annotation_position="bottom left",
-                                        annotation_text=f"{p}", layer="below")
+                                          annotation_position="bottom left",
+                                          annotation_text=f"{p}", layer="below")
 
                     # efficacies = ["top", "bmr"]
                     efficacies = ["top"]
                     for e in efficacies:
                         if e in row:
                             fig.add_hline(y=row[e], line_color=color, line_width=2,
-                                        annotation_position="bottom left",
-                                       annotation_text=f"{e}", layer="below")
+                                          annotation_position="bottom left",
+                                          annotation_text=f"{e}", layer="below")
 
         except Exception as e:
             print(f"{e}")

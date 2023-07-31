@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import t, chi2
-from tcpl_obj_fn import tcpl_obj
+
 from fit_models import get_fit_model
+from tcpl_obj_fn import tcpl_obj
 
 
 def hit_cont_inner(conc, resp, top, cutoff, er, ps, fit_model, caikwt, mll):

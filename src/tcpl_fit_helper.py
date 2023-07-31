@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import minimize, curve_fit, Bounds
+from scipy.optimize import minimize
 
 from acy import acy
 from fit_models import get_fit_model
@@ -86,7 +86,6 @@ def generate_output(fit_model, conc, resp, out, fit):
     # except Exception as e:
     #     print(f"{fit_model} >>> Error calculating parameter covariance: {e}")
     #     export_csv["cov"] = 0
-
 
 
 def assign_extra_attributes(fit_model, out):
