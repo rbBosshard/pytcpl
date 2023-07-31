@@ -52,9 +52,7 @@ streamlit run src/app.py --server.address="localhost"
 - Goto official [https://streamlit.io](https://streamlit.io)
 
 
-### Run ML for assay endpoint (single aeid)
-- Goto [ml.ipynb](ml/ml.ipynb) for running the pipeline (jupyter notebook)
-- Goto [config_ml.yaml](config/config_ml.yaml) for customizing ML pipeline behaviour
+
 ___
 
 
