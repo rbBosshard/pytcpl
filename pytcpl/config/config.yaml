@@ -33,10 +33,6 @@ fit_models:
 - poly1
 - poly2
 - pow
-- exp2
-- exp3
-- exp4
-- exp5
 - hill
 - gnls
 fit_strategy: mle
