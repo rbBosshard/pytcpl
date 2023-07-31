@@ -4,11 +4,5 @@ export_csv/5.csv
 logs/*
 !logs/.gitkeep
 
-figures/*
-!figures/.gitkeep
-
-presentations/*
-!presentations/.gitkeep
-
 profile/*
 !profile/.gitkeep
