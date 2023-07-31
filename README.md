@@ -50,9 +50,6 @@ streamlit run src/app.py --server.address="localhost"
 - The [Curve Surfer](http://localhost:8501/) web app should open as new browser tab
 - Curve Surfer only works for assay endpoints already run in pipeline
 - Goto official [https://streamlit.io](https://streamlit.io)
-
-
-
 ___
 
 
@@ -75,7 +72,7 @@ snakeviz export/logs/profiler/pipeline.prof
 - Goto [SnakeViz](https://jiffyclub.github.io/snakeviz/) website
 
 
-### Documentation automated by sphinx
+### Documentation with Sphinx
 #### Update docs
 ```bash
 docs/make clean
@@ -128,13 +125,11 @@ html_theme = 'sphinx_rtd_theme'
 - Goto official [sphinx-doc.org](https://www.sphinx-doc.org) website
 
 
-
-
-
 ### Build python package
 ```bash
 python -m build
 ```
+
 
 ### Remove conda virtual environment
 ```bash

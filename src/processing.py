@@ -10,7 +10,7 @@ from acy import acy
 from bmd_bounds import bmd_bounds
 from fit_models import get_params
 from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_
-from src.constants import custom_format, LOG_FOLDER_PATH
+from constants import custom_format, LOG_DIR_PATH
 from tcpl_fit_helper import fit_curve
 from tcpl_hit_helper import nest_select, hit_cont_inner
 
@@ -84,7 +84,7 @@ def processing(df, cutoff, config):
     df = df.assign(fitparams=fitparams)
 
     # Create a log file to track the parameter estimates
-    with open(os.path.join(LOG_FOLDER_PATH, "params_tracked.out"), "w") as log_file:
+    with open(os.path.join(LOG_DIR_PATH, "params_tracked.out"), "w") as log_file:
         for res in fitparams:
             for model, params in res.items():
                 if model != 'cnst':
