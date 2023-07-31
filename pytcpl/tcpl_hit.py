@@ -4,7 +4,7 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from pipeline_helper import status, custom_format, get_msg_with_elapsed_time
-from pytcpl.processing import tcpl_hit_core
+from processing import tcpl_hit_core
 
 
 def tcpl_hit(df, cutoff, config):
