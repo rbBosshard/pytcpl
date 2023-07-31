@@ -1,8 +1,5 @@
-export_csv/5.csv
-!export_csv/.gitkeep
+csv/5.csv
+!csv/.gitkeep
 
 logs/*
 !logs/.gitkeep
-
-profile/*
-!profile/.gitkeep

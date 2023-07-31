@@ -132,7 +132,7 @@ def preprocess(df, config):
         m3ids=('m3id', list)
     ).reset_index()
 
-    # Filter export_csv rows with NaN values in the concentration column
+    # Filter csv rows with NaN values in the concentration column
     df = df[df.concentration_unlogged.apply(lambda x: not any(pd.isna(x)))]
 
     def shrink_concentrations_and_responses(row):

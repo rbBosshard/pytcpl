@@ -2,15 +2,17 @@ import os
 import time
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FOLDER_PATH = os.path.join(ROOT_DIR, '../config')
-CONFIG_FILE_PATH = os.path.join(CONFIG_FOLDER_PATH, 'config.yaml')
-AEIDS_LIST_PATH = os.path.join(CONFIG_FOLDER_PATH, 'aeid_list.in')
-DDL_PATH = os.path.join(CONFIG_FOLDER_PATH, 'DDL')
-EXPORT_FOLDER_PATH = os.path.join(ROOT_DIR, '../export')
-EXPORT_CSV_FOLDER_PATH = os.path.join(EXPORT_FOLDER_PATH, 'export_csv')
-LOG_FOLDER_PATH = os.path.join(EXPORT_FOLDER_PATH, 'logs')
+CONFIG_DIR_PATH = os.path.join(ROOT_DIR, '../config')
+EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../export')
+CSV_DIR_PATH = os.path.join(EXPORT_DIR_PATH, 'csv')
+LOG_DIR_PATH = os.path.join(EXPORT_DIR_PATH, 'logs')
+CONFIG_PATH = os.path.join(CONFIG_DIR_PATH, 'config.yaml')
+AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
+DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
+PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
+
 START_TIME = time.time()
-DISPLAY_EMOJI = True
+DISPLAY_EMOJI = 1
 
 COLORS_DICT = {
     "WHITE": "\033[37m",

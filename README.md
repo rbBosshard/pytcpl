@@ -7,33 +7,41 @@ _pytcpl_ is a streamlined Python package that incorporates the **mc4** and **mc5
 providing concentration-response curve fitting functionality based on [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2).
 It utilizes the [Invitrodb version 3.5 release](https://cfpub.epa.gov/si/si_public_record_Report.cfm?dirEntryId=355484&Lab=CCTE)
 as its backend database.
+___
 
-### Use conda environment (optional)
-- `conda create --name pytcpl`
-- `conda activate pytcpl`
-- `conda install pip`
+
+### (Optional) Use conda environment
+```bash
+conda create --name pytcpl
+```
+```bash
+conda activate pytcpl
+```
+```bash
+conda install pip
+```
+
 
 ### Install dependencies
-  - `pip install -r requirements.txt`
+```bash 
+pip install -r config/requirements.txt
+```
 
-### Navigate into python package
-- `cd src`
 
 ### Run main pipeline script:
 - Goto [config.yaml](config/config.yaml) for customizing pipeline behaviour
-- Goto [config_db.yaml](config/config_db.yaml) for setting database login credentials
+- Goto [config_db.yaml](config/config_db.yaml) for setting MySQL database login credentials
 - Goto [aeid_list.in](config/aeid_list.in) for setting assay endpoints processed by pipeline
-
+- Goto [DDL](config/DDL/) for setting Data Definition Language (DDL) statements, used to create new MySQL database schema objects
 ```bash 
 python src/pipeline.py
 ```
-
 <details><summary>(Optional) redirect terminal output to log file</summary>
-
 ```bash
 python src/pipeline.py --unicode | tee export/logs/log.out
 ```
 </details>
+
 
 ### Visualize fitted curves (per assay/chemical pair)
 ```bash
@@ -43,42 +51,102 @@ streamlit run src/app.py --server.address="localhost"
 - Curve Surfer only works for assay endpoints already run in pipeline
 - Goto official [https://streamlit.io](https://streamlit.io)
 
+
 ### Run ML for assay endpoint (single aeid)
 - Goto [ml.ipynb](ml/ml.ipynb) for running the pipeline (jupyter notebook)
 - Goto [config_ml.yaml](config/config_ml.yaml) for customizing ML pipeline behaviour
+___
 
 
 ## This part is only relevant for development!
-### Generate requirements.txt file with pip:
+### Generate requirements.txt:
 ```bash
-pipreqs --encoding=utf8 --force --mode no-pin"
-```
-- Remove duplicates and replace problem packages manually
-  - `sqlalchemy`
-  - `mysql-connector-python`
-- Add
-  - `snakeviz`
-
-### View profiling results (if profiling was activated)
-- Activate profiling by setting `apply_profiler: 1` in [config.yaml](config/config.yaml)
-```bash
-snakeviz export/profile/pipeline.prof
-```
-- The call stack with performance details should open in browser
-- Goto official [SnakeViz](https://jiffyclub.github.io/snakeviz/) website
-
-### Not working or maybe for later:
-- Creates docs (there are no docstrings at all yet)
-```bash
-sphinx-apidoc -o ../docs .
+pipreqs --encoding=utf8 --force --mode no-pin --savepath config/requirements.txt
 ```
 ```bash
-cd ../docs && make clean && make html && cd ../pytcpl
+python config/handle_requirements.py
 ```
 
-- Build python package
+
+### View profiling results
+- Activate profiling by setting `apply_profiler: 1` in [config.yaml](config/config.yaml) and run `python src/pipeline.py`
+The call stack with performance details should open in new browser tab:
+```bash
+snakeviz export/logs/profiler/pipeline.prof
+```
+- Goto [SnakeViz](https://jiffyclub.github.io/snakeviz/) website
+
+
+### Documentation automated by sphinx
+#### Update docs
+```bash
+docs/make clean
+```
+```bash
+docs/make html
+```
+
+#### Initialize docs
+```bash
+sphinx-quickstart docs -q --project="pytcpl" --author="R. Bosshard" --release="0.1"
+```
+```bash
+sphinx-apidoc -o docs src/
+```
+Add _modules_ to `index.rst`:
+```
+# ...
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   modules
+   
+ # ...
+```
+
+Edit to `conf.py`:
+```
+# ...
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
+
+# ...
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon'
+]
+
+# ...
+
+html_theme = 'sphinx_rtd_theme'
+```
+
+- Goto official [sphinx-doc.org](https://www.sphinx-doc.org) website
+
+
+
+
+
+### Build python package
 ```bash
 python -m build
+```
+
+### Remove conda virtual environment
+```bash
+conda env list
+```
+```bash
+conda deactivate
+```
+```bash
+conda remove --name pytcpl --all
 ```
 
 

@@ -5,7 +5,7 @@ from pipeline_helper import load_config, \
     prolog, epilog, get_efficacy_cutoff_and_append, launch, load_raw_data_from_db, export_as_csv, goodbye, \
     write_output_data_to_db
 from processing import processing
-from src.constants import ROOT_DIR
+from constants import ROOT_DIR, PROFILER_PATH
 
 
 def pipeline(config, confg_path):
@@ -26,6 +26,6 @@ if __name__ == '__main__':
     if cnfg['apply_profiler']:
         with cProfile.Profile() as pr:
             pipeline(cnfg, cnfg_path)
-        pr.dump_stats(os.path.join(ROOT_DIR, "../export/profile/pipeline.prof"))
+        pr.dump_stats(os.path.join(ROOT_DIR, PROFILER_PATH))
     else:
         pipeline(cnfg, cnfg_path)

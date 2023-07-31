@@ -11,8 +11,8 @@ from constants import symbols_dict
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
-from constants import COLORS_DICT, CONFIG_FOLDER_PATH, CONFIG_FILE_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    EXPORT_CSV_FOLDER_PATH, LOG_FOLDER_PATH, START_TIME, DISPLAY_EMOJI
+from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME, DISPLAY_EMOJI
 from tcpl_output import tcpl_output
 
 
@@ -42,9 +42,9 @@ def launch(config, confg_path):
 
 
 def load_config():
-    with open(CONFIG_FILE_PATH, 'r') as file:
+    with open(CONFIG_PATH, 'r') as file:
         config = yaml.safe_load(file)
-    return config, CONFIG_FOLDER_PATH
+    return config, CONFIG_DIR_PATH
 
 
 def prolog(new_aeid, config):
@@ -55,7 +55,7 @@ def prolog(new_aeid, config):
     config['aeid'] = new_aeid
 
     # Write the updated YAML content back to the file
-    with open(CONFIG_FILE_PATH, 'w') as file:
+    with open(CONFIG_PATH, 'w') as file:
         yaml.dump(config, file)
 
     assay_component_endpoint_name = get_assay_info(config['aeid'])['assay_component_endpoint_name']
@@ -93,7 +93,7 @@ def get_efficacy_cutoff(aeid, bmad):
 
 
 def track_fitted_params():
-    tracked_models, tracked_params = read_log_file(os.path.join(LOG_FOLDER_PATH, "params_tracked.out"))
+    tracked_models, tracked_params = read_log_file(os.path.join(LOG_DIR_PATH, "params_tracked.out"))
     params = {}
     for m, ps in zip(tracked_models, tracked_params):
         if m not in params:
@@ -101,7 +101,7 @@ def track_fitted_params():
         else:
             params[m].append(ps)
     try:
-        with open(os.path.join(LOG_FOLDER_PATH, "params_tracked_median.out"), "w") as file:
+        with open(os.path.join(LOG_DIR_PATH, "params_tracked_median.out"), "w") as file:
             for key, array in params.items():
                 average = np.median(array, 0)
                 file.write(f"{key} {average}\n")
@@ -188,7 +188,7 @@ def export_as_csv(config, df):
     df = tcpl_output(df, config['aeid'])
     df = df.rename(columns={'dsstox_substance_id': 'dtxsid'})
     df = df[['dtxsid', 'chit']]
-    df.to_csv(f"{EXPORT_CSV_FOLDER_PATH}/{config['aeid']}.csv", index=False)
+    df.to_csv(f"{CSV_DIR_PATH}/{config['aeid']}.csv", index=False)
 
 
 def text_to_blue(message):

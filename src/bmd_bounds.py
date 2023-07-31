@@ -11,44 +11,6 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     """
     BMD Bounds
 
-    Uses maximum likelihood method to tune the upper and lower bounds on the BMD (BMDU, BMDL).
-
-    Takes in concentration response fit details and outputs a bmdu or bmdl, as desired.
-    If bmd is not finite, returns NA. If the objective function doesn't change sign or
-    the root finding otherwise fails, it returns NA. These failures are not uncommon
-    since some curves just don't reach the desired confidence level.
-
-    Parameters:
-    -----------
-    fit_model : str
-        Fit method: "exp2", "exp3", "exp4", "exp5", "hill", "gnls", "poly1", "poly2", or "pow".
-    bmr : float
-        Benchmark response.
-    pars : dict
-        Named vector of model parameters: a,b,tp,ga,p,la,q,er output by httrfit, and in that order.
-    conc : array-like
-        Vector of concentrations (NOT in log units).
-    resp : array-like
-        Vector of responses corresponding to given concentrations.
-    onesidedp : float
-        The one-sided p-value. Default of .05 corresponds to 5 percentile BMDL, 95 percentile BMDU, and 90 percent CI.
-    bmd : float, optional
-        Can optionally input the bmd when already known to avoid unnecessary calculation.
-    which.bound : str, optional
-        Returns BMDU if which.bound = "upper"; returns BMDL if which.bound = "lower".
-
-    Returns:
-    --------
-    float or None
-        Returns either the BMDU or BMDL.
-
-    Examples:
-    ---------
-    conc = [0.03, 0.1, 0.3, 1, 3, 10, 30, 100]
-    resp = [0.1, -0.1, 0, 1.1, 1.9, 2, 2.1, 1.9]
-    pars = {'tp': 1.973356, 'ga': 0.9401224, 'p': 3.589397, 'er': -2.698579}
-    bmdbounds(fit_model="hill", bmr=0.5, pars=pars, conc=conc, resp=resp)
-    bmdbounds(fit_model="hill", bmr=0.5, pars=pars, conc=conc, resp=resp, which.bound="upper")
     """
 
     # calculate bmd, if necessary

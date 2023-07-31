@@ -65,7 +65,7 @@ def generate_output(fit_model, conc, resp, out, fit):
     assign_extra_attributes(fit_model, out)
     del out["modl"]
 
-    # export_csv["cov"] = 0
+    # csv["cov"] = 0
     # try:
     #     # Estimate the covariance matrix using the inverse of the Hessian
     #     # Inverse of the objective function’s Hessian; may be an approximation. Not available for all solvers.
@@ -74,18 +74,18 @@ def generate_output(fit_model, conc, resp, out, fit):
     #     uncertainties = np.sqrt(np.diag(covariance_matrix))
 
     #     if not np.any(np.isnan(uncertainties)):
-    #         export_csv["cov"] = 1
-    #         export_csv["sds"] = {param: uncertainties[i] for i, param in enumerate(export_csv["sds"])}
+    #         csv["cov"] = 1
+    #         csv["sds"] = {param: uncertainties[i] for i, param in enumerate(csv["sds"])}
     #         # use taylor's theorem to approx sd's in change of units, only valid when sd's are << than ln(10)
     #         if fit_model == "hill":
-    #             export_csv["sds"]["ga_sd"] = export_csv["pars"]["ga"] * np.log(10) * export_csv["sds"]["ga_sd"]
+    #             csv["sds"]["ga_sd"] = csv["pars"]["ga"] * np.log(10) * csv["sds"]["ga_sd"]
     #         if fit_model == "gnls":
-    #             export_csv["sds"]["ga_sd"] = export_csv["pars"]["ga"] * np.log(10) * export_csv["sds"]["ga_sd"]
-    #             export_csv["sds"]["la_sd"] = export_csv["pars"]["la"] * np.log(10) * export_csv["sds"]["la_sd"]
+    #             csv["sds"]["ga_sd"] = csv["pars"]["ga"] * np.log(10) * csv["sds"]["ga_sd"]
+    #             csv["sds"]["la_sd"] = csv["pars"]["la"] * np.log(10) * csv["sds"]["la_sd"]
 
     # except Exception as e:
     #     print(f"{fit_model} >>> Error calculating parameter covariance: {e}")
-    #     export_csv["cov"] = 0
+    #     csv["cov"] = 0
 
 
 def assign_extra_attributes(fit_model, out):
@@ -104,10 +104,10 @@ def assign_extra_attributes(fit_model, out):
         if np.isnan(out["top"]):
             # if the theoretical top is NA return NA for ac50 and ac50_loss
             out["ac50"] = None
-            # export_csv["ac50_loss"] = None
+            # csv["ac50_loss"] = None
         else:
             out["ac50"] = acy(.5 * out["top"], out, fit_model=fit_model)
-            # export_csv["ac50_loss"] = acy(.5 * export_csv["top"], export_csv, fit_model=fit_model, getloss=True)
+            # csv["ac50_loss"] = acy(.5 * csv["top"], csv, fit_model=fit_model, getloss=True)
 
     return out
 
