@@ -38,7 +38,7 @@ as its backend database.
 
 ### This part is only relevant for development!
 #### Generate requirements.txt file with pip:
-  - `pipreqs --encoding=utf8 --force`
+  - `pipreqs --encoding=utf8 --force --mode no-pin`
   - Note: remove duplicates and replace problem packages manually
     - `sqlalchemy`
     - `mysql-connector-python`

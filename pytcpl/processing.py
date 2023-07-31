@@ -8,9 +8,9 @@ from tqdm import tqdm
 
 from fit_models import get_params
 from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, custom_format, print_
-from pytcpl.acy import acy
-from pytcpl.bmd_bounds import bmd_bounds
-from pytcpl.tcpl_hit_helper import nest_select, hit_cont_inner
+from acy import acy
+from bmd_bounds import bmd_bounds
+from tcpl_hit_helper import nest_select, hit_cont_inner
 from tcpl_fit_helper import fit_curve
 
 
