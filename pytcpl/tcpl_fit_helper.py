@@ -45,7 +45,7 @@ def fit_curve(fit_model, conc, resp, bidirectional, out):
         generate_output(fit_model, conc, resp, out, fit)
     except Exception as e:
         print(f"{fit_model}: {e}")
-    a = 1
+
 
 def generate_output(fit_model, conc, resp, out, fit):
     fit_params = fit.x

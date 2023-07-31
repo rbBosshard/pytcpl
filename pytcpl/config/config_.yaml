@@ -1,4 +1,4 @@
-aeid: '784'
+aeid: '5'
 assay_info_keys:
 - acid
 - assay_component_endpoint_name
@@ -14,6 +14,7 @@ assay_info_keys:
 - intended_target_family
 - intended_target_family_sub
 bidirectional: 1
+
 display_emoji: 1
 do_fit: 1
 do_hit: 1

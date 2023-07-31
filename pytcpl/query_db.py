@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, text
 
 def get_db_config():
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    CONFIG_PATH = os.path.join(ROOT_DIR, 'config/config.yaml')
+    CONFIG_PATH = os.path.join(ROOT_DIR, 'config/db_login.yaml')
     with open(CONFIG_PATH, "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         login_name = os.getlogin()

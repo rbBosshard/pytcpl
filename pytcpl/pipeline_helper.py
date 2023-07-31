@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -5,13 +6,11 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from mc4_mthds import mc4_mthds
-from mc5_mthds import mc5_mthds
-from symbols import symbols_dict
-from tcpl_output import tcpl_output
+from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
-from tcpl_mthd_load import tcpl_mthd_load
+from symbols import symbols_dict
+from tcpl_output import tcpl_output
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FOLDER_PATH = os.path.join(ROOT_DIR, 'config')
@@ -35,16 +34,14 @@ COLORS_DICT = {
 custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
 
 
-def text_to_blue(message):
-    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}"
-
-
-def text_to_green(message):
-    return f"{COLORS_DICT['GREEN']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
-
-
 def status(symbol, replacement=""):
     return symbols_dict.get(symbol, "") if DISPLAY_EMOJI else replacement
+
+
+def read_aeids():
+    with open(AEIDS_LIST_PATH, 'r') as file:
+        ids_list = [line.strip() for line in file]
+    return ids_list, AEIDS_LIST_PATH
 
 
 def launch(config, confg_path):
@@ -60,16 +57,6 @@ def launch(config, confg_path):
     return aeid_list
 
 
-def print_(msg):
-    text = get_msg_with_elapsed_time(msg)
-    print(text)
-
-
-def get_msg_with_elapsed_time(msg, color_only_time=True):
-    text = f"{get_formatted_time_elapsed(START_TIME, color_only_time)} {msg}"
-    return text
-
-
 def load_config():
     with open(CONFIG_FILE_PATH, 'r') as file:
         config = yaml.safe_load(file)
@@ -77,6 +64,9 @@ def load_config():
 
 
 def prolog(new_aeid, config):
+    # print boundary
+    print("\n" + f"#-" * 55 + "\n")
+    
     # Update the specific key with the new value
     config['aeid'] = new_aeid
 
@@ -85,10 +75,17 @@ def prolog(new_aeid, config):
         yaml.dump(config, file)
 
     assay_component_endpoint_name = get_assay_info(config['aeid'])['assay_component_endpoint_name']
-
-    print("\n" + f"#-" * 55 + "\n")
-    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")
+    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")   
     print_(f"{status('seedling')} Start new assay endpoint: {assay_info}")
+
+
+def epilog():
+    print_(f"{status('carrot')} Assay endpoint processing completed")
+
+
+def goodbye():
+    print(f"\n{status('clinking_beer_mugs')} Pipeline completed")
+    print(f"{status('waving_hand')} Goodbye!")
 
 
 def check_db(config):
@@ -103,17 +100,6 @@ def check_db(config):
             ddl_query = f.read()
             query_db(ddl_query)
     print(f"{status('thumbs_up')} Verified the existence of required DB tables")
-
-
-def get_formatted_time_elapsed(start_time, blue=True):
-    seconds = time.time() - start_time
-    minutes = int(seconds)
-    formatted_seconds = "{:.2f}".format(seconds - minutes)[2:]
-    elapsed_time_formatted = f"[0:{minutes:02}:{formatted_seconds}s]"
-    if DISPLAY_EMOJI and blue:
-        return text_to_blue(f"{elapsed_time_formatted}")
-    else:
-        return elapsed_time_formatted
 
 
 def get_efficacy_cutoff(aeid, bmad):
@@ -139,14 +125,6 @@ def track_fitted_params():
         print(f"{e}")
 
 
-def export_data(dat, path, folder, id):
-    full_folder_path = os.path.join(ROOT_DIR, path, folder)
-    is_exist = os.path.exists(full_folder_path)
-    if not is_exist:
-        os.makedirs(full_folder_path)
-    dat.to_csv(f"{full_folder_path}/{id}.csv", index=False)
-
-
 def read_log_file(log_file):
     models = []
     parameters = []
@@ -163,13 +141,6 @@ def read_log_file(log_file):
                 models.append(model)
                 parameters.append(param_list)
     return models, parameters
-
-
-def store_cutoff(aeid, df):
-    bmad = df["bmad"].iloc[0]
-    cutoff = get_efficacy_cutoff(aeid=aeid, bmad=bmad)
-    tcpl_append(pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'cutoff': [cutoff]}), 'cutoffs')
-    return cutoff
 
 
 def get_efficacy_cutoff_and_append(aeid, df):
@@ -218,10 +189,21 @@ def tcpl_delete(aeid, tbl):
     query_db(qstring)
 
 
-def read_aeids():
-    with open(AEIDS_LIST_PATH, 'r') as file:
-        ids_list = [line.strip() for line in file]
-    return ids_list, AEIDS_LIST_PATH
+def write_output_data_to_db(config, df):
+    mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
+    print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
+    for col in ['concentration_unlogged', 'response', 'fitparams']:
+        df.loc[:, col] = df[col].apply(json.dumps)
+    tcpl_delete(config['aeid'], "output")
+    tcpl_append(df[config['output_cols']], "output")
+
+
+def export_data(dat, path, folder, id):
+    full_folder_path = os.path.join(ROOT_DIR, path, folder)
+    is_exist = os.path.exists(full_folder_path)
+    if not is_exist:
+        os.makedirs(full_folder_path)
+    dat.to_csv(f"{full_folder_path}/{id}.csv", index=False)
 
 
 def export_as_csv(config, dat):
@@ -231,3 +213,32 @@ def export_as_csv(config, dat):
     dat = dat.rename(columns={'dsstox_substance_id': 'dtxsid'})
     df_export = dat[['dtxsid', 'chit']]
     export_data(df_export, path=config['export_path'], folder='out', id=config['aeid'])
+
+
+def text_to_blue(message):
+    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}"
+
+
+def text_to_green(message):
+    return f"{COLORS_DICT['GREEN']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
+
+
+def get_formatted_time_elapsed(start_time, blue=True):
+    seconds = time.time() - start_time
+    minutes = int(seconds)
+    formatted_seconds = "{:.2f}".format(seconds - minutes)[2:]
+    elapsed_time_formatted = f"[0:{minutes:02}:{formatted_seconds}s]"
+    if DISPLAY_EMOJI and blue:
+        return text_to_blue(f"{elapsed_time_formatted}")
+    else:
+        return elapsed_time_formatted
+
+
+def get_msg_with_elapsed_time(msg, color_only_time=True):
+    text = f"{get_formatted_time_elapsed(START_TIME, color_only_time)} {msg}"
+    return text
+
+
+def print_(msg):
+    text = get_msg_with_elapsed_time(msg)
+    print(text)

@@ -248,10 +248,10 @@ def filter_spid():
 st.set_page_config(page_title="Curve surfer", page_icon="✅", layout="wide",
                    )
 
-config = load_config()["pytcpl"]
+config, _ = load_config()
 # st.title("Curve surfer")
 st.session_state.aeid = int(
-    st.number_input(label="Enter assay id (aeid)", value=config['aeid'], on_change=reset_spid_row))
+    st.number_input(label="Enter assay id (aeid)", value=int(config['aeid']), on_change=reset_spid_row))
 st.session_state.spid = st.text_input(label="Filter sample id (spid)", on_change=filter_spid)
 col1, col2, col3 = st.columns(3)
 with col1:

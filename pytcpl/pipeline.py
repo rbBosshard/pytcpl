@@ -1,39 +1,23 @@
 import cProfile
-import json
 import os
 
 from pipeline_helper import load_config, \
-    ROOT_DIR, print_, prolog, get_efficacy_cutoff_and_append, tcpl_delete, launch
-from pipeline_helper import load_raw_data_from_db, tcpl_append, export_as_csv, status
-from tcpl_fit import tcpl_fit
-from tcpl_hit import tcpl_hit
+    ROOT_DIR, prolog, epilog, get_efficacy_cutoff_and_append, launch, load_raw_data_from_db, export_as_csv, goodbye, \
+    write_output_data_to_db
+from processing import processing
 
 
 def pipeline(config, confg_path):
-    
     aeid_list = launch(config, confg_path)
-
     for aeid in aeid_list:
         prolog(aeid, config)
-        df = load_raw_data_from_db(aeid=config['aeid'])
+        df = load_raw_data_from_db(config['aeid'])
         cutoff, df = get_efficacy_cutoff_and_append(config['aeid'], df)
-
-        df = tcpl_fit(dat=df, cutoff=cutoff, config=config)
-        dat = tcpl_hit(df=df, cutoff=cutoff, config=config)
-
-        mb_value = dat.memory_usage(deep=True).sum() / (1024 * 1024)
-        mb_value = f"{mb_value:.2f} MB"
-        print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
-        for col in ['concentration_unlogged', 'response', 'fitparams']:
-            dat.loc[:, col] = dat[col].apply(json.dumps)
-
-        tcpl_delete(config['aeid'], "output")
-        tcpl_append(dat[config['output_cols']], "output")
-        export_as_csv(config, dat)
-        print_(f"{status('carrot')} Assay endpoint processing completed")
-
-    print(f"\n{status('clinking_beer_mugs')} Pipeline completed\n")
-    print(f"{status('waving_hand')} Bye!")
+        df = processing(df, cutoff, config)
+        write_output_data_to_db(config, df)
+        export_as_csv(config, df)
+        epilog()
+    goodbye()
 
 
 if __name__ == '__main__':

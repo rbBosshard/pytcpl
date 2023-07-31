@@ -11,7 +11,7 @@ from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, stat
 from tcpl_fit_helper import fit_curve
 
 
-def tcpl_fit(dat, cutoff, config):
+def tcpl_fit(df, cutoff, config):
     def tcplfit_core(group):
         conc = np.array(group['concentration_unlogged'])
         resp = np.array(group['response'])
@@ -39,17 +39,17 @@ def tcpl_fit(dat, cutoff, config):
         fit_curve(model, conc, resp, config['bidirectional'], out[model])
         return out, to_fit
 
-    dat = preprocess(dat, config["test"])
+    df = preprocess(df, config["test"])
 
-    print_(f"{status('laptop')} Processing {dat.shape[0]} concentration-response series "
+    print_(f"{status('laptop')} Processing {df.shape[0]} concentration-response series "
            f"using {len(config['fit_models'])} different models:")
     time.sleep(0.05)
     if os.path.exists("fit_results_log.txt"):
         os.remove("fit_results_log.txt")
 
     desc = get_msg_with_elapsed_time(f"{status('petri_dish')}    - First run (filtering):  ", color_only_time=False)
-    total = dat.shape[0]
-    iterator = tqdm(dat.iterrows(), total=total, desc=desc, bar_format=custom_format)
+    total = df.shape[0]
+    iterator = tqdm(df.iterrows(), total=total, desc=desc, bar_format=custom_format)
 
     if config["parallelize"]:
         fitparams_cnst, fits = map(list, zip(*Parallel(n_jobs=config['n_jobs'])(
@@ -63,7 +63,7 @@ def tcpl_fit(dat, cutoff, config):
             fitparams_cnst.append(result)
             fits.append(fit)
 
-    relevant_dat = dat[fits]
+    relevant_dat = df[fits]
     total = relevant_dat.shape[0]
     desc = get_msg_with_elapsed_time(f"{status('atom_symbol')}    - Second run (curve-fit): ", color_only_time=False)
     iterator = tqdm(relevant_dat.iterrows(), total=total, desc=desc, bar_format=custom_format)
@@ -78,7 +78,7 @@ def tcpl_fit(dat, cutoff, config):
     masked = np.array([{} for _ in range(len(fitparams_cnst))])
     masked[fits] = fitparams
     fitparams = [{**dict1, **dict2} for dict1, dict2 in zip(fitparams_cnst, masked)]
-    dat = dat.assign(fitparams=fitparams)
+    df = df.assign(fitparams=fitparams)
 
     # Create a log file to track the parameter estimates
     with open("fit_results_log.txt", "w") as log_file:
@@ -91,7 +91,7 @@ def tcpl_fit(dat, cutoff, config):
     if config['track_fitted_params']:
         track_fitted_params()
 
-    return dat
+    return df
 
 
 
