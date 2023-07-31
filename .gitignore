@@ -10,15 +10,5 @@ dist/.gitkeep
 docs/*
 docs/.gitkeep
 
-pytcpl/export/*
-!pytcpl/export/.gitkeep
-
-pytcpl/profile/*
-!pytcpl/profile/.gitkeep
-
-pytcpl/input/*
-
-pytcpl/test.py
-
-
-
+input/*
+input/.gitkeep

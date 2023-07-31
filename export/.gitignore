@@ -1,0 +1,14 @@
+export_csv/5.csv
+!export_csv/.gitkeep
+
+logs/*
+!logs/.gitkeep
+
+figures/*
+!figures/.gitkeep
+
+presentations/*
+!presentations/.gitkeep
+
+profile/*
+!profile/.gitkeep

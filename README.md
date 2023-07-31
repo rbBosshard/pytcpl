@@ -4,7 +4,7 @@ Welcome to the GitHub repository for the pytcpl package.
 
 Pytcpl is a streamlined Python package that incorporates the ***mc4*** and ***mc5*** levels of
 [tcpl](https://github.com/USEPA/CompTox-ToxCast-tcpl), 
-providing concentration-response curve fitting functionality akin to [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2).
+providing concentration-response curve fitting functionality based on [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2).
 It utilizes the [Invitrodb version 3.5 release](https://cfpub.epa.gov/si/si_public_record_Report.cfm?dirEntryId=355484&Lab=CCTE)
 as its backend database.
 
@@ -17,13 +17,15 @@ as its backend database.
   - `pip install -r requirements.txt`
 
 #### Navigate into python package
-- `cd pytcpl`
+- `cd src`
 
 #### Run main pipeline script:
-- `python pytcpl/pipeline.py`
-- uses config file: `pytcpl/config/config.yaml` (contains database login)
-- Note: pipeline works only for single assay at once! 
-- Todo: Input a list of assay ids (aeid) to run multiple assays.
+- `python pipeline.py`
+- location of general config file: `pytcpl/config/config.yaml`
+  - Note: only if `display_emoji: 0` in `config.yaml` redirection of the output is possible with `python pytcpl/pipeline.py | tee pytcpl/pipeline.py` 
+- location of database connection config: `pytcpl/config/db_login.yaml`
+- location of assay endpoint ids: `pytcpl/config/aeid_list.in`
+  - Note: Pipeline run for multiple assay endpoints specified in the above list
 
 #### Visualize curve-fits per assay/chemical pair
 - `streamlit run pytcpl/app.py --server.address="localhost"`
