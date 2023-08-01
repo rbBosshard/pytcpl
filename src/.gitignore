@@ -1,6 +1,3 @@
-.streamlit/*
-!streamlit/.gitkeep
-
 pytcpl.egg-info/
 
 

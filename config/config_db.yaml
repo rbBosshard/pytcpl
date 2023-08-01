@@ -1,9 +1,15 @@
+#bossh:
+#  db: invitrodb_v3o5
+#  host: localhost
+#  password: root
+#  port: 3306
+#  username: root
 bossh:
   db: invitrodb_v3o5
-  host: localhost
-  password: root
+  host: expectmine.datascience.ch
+  password: robin
   port: 3306
-  username: root
+  username: robin
 eliza:
   db: invitrodb_v3o5
   host: localhost
