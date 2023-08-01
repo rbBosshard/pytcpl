@@ -4,10 +4,3 @@ sphinx
 sphinx_rtd_theme
 build
 mysqlclient
-
-
-
-
-
-
-

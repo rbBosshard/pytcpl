@@ -2,7 +2,7 @@ import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-file1 = os.path.join(ROOT_DIR, 'requirements.txt')
+file1 = os.path.join(ROOT_DIR, '../requirements.txt')
 file2 = os.path.join(ROOT_DIR, 'manual_requirements.txt')
 output_file = file1
 
