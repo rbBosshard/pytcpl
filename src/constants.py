@@ -26,6 +26,8 @@ COLORS_DICT = {
 # tqdm format
 custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
 
+custom_format_ = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
+
 symbols_dict = {
     "ZZZ": "💤",
     "alembic": "⚗️",

@@ -1,156 +1,100 @@
-import os
-import time
-
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from acy import acy
-from bmd_bounds import bmd_bounds
+from constants import custom_format, custom_format_
 from fit_models import get_params
 from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_
-from constants import custom_format, LOG_DIR_PATH
 from tcpl_fit_helper import fit_curve
 from tcpl_hit_helper import nest_select, hit_cont_inner
 
 
 def processing(df, cutoff, config):
-    def tcplfit_core(group):
-        conc = np.array(group['concentration_unlogged'])
-        resp = np.array(group['response'])
+    print_(f"{status('laptop')} Processing {df.shape[0]} concentration-response series")
+    df = preprocess(df, config)
+
+    def get_out_keys(model, out):
+        out[model] = {'pars': {p: None for p in get_params(model)}, **{p: None for p in ['aic', 'modl', 'rmse']}}
+
+    def fit(group):
         out = {}
-        for model in config['fit_models']:
-            get_out_skeleton(model, out)
-            try:
-                fit_curve(model, conc, resp, out[model])
-            except Exception as e:
-                print(f"{model} >>> Error fit_curve: {e}")
+        for model in config['curve_fit_models']:
+            get_out_keys(model, out)
+            fit_curve(model, np.array(group['conc']), np.array(group['response']), out[model])
         return out
 
-    def get_out_skeleton(model, out):
-        out[model] = {'pars': {p: None for p in get_params(model)},
-                      **{p: None for p in ['aic', 'modl', 'rmse']}}
-
     def process_row(row):
-        conc = np.array(row['concentration_unlogged'])
+        conc = np.array(row['conc'])
         resp = np.array(row['response'])
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
         to_fit = (rmds.size >= 4) and np.any(np.abs(rmds) >= cutoff)
         model = 'cnst'
         out = {}
-        get_out_skeleton(model, out)
+        get_out_keys(model, out)
         fit_curve(model, conc, resp, out[model])
         return out, to_fit
 
-    df = preprocess(df, config)
-
-    df = df[-config['subset']:] if config['subset'] else df
-    print_(f"{status('laptop')} Processing {df.shape[0]} concentration-response series "
-           f"using {len(config['fit_models'])} different fit models:")
-
-    time.sleep(0.05)
-
-    desc = get_msg_with_elapsed_time(f"{status('petri_dish')}   - First run (filtering):  ", color_only_time=False)
-    total = df.shape[0]
-    iterator = tqdm(df.iterrows(), total=total, desc=desc, bar_format=custom_format)
-
+    # Preprocessing & Filtering
+    desc = get_msg_with_elapsed_time(f"{status('hammer_and_wrench')}  -> Preprocessing:  ", color_only_time=False)
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
     if config["n_jobs"] != 1:
-        fitparams_cnst, fits = map(list, zip(*Parallel(n_jobs=config['n_jobs'])(
-            delayed(process_row)(row) for _, row in iterator)))
+        fit_params_cnst, fits = map(list, zip(*Parallel(n_jobs=config['n_jobs'])(delayed(process_row)(i) for _, i in it)))
     else:
-        fitparams_cnst = []
-        fits = []
-        fitparams = []
-        for _, row in iterator:
-            result, fit = process_row(row)
-            fitparams_cnst.append(result)
-            fits.append(fit)
+        fit_params_cnst, fits = map(list, zip(*(process_row(row) for _, row in it)))
 
-    relevant_df = df[fits]
-    total = relevant_df.shape[0]
-    desc = get_msg_with_elapsed_time(f"{status('atom_symbol')}   - Second run (curve-fit): ", color_only_time=False)
-    iterator = tqdm(relevant_df.iterrows(), total=total, desc=desc, bar_format=custom_format)
-
+    # Curve-Fitting
+    desc = get_msg_with_elapsed_time(f"{status('comet')}  -> Curve-Fitting: ", color_only_time=False)
+    it = tqdm(df[fits].iterrows(), total=df[fits].shape[0], desc=desc, bar_format=custom_format_)
     if config["n_jobs"] != 1:
-        fitparams = Parallel(n_jobs=config['n_jobs'])(
-            delayed(tcplfit_core)(row) for _, row in iterator)
-    else:  # Serial version for debugging
-        for _, row in iterator:
-            fitparams.append(tcplfit_core(row))
+        fit_params = Parallel(n_jobs=config['n_jobs'])(delayed(fit)(i) for _, i in it)
+    else:
+        fit_params = [fit(i) for _, i in it]
 
-    masked = np.array([{} for _ in range(len(fitparams_cnst))])
-    masked[fits] = fitparams
-    fitparams = [{**dict1, **dict2} for dict1, dict2 in zip(fitparams_cnst, masked)]
-    df = df.assign(fitparams=fitparams)
+    # Merge fit_params
+    masked = np.array([{} for _ in range(len(fit_params_cnst))])
+    masked[fits] = fit_params
+    fit_params = [{**dict1, **dict2} for dict1, dict2 in zip(fit_params_cnst, masked)]
+    df = df.assign(fit_params=fit_params)
 
-    # Create a log file to track the parameter estimates
-    with open(os.path.join(LOG_DIR_PATH, "params_tracked.out"), "w") as log_file:
-        for res in fitparams:
-            for model, params in res.items():
-                if model != 'cnst':
-                    params_str = ", ".join(map(str, list(params['pars'].values())))
-                    log_file.write(f"{model}: {params_str}\n")
+    if config['enable_curve_fit_parameter_tracking']:
+        track_fitted_params(df['fit_params'])
 
-    if config['apply_track_fitted_params']:
-        track_fitted_params()
-
-
-    # Hit
-    total = df.shape[0]
-    desc = get_msg_with_elapsed_time(f"{status('test_tube')}   - Third run (hit-call):   ", color_only_time=False)
-    iterator = tqdm(df.iterrows(), desc=desc, total=total, bar_format=custom_format)
+    # Hit-Calling
+    desc = get_msg_with_elapsed_time(f"{status('horizontal_traffic_light')}  -> Hit-Calling:   ", color_only_time=False)
+    it = tqdm(df.iterrows(), desc=desc, total=df.shape[0], bar_format=custom_format)
 
     if config["n_jobs"] != 1:
         res = pd.DataFrame(Parallel(n_jobs=config['n_jobs'])(
             delayed(tcpl_hit_core)(
-                params=row.fitparams,
-                conc=np.array(row.concentration_unlogged),
-                resp=np.array(row.response),
+                params=i.fit_params,
+                conc=np.array(i.conc),
+                resp=np.array(i.response),
                 cutoff=cutoff
-            ) for _, row in iterator
+            ) for _, i in it
         ))
     else:
-        res = df.apply(lambda row: tcpl_hit_core(params=row.fitparams, conc=np.array(row.concentration_unlogged),
-                                                 resp=np.array(row.response), cutoff=cutoff), axis=1,
-                       result_type='expand')
-
+        res = df.apply(lambda i: tcpl_hit_core(params=i.fit_params, conc=np.array(i.conc), resp=np.array(i.response),
+                                               cutoff=cutoff), axis=1, result_type='expand')
     df[res.columns] = res
     return df
 
 
 def preprocess(df, config):
-    # if 'bmed' not in dat.columns:
-    #     dat = dat.assign(bmed=None)
-    # if 'osd' not in dat.columns:
-    #     dat = dat.assign(osd=None)
-    grouped = df.groupby(['aeid', 'spid'])
-    df = grouped.agg(
-        bmad=('bmad', np.min),
-        # osd=('osd', np.min),
-        # bmed=('bmed', lambda x: 0 if x.isnull().values.all() else np.max(x)),
-        concentration_unlogged=('logc', lambda x: list(10 ** x)),
-        response=('resp', list),
-        m3ids=('m3id', list)
-    ).reset_index()
+    df = df.groupby(['aeid', 'spid']).agg(conc=('logc', lambda x: list(10 ** x)), response=('resp', list)).reset_index()
+    df = df[df.conc.apply(lambda x: not any(pd.isna(x)))]
+    df = df[:config['enable_data_subsetting']] if config['enable_data_subsetting'] else df
 
-    # Filter csv rows with NaN values in the concentration column
-    df = df[df.concentration_unlogged.apply(lambda x: not any(pd.isna(x)))]
+    def shrink_series(row):
+        conc = row['conc']
+        resp = row['response']
+        uconc = pd.unique(conc)
+        t = len(conc) > config['num_datapoints_per_series_threshold']
+        return (list(uconc), [pd.Series(resp)[conc == c].median() for c in uconc]) if t else (list(conc), list(resp))
 
-    def shrink_concentrations_and_responses(row):
-        concentration_list = row['concentration_unlogged']
-        response_list = row['response']
-        if len(concentration_list) > config['threshold_num_datapoints']:
-            unique_concentrations = pd.unique(concentration_list)
-            # Calculate the median of responses over the unique concentrations
-            median_responses = [pd.Series(response_list)[concentration_list == c].median() for c in
-                                unique_concentrations]
-            return list(unique_concentrations), list(median_responses)
-        else:
-            return list(concentration_list), list(response_list)
-
-    # Shrink series with too high number of datapoints to store/handle like positive control chemical
-    df['concentration_unlogged'], df['response'] = zip(*df.apply(shrink_concentrations_and_responses, axis=1))
+    # Shrink series containing too many datapoints to handle. Often the case for positive control chemical
+    df['conc'], df['response'] = zip(*df.apply(shrink_series, axis=1))
 
     return df
 
@@ -183,7 +127,7 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd=1, bmr_scale=1.349, bmed=0, 
 
         try:  # Todo: RuntimeWarning: invalid value encountered in scalar divide
             assert aics[fit_model] <= aics["cnst"]
-            caikwt = np.exp((aics[fit_model]-aics["cnst"]) / 2)
+            caikwt = np.exp((aics[fit_model] - aics["cnst"]) / 2)
         except Exception as e:
             print(f"Error caikwt: {e}")
             caikwt = 1

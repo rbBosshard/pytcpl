@@ -7,42 +7,40 @@ from tcpl_obj_fn import tcpl_obj
 
 
 def fit_curve(fit_model, conc, resp, out):
-    x = 10000
-    a = 0.01
-    b = 0.001
+
+    x = 1000
+    a = 0.1
     c = 10
 
     initial_values = {
-        'cnst': [1],
-        'poly1': [1],
-        'poly2': [20, 70],
-        'pow': [1, 1],
-        'exp4': [60, 10],
-        'exp5': [60, 10, 2],
-        'hill': [60, 10, 2],
-        'gnls': [60, 10, 2, 60, 5],
+        'cnst': [a, 0.9],
+        'poly1': [0.8],
+        'poly2': [230, 340],
+        'pow': [1.5, 0.8],
+        'exp4': [110, 80],
+        'exp5': [100, 50, 1.5],
+        'hill': [90, 30, 1.9],
+        'gnls': [170, 45, 1.7, 70, 1.7],
     }
 
     bounds = {
-        'cnst': ((a, x),),
-        'poly1': ((-10, 10),),
-        'poly2': ((-10, x), (-x, x)),
-        'pow': ((-1000, 1000), (0.3, c)),
-        'exp4': ((a, x), (b, x)),
-        'exp5': ((a, x), (b, x), (a, c)),
-        'hill': ((a, x), (b, x), (a, c)),
-        'gnls': ((a, x), (b, x), (a, c), (b, x), (a, 20)),
+        'cnst': ((a, x), (-1, 1)),
+        'poly1': ((-c, c),),
+        'poly2': ((-c, x), (-c, x)),
+        'pow': ((-c, 100), (a, c)),
+        'exp4': ((a, x), (a, x)),
+        'exp5': ((a, x), (a, x), (a, c)),
+        'hill': ((a, x), (a, x), (a, c)),
+        'gnls': ((a, x), (a, x), (a, c), (a, x), (a, c)),
     }
 
-    initial_values = initial_values[fit_model] + [0.1]
-    bounds = bounds[fit_model] + ((-1, 1),)
+    initial_value_er = [] if fit_model == 'cnst' else [0.9]
+    bounds_er = () if fit_model == 'cnst' else ((-1, 5),)
+    initial_values = initial_values[fit_model] + initial_value_er
+    bounds = bounds[fit_model] + bounds_er
     args = (conc, resp, get_fit_model(fit_model))
     fit = minimize(tcpl_obj, x0=initial_values, bounds=bounds, args=args)
-
-    try:
-        generate_output(fit_model, conc, resp, out, fit)
-    except Exception as e:
-        print(f"{fit_model}: {e}")
+    generate_output(fit_model, conc, resp, out, fit)
 
 
 def generate_output(fit_model, conc, resp, out, fit):

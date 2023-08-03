@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS `output` (
   `ac50` double DEFAULT NULL,
   `bmd` double DEFAULT NULL,
   `top` double DEFAULT NULL,
-  `concentration_unlogged` JSON,
+  `conc` JSON,
   `response` JSON,
-  `fitparams` JSON,
+  `fit_params` JSON,
   PRIMARY KEY (`id`),
   KEY `aeid` (`aeid`) USING BTREE,
   KEY `spid` (`spid`)

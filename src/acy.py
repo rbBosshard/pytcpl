@@ -5,7 +5,6 @@ from fit_models import get_fit_model
 
 
 def acy(y, modpars, fit_model, returntop=False, returntoploc=False, getloss=False):
-
     # unpack parameter dictionary into local variables
     if "pars" in modpars:
         locals().update(modpars["pars"])

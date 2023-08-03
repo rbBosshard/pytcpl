@@ -54,7 +54,7 @@ def top_likelihood(fit_model, cutoff, conc, resp, ps, top, mll):
     elif fit_model == "pow":
         ps[0] = cutoff / (np.max(conc) ** ps[1])
 
-    # get loglikelihood of top exactly at cutoff, use likelihood apply_profiler test
+    # get loglikelihood of top exactly at cutoff, use likelihood enable_profiling test
     loglik = -tcpl_obj(params=ps, conc=conc, resp=resp, fit_model=get_fit_model(fit_model))
     if abs(top) >= cutoff:
         out = (1 + chi2.cdf(2 * (mll - loglik), 1)) / 2

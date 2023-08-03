@@ -4,21 +4,19 @@ from query_db import query_db
 from tcpl_fit_helper import mad
 
 
-def mc4_mthds(mthd):
-    return {
-        'bmad.aeid.lowconc.twells': lambda df: df.assign(
-            bmad=mad(df.loc[df['cndx'].isin([1, 2]) & (df['wllt'] == 't'), 'resp'])),
-        'bmad.aeid.lowconc.nwells': lambda df: df.assign(bmad=mad(df.loc[df['wllt'] == 'n', 'resp'])),
-        'onesd.aeid.lowconc.twells': lambda df: df.assign(
-            osd=df.loc[df['cndx'].isin([1, 2]) & (df['wllt'] == 't'), 'resp'].std()),
-        'bidirectional.false': lambda df: df.assign(bidirectional=False),
-        'bmed.aeid.lowconc.twells': lambda df: df.assign(
-            bmed=df.loc[df['cndx'].isin([1, 2]) & (df['wllt'] == 't'), 'resp'].median()),
-        'no.gnls.fit': lambda df: df.assign(
-            fit_models=[['cnst', 'hill', 'poly1', 'poly2', 'pow', 'exp2', 'exp3', 'exp4', 'exp5']]),
-        'nmad.apid.null.zwells': lambda df: df.assign(
-            bmad=df.groupby(['aeid', 'apid'])['resp'].apply(lambda x: mad(x))),
-    }.get(mthd)
+def mc4_mthds(mthd, df):
+    cndx = df['cndx'].isin([1, 2])
+    wllt_t = df['wllt'] == 't'
+    mask = df.loc[cndx & wllt_t, 'resp']
+
+    if mthd == 'bmad.aeid.lowconc.twells':
+        return mad(mask)
+    elif mthd == 'bmad.aeid.lowconc.nwells':
+        return mad(df.loc[df['wllt'] == 'n', 'resp'])
+    elif mthd == 'onesd.aeid.lowconc.twells':
+        return mask.std()
+    elif mthd == 'bmed.aeid.lowconc.twells':
+        return mask.median()
 
 
 def mc5_mthds(mthd, bmad):
@@ -52,10 +50,10 @@ def mc5_mthds(mthd, bmad):
 
 
 def tcpl_mthd_load(lvl, aeid):
-    flds = ["aeid", f"b.mc{lvl}_mthd AS mthd", f"b.mc{lvl}_mthd_id AS mthd_id"]
+    flds = [f"b.mc{lvl}_mthd AS mthd"]
     tbls = [f"mc{lvl}_aeid AS a", f"mc{lvl}_methods AS b"]
     qstring = f"SELECT {', '.join(flds)} " \
               f"FROM {', '.join(tbls)} " \
               f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
               f"AND aeid IN ({aeid});"
-    return query_db(query=qstring)
+    return query_db(query=qstring)["mthd"].tolist()

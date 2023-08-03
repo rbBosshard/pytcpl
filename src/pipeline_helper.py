@@ -2,19 +2,20 @@ import json
 import os
 import sys
 from datetime import datetime
-import time
 
 import numpy as np
 import pandas as pd
 import yaml
 
+from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME
 from constants import symbols_dict
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
-from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME
 from tcpl_output import tcpl_output
+import matplotlib.pyplot as plt
+from fit_models import get_params
 
 CONFIG = {}
 DISPLAY_EMOJI = 1
@@ -34,7 +35,7 @@ def launch(config, config_path):
     global DISPLAY_EMOJI
     aeid_list = read_aeids()
     # disable verbose output if --unicode passed as runtime argument
-    DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['apply_fancy_logging']
+    DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['enable_fancy_logging']
 
     print(f"{status('balloon')} Hi :)\n"
           f"{status('rocket')} Pytcpl launched!\n"
@@ -54,7 +55,7 @@ def load_config():
 def prolog(config, new_aeid):
     global CONFIG
     CONFIG = config
-    
+
     # print  boundary
     print("\n" + f"#-" * 55 + "\n")
 
@@ -74,14 +75,14 @@ def epilog():
     print_(f"{status('carrot')} Assay endpoint processing completed")
 
 
-def goodbye():
-    print(f"\n{status('clinking_beer_mugs')} Pipeline completed")
-    print(f"{status('waving_hand')} Goodbye!")
+def bye():
+    print(f"\n{status('confetti_ball')} Pipeline completed!")
+    print(f"{status('waving_hand')} Goodbye")
 
 
 def check_db(CONFIG):
-    if CONFIG['apply_dropping_new_tables']:
-        new_table_names = CONFIG['new_table_names']
+    if CONFIG['enable_dropping_new_tables']:
+        new_table_names = CONFIG['new_db_tables']
         tables = ", ".join(new_table_names)
         drop_stmt = f"DROP TABLE IF EXISTS {tables};"
         query_db(drop_stmt)  # Permanently removes tables from db!
@@ -93,27 +94,36 @@ def check_db(CONFIG):
     print(f"{status('thumbs_up')} Verified the existence of required DB tables")
 
 
-def get_efficacy_cutoff(aeid, bmad):
-    assay_cutoff_methods = tcpl_mthd_load(lvl=5, aeid=aeid)['mthd']
-    cutoffs = [mc5_mthds(mthd, bmad) for mthd in assay_cutoff_methods]
-    return max(cutoffs, default=0)
+def track_fitted_params(fit_params):
+    parameters = {}
+    for res in fit_params:
+        for model, params in res.items():
+            ps = list(params['pars'].values())
+            parameters.setdefault(model, []).append(ps)
 
+    def plot_histograms(params, key):
+        plt.figure(figsize=(10, 6))
+        plt.suptitle(f'Fit model parameters histograms: {key}')
+        param_names = get_params(key)
+        num_params = len(param_names)
+        for i in range(num_params):
+            plt.subplot(1, num_params, i + 1)
+            plt.hist(params[:, i])
+            plt.title(f"{param_names[i]}")
+            plt.xlabel('Value')
+            plt.ylabel('Frequency')
+        plt.tight_layout()
+        plt.savefig(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"{key}.png"))
 
-def track_fitted_params():
-    tracked_models, tracked_params = read_log_file(os.path.join(LOG_DIR_PATH, "params_tracked.out"))
-    params = {}
-    for m, ps in zip(tracked_models, tracked_params):
-        if m not in params:
-            params[m] = []
-        else:
-            params[m].append(ps)
-    try:
-        with open(os.path.join(LOG_DIR_PATH, "params_tracked_median.out"), "w") as file:
-            for key, array in params.items():
-                average = np.median(array, 0)
-                file.write(f"{key} {average}\n")
-    except Exception as e:
-        print(f"{e}")
+    with open(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"stats.out"), "w") as file:
+        # Plot histograms for each key in the dictionary
+        for key, param_list in parameters.items():
+            param_array = np.array(param_list)
+            plot_histograms(param_array, key)
+            median = np.median(param_array, 0)
+            min = np.min(param_array, 0)
+            max = np.max(param_array, 0)
+            file.write(f"{key}:\n >> median {median}\n >> min {min}\n >> max {max}\n\n")
 
 
 def read_log_file(log_file):
@@ -134,15 +144,28 @@ def read_log_file(log_file):
     return models, parameters
 
 
-def get_efficacy_cutoff_and_append(df):
-    get_bmad = tcpl_mthd_load(lvl=4, aeid=CONFIG['aeid'])
-    for mthd in list(get_bmad['mthd'].values):  # +['onesd.aeid.lowconc.twells']
-        df = mc4_mthds(mthd)(df)
-    bmad = df['bmad'].iloc[0]
-    cutoff = get_efficacy_cutoff(aeid=CONFIG['aeid'], bmad=bmad)
+def get_cutoffs(df):
+    print_(f"{status('thermometer')} Computing efficacy cutoff")
+    values = {}
+    other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
+    for mthd in tcpl_mthd_load(lvl=4, aeid=CONFIG['aeid']) + other_mthds:
+        value = mc4_mthds(mthd, df)
+        values.update({mthd: value})
+
+    bmad = values['bmad.aeid.lowconc.twells']
+    bmed = values['bmed.aeid.lowconc.twells']
+    onesd = values['onesd.aeid.lowconc.twells']
+
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in tcpl_mthd_load(lvl=5, aeid=CONFIG['aeid'])]
+    cutoff = max(cutoffs, default=0)
+
     tcpl_delete(CONFIG['aeid'], 'cutoffs')
-    tcpl_append(pd.DataFrame({'aeid': [CONFIG['aeid']], 'bmad': [bmad], 'cutoff': [cutoff]}), 'cutoffs')
-    return cutoff, df
+    tcpl_append(pd.DataFrame({'aeid': [CONFIG['aeid']],
+                              'bmad': [bmad],
+                              'bmed': [bmed],
+                              'onesd': [onesd],
+                              'cutoff': [cutoff]}), 'cutoffs')
+    return cutoff
 
 
 def get_assay_info(aeid):
@@ -156,25 +179,33 @@ def get_assay_info(aeid):
 
 
 def load_raw_data():
-    csv_file_path = os.path.join(CSV_DIR_PATH, f"{CONFIG['aeid']}_in.csv")
-    load_from_csv = os.path.exists(csv_file_path)
-    data_source = "csv file" if load_from_csv else "DB"
-    
+    suffix = ".csv.gzip" if CONFIG['data_file_format'] == 'csv' else ".parquet.gzip"
+    csv_file_path = os.path.join(CSV_DIR_PATH, f"{CONFIG['aeid']}_in{suffix}")
+    load_from_disk = os.path.exists(csv_file_path)
+    data_source = "disk" if load_from_disk else "DB"
+
     print_(f"{status('hourglass_not_done')} Fetching raw data from {data_source}..")
-    
-    if load_from_csv:
-        df = pd.read_csv(csv_file_path)
-    else:   
-        select_cols = ['mc3.m0id', 'mc3.m1id', 'mc3.m2id', 'm3id', 'spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
+
+    if load_from_disk:
+        df = pd.read_parquet(csv_file_path) if CONFIG['data_file_format'] == 'csv' else pd.read_parquet(csv_file_path)
+    else:
+        select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
+        table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
+        join_string = ' AND '.join([f"{key} = {value}" for key, value in table_mapping.items()])
         qstring = f"SELECT {', '.join(select_cols)} " \
                   f"FROM mc0, mc1, mc3 " \
-                  f"WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id " \
-                  f"AND aeid = {CONFIG['aeid']};"
+                  f"WHERE {join_string} AND aeid = {CONFIG['aeid']};"
         df = query_db(query=qstring)
-        df.to_csv(csv_file_path)
+        if CONFIG['data_file_format'] == 'csv':
+            df.to_csv(csv_file_path, compression='gzip')
+        else:
+            df.to_parquet(csv_file_path, compression='gzip')
 
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
-    return df
+
+    cutoff = get_cutoffs(df)
+
+    return df, cutoff
 
 
 def tcpl_append(dat, tbl):
@@ -190,16 +221,16 @@ def tcpl_delete(aeid, tbl):
     query_db(qstring)
 
 
-def write_output_data_to_db(df):
+def store_output_in_db(df):
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
     print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
-    for col in ['concentration_unlogged', 'response', 'fitparams']:
+    for col in ['conc', 'response', 'fit_params']:
         df.loc[:, col] = df[col].apply(json.dumps)
     tcpl_delete(CONFIG['aeid'], "output")
     tcpl_append(df[CONFIG['z_output_columns']], "output")
 
 
-def export_as_csv(df):
+def export(df):
     print_(f"{status('floppy_disk')} Exporting output data as csv")
     df = df[CONFIG['z_export_cols']]
     df = tcpl_output(df, CONFIG['aeid'])
@@ -217,7 +248,7 @@ def get_formatted_time_elapsed(start_time, blue=True):
     hours, remainder = divmod(delta.total_seconds(), 3600)
     minutes, seconds = divmod(remainder, 60)
     hundredths = int((delta.microseconds / 10000) % 100)
-    elapsed_time_formatted =  f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
+    elapsed_time_formatted = f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
 
     if DISPLAY_EMOJI and blue:
         return text_to_blue(f"{elapsed_time_formatted}")

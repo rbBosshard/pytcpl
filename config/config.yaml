@@ -1,9 +1,5 @@
-aeid: '784'
-apply_dropping_new_tables: 1
-apply_fancy_logging: 1
-apply_profiler: 1
-apply_track_fitted_params: 1
-fit_models:
+aeid: '5'
+curve_fit_models:
 - cnst
 - poly1
 - poly2
@@ -12,12 +8,17 @@ fit_models:
 - exp5
 - hill
 - gnls
+data_file_format: parquet
+enable_curve_fit_parameter_tracking: 1
+enable_data_subsetting: 0
+enable_dropping_new_tables: 1
+enable_fancy_logging: 1
+enable_profiling: 1
 n_jobs: -1
-new_table_names:
+new_db_tables:
 - cutoffs
 - output
-subset: 0
-threshold_num_datapoints: 1000
+num_datapoints_per_series_threshold: 1000
 z_assay_info_keys:
 - acid
 - assay_component_endpoint_name
@@ -50,6 +51,6 @@ z_output_columns:
 - ac50
 - bmd
 - top
-- concentration_unlogged
+- conc
 - response
-- fitparams
+- fit_params
