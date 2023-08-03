@@ -1,5 +1,5 @@
 import os
-import time
+from datetime import datetime
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR_PATH = os.path.join(ROOT_DIR, '../config')
@@ -11,8 +11,7 @@ AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
 
-START_TIME = time.time()
-DISPLAY_EMOJI = 1
+START_TIME = datetime.now()
 
 COLORS_DICT = {
     "WHITE": "\033[37m",

@@ -54,6 +54,7 @@ def pow_fn(x, a, p):
 
 
 def exp2(x, a, b):
+    print(f"a: {a},  b: {b}")
     return a * (np.exp(x / b) - 1)
 
 

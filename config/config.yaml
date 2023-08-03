@@ -1,4 +1,4 @@
-aeid: '5'
+aeid: '784'
 apply_dropping_new_tables: 1
 apply_fancy_logging: 1
 apply_profiler: 1
@@ -8,12 +8,15 @@ fit_models:
 - poly1
 - poly2
 - pow
+- exp4
+- exp5
 - hill
 - gnls
-n_jobs: 2
+n_jobs: -1
 new_table_names:
 - cutoffs
 - output
+subset: 0
 threshold_num_datapoints: 1000
 z_assay_info_keys:
 - acid

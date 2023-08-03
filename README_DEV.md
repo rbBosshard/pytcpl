@@ -26,7 +26,7 @@ docs/make clean
 docs/make html
 ```
 
-#### Initialize docs
+#### Initialize empty docs
 ```bash
 sphinx-quickstart docs -q --project="pytcpl" --author="R. Bosshard" --release="0.1"
 ```

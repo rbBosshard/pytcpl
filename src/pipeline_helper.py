@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime
 import time
 
 import numpy as np
@@ -12,8 +13,11 @@ from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
 from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME, DISPLAY_EMOJI
+    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME
 from tcpl_output import tcpl_output
+
+CONFIG = {}
+DISPLAY_EMOJI = 1
 
 
 def status(symbol, replacement=""):
@@ -26,41 +30,44 @@ def read_aeids():
     return ids_list
 
 
-def launch(config, confg_path):
+def launch(config, config_path):
     global DISPLAY_EMOJI
     aeid_list = read_aeids()
     # disable verbose output if --unicode passed as runtime argument
     DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['apply_fancy_logging']
 
-    print(f"{status('balloon')} Hi :)\n\n"
-          f"{status('rocket')} Pytcpl launched!\n\n"
-          f"{status('gear')} Configuration located in {confg_path}\n\n"
+    print(f"{status('balloon')} Hi :)\n"
+          f"{status('rocket')} Pytcpl launched!\n"
+          f"{status('gear')} Configuration located in {config_path}\n"
           f"{status('scroll')} Running pipeline for "
-          f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')\n")
+          f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')")
     check_db(config)
     return aeid_list
 
 
 def load_config():
     with open(CONFIG_PATH, 'r') as file:
-        config = yaml.safe_load(file)
-    return config, CONFIG_DIR_PATH
+        CONFIG = yaml.safe_load(file)
+    return CONFIG, CONFIG_DIR_PATH
 
 
-def prolog(new_aeid, config):
-    # print boundary
+def prolog(config, new_aeid):
+    global CONFIG
+    CONFIG = config
+    
+    # print  boundary
     print("\n" + f"#-" * 55 + "\n")
 
     # Update the specific key with the new value
-    config['aeid'] = new_aeid
+    CONFIG['aeid'] = new_aeid
 
     # Write the updated YAML content back to the file
     with open(CONFIG_PATH, 'w') as file:
-        yaml.dump(config, file)
+        yaml.dump(CONFIG, file)
 
-    assay_component_endpoint_name = get_assay_info(config['aeid'])['assay_component_endpoint_name']
-    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={config['aeid']})")
-    print_(f"{status('seedling')} Start new assay endpoint: {assay_info}")
+    assay_component_endpoint_name = get_assay_info(CONFIG['aeid'])['assay_component_endpoint_name']
+    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})")
+    print_(f"{status('seedling')} Start processing new assay endpoint: {assay_info}")
 
 
 def epilog():
@@ -72,9 +79,9 @@ def goodbye():
     print(f"{status('waving_hand')} Goodbye!")
 
 
-def check_db(config):
-    if config['apply_dropping_new_tables']:
-        new_table_names = config['new_table_names']
+def check_db(CONFIG):
+    if CONFIG['apply_dropping_new_tables']:
+        new_table_names = CONFIG['new_table_names']
         tables = ", ".join(new_table_names)
         drop_stmt = f"DROP TABLE IF EXISTS {tables};"
         query_db(drop_stmt)  # Permanently removes tables from db!
@@ -127,14 +134,14 @@ def read_log_file(log_file):
     return models, parameters
 
 
-def get_efficacy_cutoff_and_append(aeid, df):
-    get_bmad = tcpl_mthd_load(lvl=4, aeid=aeid)
+def get_efficacy_cutoff_and_append(df):
+    get_bmad = tcpl_mthd_load(lvl=4, aeid=CONFIG['aeid'])
     for mthd in list(get_bmad['mthd'].values):  # +['onesd.aeid.lowconc.twells']
         df = mc4_mthds(mthd)(df)
     bmad = df['bmad'].iloc[0]
-    cutoff = get_efficacy_cutoff(aeid=aeid, bmad=bmad)
-    tcpl_delete(aeid, 'cutoffs')
-    tcpl_append(pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'cutoff': [cutoff]}), 'cutoffs')
+    cutoff = get_efficacy_cutoff(aeid=CONFIG['aeid'], bmad=bmad)
+    tcpl_delete(CONFIG['aeid'], 'cutoffs')
+    tcpl_append(pd.DataFrame({'aeid': [CONFIG['aeid']], 'bmad': [bmad], 'cutoff': [cutoff]}), 'cutoffs')
     return cutoff, df
 
 
@@ -148,14 +155,24 @@ def get_assay_info(aeid):
     return assay_info_dict
 
 
-def load_raw_data_from_db(aeid):
-    print_(f"{status('hourglass_not_done')} Fetching raw data from DB..")
-    select_cols = ['mc3.m0id', 'mc3.m1id', 'mc3.m2id', 'm3id', 'spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
-    qstring = f"SELECT {', '.join(select_cols)} " \
-              f"FROM mc0, mc1, mc3 " \
-              f"WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id " \
-              f"AND aeid = {aeid};"
-    df = query_db(query=qstring)
+def load_raw_data():
+    csv_file_path = os.path.join(CSV_DIR_PATH, f"{CONFIG['aeid']}_in.csv")
+    load_from_csv = os.path.exists(csv_file_path)
+    data_source = "csv file" if load_from_csv else "DB"
+    
+    print_(f"{status('hourglass_not_done')} Fetching raw data from {data_source}..")
+    
+    if load_from_csv:
+        df = pd.read_csv(csv_file_path)
+    else:   
+        select_cols = ['mc3.m0id', 'mc3.m1id', 'mc3.m2id', 'm3id', 'spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
+        qstring = f"SELECT {', '.join(select_cols)} " \
+                  f"FROM mc0, mc1, mc3 " \
+                  f"WHERE mc0.m0id = mc1.m0id AND mc1.m0id = mc3.m0id " \
+                  f"AND aeid = {CONFIG['aeid']};"
+        df = query_db(query=qstring)
+        df.to_csv(csv_file_path)
+
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
     return df
 
@@ -173,22 +190,22 @@ def tcpl_delete(aeid, tbl):
     query_db(qstring)
 
 
-def write_output_data_to_db(config, df):
+def write_output_data_to_db(df):
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
     print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
     for col in ['concentration_unlogged', 'response', 'fitparams']:
         df.loc[:, col] = df[col].apply(json.dumps)
-    tcpl_delete(config['aeid'], "output")
-    tcpl_append(df[config['z_output_columns']], "output")
+    tcpl_delete(CONFIG['aeid'], "output")
+    tcpl_append(df[CONFIG['z_output_columns']], "output")
 
 
-def export_as_csv(config, df):
+def export_as_csv(df):
     print_(f"{status('floppy_disk')} Exporting output data as csv")
-    df = df[config['z_export_cols']]
-    df = tcpl_output(df, config['aeid'])
+    df = df[CONFIG['z_export_cols']]
+    df = tcpl_output(df, CONFIG['aeid'])
     df = df.rename(columns={'dsstox_substance_id': 'dtxsid'})
     df = df[['dtxsid', 'chit']]
-    df.to_csv(f"{CSV_DIR_PATH}/{config['aeid']}.csv", index=False)
+    df.to_csv(f"{CSV_DIR_PATH}/{CONFIG['aeid']}.csv", index=False)
 
 
 def text_to_blue(message):
@@ -196,10 +213,12 @@ def text_to_blue(message):
 
 
 def get_formatted_time_elapsed(start_time, blue=True):
-    seconds = time.time() - start_time
-    minutes = int(seconds)
-    formatted_seconds = "{:.2f}".format(seconds - minutes)[2:]
-    elapsed_time_formatted = f"[0:{minutes:02}:{formatted_seconds}s]"
+    delta = datetime.now() - start_time
+    hours, remainder = divmod(delta.total_seconds(), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    hundredths = int((delta.microseconds / 10000) % 100)
+    elapsed_time_formatted =  f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
+
     if DISPLAY_EMOJI and blue:
         return text_to_blue(f"{elapsed_time_formatted}")
     else:

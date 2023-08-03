@@ -45,12 +45,13 @@ def processing(df, cutoff, config):
 
     df = preprocess(df, config)
 
+    df = df[-config['subset']:] if config['subset'] else df
     print_(f"{status('laptop')} Processing {df.shape[0]} concentration-response series "
            f"using {len(config['fit_models'])} different fit models:")
 
     time.sleep(0.05)
 
-    desc = get_msg_with_elapsed_time(f"{status('petri_dish')}    - First run (filtering):  ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"{status('petri_dish')}   - First run (filtering):  ", color_only_time=False)
     total = df.shape[0]
     iterator = tqdm(df.iterrows(), total=total, desc=desc, bar_format=custom_format)
 
@@ -68,7 +69,7 @@ def processing(df, cutoff, config):
 
     relevant_df = df[fits]
     total = relevant_df.shape[0]
-    desc = get_msg_with_elapsed_time(f"{status('atom_symbol')}    - Second run (curve-fit): ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"{status('atom_symbol')}   - Second run (curve-fit): ", color_only_time=False)
     iterator = tqdm(relevant_df.iterrows(), total=total, desc=desc, bar_format=custom_format)
 
     if config["n_jobs"] != 1:
@@ -94,9 +95,10 @@ def processing(df, cutoff, config):
     if config['apply_track_fitted_params']:
         track_fitted_params()
 
+
     # Hit
     total = df.shape[0]
-    desc = get_msg_with_elapsed_time(f"{status('test_tube')}    - Third run (hit-call):   ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"{status('test_tube')}   - Third run (hit-call):   ", color_only_time=False)
     iterator = tqdm(df.iterrows(), desc=desc, total=total, bar_format=custom_format)
 
     if config["n_jobs"] != 1:
@@ -178,18 +180,13 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd=1, bmr_scale=1.349, bmed=0, 
         # never choose constant as winner for continuous hitcalls
         nocnstaics = {model: aics[model] for model in aics if model != "cnst"}
         fit_model = min(nocnstaics, key=nocnstaics.get)
+
         try:  # Todo: RuntimeWarning: invalid value encountered in scalar divide
-            caikwt = np.exp(-aics["cnst"] / 2) / (np.exp(-aics["cnst"] / 2) + np.exp(-aics[fit_model] / 2))
-        except:
-            try:
-                term = np.exp(aics["cnst"] / 2 - aics[fit_model] / 2)
-                if term == np.inf:
-                    caikwt = 0
-                else:
-                    caikwt = 1 / (1 + term)
-            except Exception as e:
-                print(f"Error caikwt: {e}")
-                caikwt = 0
+            assert aics[fit_model] <= aics["cnst"]
+            caikwt = np.exp((aics[fit_model]-aics["cnst"]) / 2)
+        except Exception as e:
+            print(f"Error caikwt: {e}")
+            caikwt = 1
 
     # if the fit_model is not reported as 'none', obtain model information
     if fit_model != "none":
@@ -226,36 +223,36 @@ def tcpl_hit_core(params, conc, resp, cutoff, onesd=1, bmr_scale=1.349, bmed=0, 
         bmd = acy(np.sign(top) * bmr, modpars, fit_model=fit_model)
 
         # get bmdl and bmdu
-        try:
-            bmdl = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                              bmd=bmd, which_bound="lower")
-            bmdu = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
-                              bmd=bmd, which_bound="upper")
-        except Exception as e:
-            # print(f"bmd_bounds: {e}")
-            pass
+        # try:
+        #     bmdl = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+        #                       bmd=bmd, which_bound="lower")
+        #     bmdu = bmd_bounds(fit_model, bmr=np.sign(top) * bmr, pars=modpars, conc=conc, resp=resp, onesidedp=0.05,
+        #                       bmd=bmd, which_bound="upper")
+        # except Exception as e:
+        #     print(f"bmd_bounds: {e}")
+        #     pass
 
         # apply bmd min
-        if bmd_low_bnd is not None and not np.isnan(bmd):
-            min_conc = np.min(conc)
-            min_bmd = min_conc * bmd_low_bnd
-            if bmd < min_bmd:
-                bmd_diff = min_bmd - bmd
-                # shift all bmd to the right
-                bmd += bmd_diff
-                bmdl += bmd_diff
-                bmdu += bmd_diff
-
-        # apply bmd max
-        if bmd_up_bnd is not None and not np.isnan(bmd):
-            max_conc = np.max(conc)
-            max_bmd = max_conc * bmd_up_bnd
-            if bmd > max_bmd:
-                # shift all bmd to the left
-                bmd_diff = bmd - max_bmd
-                bmd -= bmd_diff
-                bmdl -= bmd_diff
-                bmdu -= bmd_diff
+        # if bmd_low_bnd is not None and not np.isnan(bmd):
+        #     min_conc = np.min(conc)
+        #     min_bmd = min_conc * bmd_low_bnd
+        #     if bmd < min_bmd:
+        #         bmd_diff = min_bmd - bmd
+        #         # shift all bmd to the right
+        #         bmd += bmd_diff
+        #         bmdl += bmd_diff
+        #         bmdu += bmd_diff
+        #
+        # # apply bmd max
+        # if bmd_up_bnd is not None and not np.isnan(bmd):
+        #     max_conc = np.max(conc)
+        #     max_bmd = max_conc * bmd_up_bnd
+        #     if bmd > max_bmd:
+        #         # shift all bmd to the left
+        #         bmd_diff = bmd - max_bmd
+        #         bmd -= bmd_diff
+        #         bmdl -= bmd_diff
+        #         bmdu -= bmd_diff
 
     locals().update(fitout)
     if "pars" in fitout:

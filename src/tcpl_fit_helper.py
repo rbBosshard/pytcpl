@@ -7,39 +7,37 @@ from tcpl_obj_fn import tcpl_obj
 
 
 def fit_curve(fit_model, conc, resp, out):
-    x = 100.0
+    x = 10000
+    a = 0.01
+    b = 0.001
+    c = 10
+
     initial_values = {
-        'cnst': [0.9],
-        'poly1': [0.9],
+        'cnst': [1],
+        'poly1': [1],
         'poly2': [20, 70],
-        'pow': [0.9, 0.9],
-        'exp2': [40, 70],
-        'exp3': [50, 90, 0.9],
+        'pow': [1, 1],
         'exp4': [60, 10],
         'exp5': [60, 10, 2],
         'hill': [60, 10, 2],
         'gnls': [60, 10, 2, 60, 5],
-        'expo': [1, 1],
     }
 
     bounds = {
-        'cnst': ((-x, x),),
-        'poly1': ((-x, x),),
-        'poly2': ((-x, x), (-x, x)),
-        'pow': ((-x, x), (0.3, 20)),
-        'exp2': ((-x, x), (0.1, x)),
-        'exp3': ((-x, x), (0.1, x), (0.3, 8)),
-        'exp4': ((-x, x), (0.1, x)),
-        'exp5': ((-x, x), (0.1, x), (0.3, 8)),
-        'hill': ((-x, x), (0.1, x), (0.3, 8)),
-        'gnls': ((-x, x), (0.1, x), (0.3, 8), (0.1, x), (0.3, 8)),
-        'expo': ((0.1, x), (-x, x)),
+        'cnst': ((a, x),),
+        'poly1': ((-10, 10),),
+        'poly2': ((-10, x), (-x, x)),
+        'pow': ((-1000, 1000), (0.3, c)),
+        'exp4': ((a, x), (b, x)),
+        'exp5': ((a, x), (b, x), (a, c)),
+        'hill': ((a, x), (b, x), (a, c)),
+        'gnls': ((a, x), (b, x), (a, c), (b, x), (a, 20)),
     }
 
     initial_values = initial_values[fit_model] + [0.1]
     bounds = bounds[fit_model] + ((-1, 1),)
     args = (conc, resp, get_fit_model(fit_model))
-    fit = minimize(tcpl_obj, x0=initial_values, bounds=bounds, args=args, )
+    fit = minimize(tcpl_obj, x0=initial_values, bounds=bounds, args=args)
 
     try:
         generate_output(fit_model, conc, resp, out, fit)

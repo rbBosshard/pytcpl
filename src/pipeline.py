@@ -1,28 +1,31 @@
 import cProfile
 import os
 
+from constants import ROOT_DIR, PROFILER_PATH
 from pipeline_helper import load_config, \
-    prolog, epilog, get_efficacy_cutoff_and_append, launch, load_raw_data_from_db, export_as_csv, goodbye, \
+    prolog, epilog, get_efficacy_cutoff_and_append, launch, load_raw_data, export_as_csv, goodbye, \
     write_output_data_to_db
 from processing import processing
-from constants import ROOT_DIR, PROFILER_PATH
 
 
 def pipeline(config, confg_path):
     aeid_list = launch(config, confg_path)
+
     for aeid in aeid_list:
-        prolog(aeid, config)
-        df = load_raw_data_from_db(config['aeid'])
-        cutoff, df = get_efficacy_cutoff_and_append(config['aeid'], df)
+        prolog(config, aeid)
+        df = load_raw_data()
+        cutoff, df = get_efficacy_cutoff_and_append(df)
         df = processing(df, cutoff, config)
-        write_output_data_to_db(config, df)
-        export_as_csv(config, df)
+        write_output_data_to_db(df)
+        export_as_csv(df)
         epilog()
+
     goodbye()
 
 
 if __name__ == '__main__':
     cnfg, cnfg_path = load_config()
+
     if cnfg['apply_profiler']:
         with cProfile.Profile() as pr:
             pipeline(cnfg, cnfg_path)

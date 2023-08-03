@@ -6,10 +6,10 @@
 #  username: root
 bossh:
   db: invitrodb_v3o5
-  host: expectmine.datascience.ch
-  password: robin
+  host: localhost
+  password: root
   port: 3306
-  username: robin
+  username: root
 eliza:
   db: invitrodb_v3o5
   host: localhost
