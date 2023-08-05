@@ -1,7 +1,6 @@
 import numpy as np
 
 from query_db import query_db
-from tcpl_fit_helper import mad
 
 
 def mc4_mthds(mthd, df):
@@ -57,3 +56,11 @@ def tcpl_mthd_load(lvl, aeid):
               f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
               f"AND aeid IN ({aeid});"
     return query_db(query=qstring)["mthd"].tolist()
+
+
+BMAD_CONSTANT = 1.4826
+
+
+def mad(x):
+    """Calculate the median absolute deviation (MAD) of an array"""
+    return BMAD_CONSTANT * np.median(np.abs(x - np.median(x)))

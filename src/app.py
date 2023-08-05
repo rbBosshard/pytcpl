@@ -7,7 +7,7 @@ import streamlit as st
 
 
 
-from fit_models import get_fit_model
+from fit_models import get_model
 from pipeline_helper import get_assay_info, print_
 from pipeline_helper import load_config
 from query_db import query_db
@@ -121,13 +121,13 @@ def add_curves(fig, row):
     pars_dict = {}
     for m, model in enumerate(curve_fit_models):
         params = fit_params[model]["pars"]
-        params = {param: value for param, value in params.items() if param in get_fit_model(model).__code__.co_varnames}
+        params = {param: value for param, value in params.items() if param in get_model(model).__code__.co_varnames}
 
         min_val = np.min(conc)
         # min_val = min_val if row['hitcall'] >= 0 else min(min_val, row['ac50'])
 
         x = powspace(min_val, np.max(conc), 100, 500)
-        y = np.array(get_fit_model(model)(x, **params))
+        y = np.array(get_model(model)(x, **params))
         color = px.colors.qualitative.Bold[m]
         aic = {round(fit_params[model]['aic'], 2)}
         rmse = {round(fit_params[model]['rmse'], 2)}

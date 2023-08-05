@@ -3,6 +3,8 @@ import os
 import sys
 from datetime import datetime
 
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
@@ -10,12 +12,11 @@ import yaml
 from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     CSV_DIR_PATH, LOG_DIR_PATH, START_TIME
 from constants import symbols_dict
+from fit_models import get_params
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
 from tcpl_output import tcpl_output
-import matplotlib.pyplot as plt
-from fit_models import get_params
 
 CONFIG = {}
 DISPLAY_EMOJI = 1
@@ -33,15 +34,16 @@ def read_aeids():
 
 def launch(config, config_path):
     global DISPLAY_EMOJI
-    aeid_list = read_aeids()
     # disable verbose output if --unicode passed as runtime argument
     DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['enable_fancy_logging']
 
-    print(f"{status('balloon')} Hi :)\n"
-          f"{status('rocket')} Pytcpl launched!\n"
-          f"{status('gear')} Configuration located in {config_path}\n"
-          f"{status('scroll')} Running pipeline for "
-          f"{len(aeid_list)} assay endpoints (specified in 'config/aeid_list.in')")
+    aeid_list = read_aeids()
+
+    print(f"{status('balloon')} Hi :)")
+    print(f"{status('rocket')} Pytcpl launched!")
+    print(f"{status('gear')} Configuration located in {config_path}")
+    print(f"{status('scroll')} Running pipeline for {len(aeid_list)} assay endpoints (spec in 'config/aeid_list.in')")
+
     check_db(config)
     return aeid_list
 
@@ -96,76 +98,53 @@ def check_db(CONFIG):
 
 def track_fitted_params(fit_params):
     parameters = {}
-    for res in fit_params:
-        for model, params in res.items():
-            ps = list(params['pars'].values())
-            parameters.setdefault(model, []).append(ps)
+    for result in fit_params:
+        for model, params in result.items():
+            parameters.setdefault(model, []).append(list(params['pars'].values()))
 
     def plot_histograms(params, key):
         plt.figure(figsize=(10, 6))
         plt.suptitle(f'Fit model parameters histograms: {key}')
         param_names = get_params(key)
         num_params = len(param_names)
-        for i in range(num_params):
+        for i, param_name in enumerate(param_names):
             plt.subplot(1, num_params, i + 1)
             plt.hist(params[:, i])
-            plt.title(f"{param_names[i]}")
+            plt.title(f"{param_name}")
             plt.xlabel('Value')
             plt.ylabel('Frequency')
         plt.tight_layout()
         plt.savefig(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"{key}.png"))
+        plt.close()
+
+    matplotlib.use('Agg')
 
     with open(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"stats.out"), "w") as file:
-        # Plot histograms for each key in the dictionary
         for key, param_list in parameters.items():
             param_array = np.array(param_list)
             plot_histograms(param_array, key)
-            median = np.median(param_array, 0)
-            min = np.min(param_array, 0)
-            max = np.max(param_array, 0)
-            file.write(f"{key}:\n >> median {median}\n >> min {min}\n >> max {max}\n\n")
-
-
-def read_log_file(log_file):
-    models = []
-    parameters = []
-    with open(log_file, "r") as file:
-        for line in file:
-            model, params = line.strip().split(": ")
-            param_list = []
-            for x in params.split(", "):
-                if x != 'None':
-                    param_list.append(float(x))
-                else:
-                    continue
-            if param_list:
-                models.append(model)
-                parameters.append(param_list)
-    return models, parameters
+            median, minimum, maximum = np.median(param_array, 0), np.min(param_array, 0), np.max(param_array, 0)
+            file.write(f"{key}:\n >> median {median}\n >> min {minimum}\n >> max {maximum}\n\n")
 
 
 def get_cutoffs(df):
     print_(f"{status('thermometer')} Computing efficacy cutoff")
+    aeid = CONFIG['aeid']
     values = {}
     other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-    for mthd in tcpl_mthd_load(lvl=4, aeid=CONFIG['aeid']) + other_mthds:
-        value = mc4_mthds(mthd, df)
-        values.update({mthd: value})
+    for mthd in tcpl_mthd_load(lvl=4, aeid=aeid) + other_mthds:
+        values.update({mthd: mc4_mthds(mthd, df)})
 
     bmad = values['bmad.aeid.lowconc.twells']
     bmed = values['bmed.aeid.lowconc.twells']
-    onesd = values['onesd.aeid.lowconc.twells']
+    sd = values['onesd.aeid.lowconc.twells']
 
-    cutoffs = [mc5_mthds(mthd, bmad) for mthd in tcpl_mthd_load(lvl=5, aeid=CONFIG['aeid'])]
-    cutoff = max(cutoffs, default=0)
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in tcpl_mthd_load(lvl=5, aeid=aeid)]
+    c = max(cutoffs, default=0)
 
-    tcpl_delete(CONFIG['aeid'], 'cutoffs')
-    tcpl_append(pd.DataFrame({'aeid': [CONFIG['aeid']],
-                              'bmad': [bmad],
-                              'bmed': [bmed],
-                              'onesd': [onesd],
-                              'cutoff': [cutoff]}), 'cutoffs')
-    return cutoff
+    db_delete(aeid, 'cutoffs')
+    db_append(pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [c]}), 'cutoffs')
+    return c
 
 
 def get_assay_info(aeid):
@@ -202,13 +181,11 @@ def load_raw_data():
             df.to_parquet(csv_file_path, compression='gzip')
 
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
-
     cutoff = get_cutoffs(df)
-
     return df, cutoff
 
 
-def tcpl_append(dat, tbl):
+def db_append(dat, tbl):
     try:
         engine = get_sqlalchemy_engine()
         dat.to_sql(tbl, engine, if_exists='append', index=False)
@@ -216,9 +193,8 @@ def tcpl_append(dat, tbl):
         print(err)
 
 
-def tcpl_delete(aeid, tbl):
-    qstring = f"DELETE FROM {tbl} WHERE aeid = {aeid};"
-    query_db(qstring)
+def db_delete(aeid, tbl):
+    query_db(f"DELETE FROM {tbl} WHERE aeid = {aeid};")
 
 
 def store_output_in_db(df):
@@ -226,8 +202,8 @@ def store_output_in_db(df):
     print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
     for col in ['conc', 'response', 'fit_params']:
         df.loc[:, col] = df[col].apply(json.dumps)
-    tcpl_delete(CONFIG['aeid'], "output")
-    tcpl_append(df[CONFIG['z_output_columns']], "output")
+    db_delete(CONFIG['aeid'], "output")
+    db_append(df[CONFIG['z_output_columns']], "output")
 
 
 def export(df):

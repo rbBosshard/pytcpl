@@ -1,4 +1,4 @@
-aeid: '5'
+aeid: '784'
 curve_fit_models:
 - cnst
 - poly1
@@ -9,7 +9,7 @@ curve_fit_models:
 - hill
 - gnls
 data_file_format: parquet
-enable_curve_fit_parameter_tracking: 1
+enable_curve_fit_parameter_tracking: 0
 enable_data_subsetting: 0
 enable_dropping_new_tables: 1
 enable_fancy_logging: 1
@@ -37,19 +37,15 @@ z_export_cols:
 - aeid
 - spid
 - fit_model
-- cutoff
 - hitcall
 - ac50
-- bmd
 - top
 z_output_columns:
 - aeid
 - spid
 - fit_model
-- cutoff
 - hitcall
 - ac50
-- bmd
 - top
 - conc
 - response
