@@ -150,7 +150,7 @@ def add_curves(series, fig):
                             line=dict(color=color, width=2),
                             showlegend=False,  # Do not show the marker in the legend
                         ))
-                        fig.add_annotation(text = potency,
+                        fig.add_annotation(text=f"{potency}",
                             yref = "paper",
                             x = pot,
                             y = 0,
@@ -248,11 +248,11 @@ def update():
 
 config, _ = load_config()
 layout = "wide"
-st.set_page_config(page_title="Curve surfer", page_icon="☣️", layout=layout, initial_sidebar_state="expanded")
+st.set_page_config(page_title="PyTCPL Curve Surfer", page_icon="☣️", layout=layout, initial_sidebar_state="expanded")
 check_reset()
 try:
     with st.sidebar:
-        st.header("Curve surfer :surfer:")
+        st.header("PyTCPL Curve Surfer :surfer:")
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=int(config['aeid'])))
         col1, col2 = st.columns(2)
         with col1:
@@ -293,7 +293,7 @@ try:
         }
     )
 
-    with st.expander("Sample info", expanded=True):
+    with st.expander("Sample info :petri_dish:", expanded=True):
         st.dataframe(df,
             column_config= {
                 "Hitcall": st.column_config.ProgressColumn(
