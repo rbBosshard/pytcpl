@@ -28,11 +28,10 @@ def process_assay_endpoint(df, cutoff, config):
         df['conc'], df['resp'] = zip(*df.apply(shrink_series, axis=1))
         return df
 
-    def check(series):
+    def check_to_fit(series):
         conc, resp = np.array(series.conc), np.array(series.resp)
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
-        to_fit = (rmds.size >= config['min_num_median_responses_threshold']) and np.any(np.abs(rmds) >= cutoff)
-        return to_fit
+        return (rmds.size >= config['min_num_median_responses_threshold']) and np.any(rmds >= cutoff)
 
     def fit(series):
         out = {}
@@ -65,18 +64,9 @@ def process_assay_endpoint(df, cutoff, config):
         ll = params[best_aic_model]['ll']
         pred = get_model(best_aic_model)(conc, *ps_list[:-1]).tolist()
         rmse = np.sqrt(np.mean((resp - pred) ** 2))
-
-
-        if best_aic_model in ("poly1", "poly2", "pow", "gnls", "sigmoid"):
-            top = np.max(np.abs(pred))  # top is taken to be highest model value
-            ac50 = get_inverse_model(best_aic_model)(.5 * top, *ps_list[:-1], conc)
-        elif best_aic_model in ("hill", "exp4", "exp5"):
-            top = ps["tp"]
-            ac50 = ps["ga"]
-        else:
-            raise NotImplementedError()
-
-        acc = get_inverse_model(best_aic_model)(cutoff, *ps_list[:-1], conc)
+        top = np.max(np.abs(pred))  # top is taken to be highest model value
+        ac50 = get_inverse_model(best_aic_model)(.5 * top, *ps_list[:-1], conc)
+        acc = get_inverse_model(best_aic_model)(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
         actop = get_inverse_model(best_aic_model)(top, *ps_list[:-1], conc)
         # ac1sd = get_inverse_model(onesd)(*ps_list[:-1], get_inverse_model)
         # bmr = onesd * bmr_scale  # bmr_scale is default 1.349
@@ -100,16 +90,17 @@ def process_assay_endpoint(df, cutoff, config):
 
         out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'acc': acc, 'actop': actop}
         return out
+
     # Preprocessing
     nj = config['n_jobs']
     p = nj != 1
     df = group_datapoints_to_series(df)
     desc = get_msg_with_elapsed_time(f"{status('hammer_and_wrench')}  -> Preprocessing:  ", color_only_time=False)
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
-    to_fit = Parallel(n_jobs=nj)(delayed(check)(i) for _, i in it) if p else [check(i) for _, i in it]
-    to_fit = pd.Series(to_fit)
-    df_to_fit = df[to_fit].reset_index(drop=True)
-    df_no_fit = df[~to_fit].reset_index(drop=True)
+    mask = Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it]
+    mask = pd.Series(mask)
+    df_to_fit = df[mask].reset_index(drop=True)
+    df_no_fit = df[~mask].reset_index(drop=True)
 
     # Curve-Fitting
     desc = get_msg_with_elapsed_time(f"{status('comet')}  -> Curve-Fitting: ", color_only_time=False)

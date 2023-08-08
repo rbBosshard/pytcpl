@@ -1,38 +1,40 @@
 import numpy as np
 
 
-b = 1000
+b = 1e6
 a = 0.0
 c = 10
-d = 1e-8
+e = 5
+d = 1e-6
 a1 = 0.01
+a2 = 1e-4
 
 
 def get_initial_values(fit_model, conc=[]):
     return {
-        'cnst': [a, 0.9],
+        'cnst': [0.1, 0.5],
         'poly1': [0.8],
-        'poly2': [230, 340],
+        'poly2': [300, 500],
         'pow': [1.5, 0.8],
-        'exp4': [110, 80],
-        'exp5': [100, 50, 1.5],
-        'hill': [90, 30, 1.9],
-        'gnls': [170, 45, 1.7, 70, 1.7],
-        'sigmoid': [0.5, 0.5, 0.5, 0.1]
+        'exp4': [100, 10],
+        'exp5': [100, 10, 2],
+        'hill': [100, 10, 2],
+        'gnls': [100, 10, 2, 10, 0.5],
+        'sigmoid': [100, 10, 2, 0.5]
     }.get(fit_model)
 
 
 def get_bounds(fit_model, conc=[]):
     return {
-        'cnst': ((a, b), (-1, 1)),
+        'cnst': ((d, b), (-1, 1)),
         'poly1': ((a1, c),),
         'poly2': ((a1, b), (a1, b)),
-        'pow': ((a, 100), (0.1, c)),
-        'exp4': ((a, b), (a1, b)),
-        'exp5': ((a, b), (a1, b), (a, c)),
-        'hill': ((a, b), (a, b), (a, c)),
-        'gnls': ((a, b), (a, b), (a, c), (a1, b), (a, c)),
-        'sigmoid': ((a, b), (0.0001, b), (0, 5), (0, 1)),
+        'pow': ((a2, 100), (0.1, c)),
+        'exp4': ((a2, b), (a1, b)),
+        'exp5': ((a2, b), (a1, b), (a1, c)),
+        'hill': ((d, b), (d, b), (0.1, c)),
+        'gnls': ((d, b), (d, b), (d, c), (a1, b), (d, c)),
+        'sigmoid': ((d, b), (a2, b), (d, e), (d, 2)),
     }.get(fit_model)
 
 
@@ -123,24 +125,28 @@ def poly2_inverse(y, a, b, conc=[]):
 
 
 def pow_fn_inverse(y, a, p, conc=[]):
+
     return (y / a) ** (1 / p)
 
 
 def exp4_inverse(y, tp, ga, conc=[]):
     val = 1 - y / tp
     if val == 0:
-        val += 1e-6
+        val = 1e-6
     return -ga * np.log2(val)
 
 
 def exp5_inverse(y, tp, ga, p, conc=[]):
-    return ga * (-np.log2(1 - y / tp)) ** (1 / p)
+    val = 1 - y / tp
+    if val == 0:
+        val = 1e-6
+    return ga * (-np.log2(val)) ** (1 / p)
 
 
 def hill_inverse(y, tp, ga, p, conc=[]):
     val = (tp / y) - 1
     if val == 0:
-        val += 1e-6
+        val = 1e-6
     return ga / val ** (1 / p)
 
 

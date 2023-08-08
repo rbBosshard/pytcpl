@@ -1,16 +1,17 @@
-aeid: '5'
+aeid: '784'
 bmr_scale: 1.349
 curve_fit_models:
 - cnst
-- exp4
-- exp5
-- gnls
-- hill
 - poly1
 - poly2
+- pow
+- exp4
+- exp5
+- hill
 - sigmoid
+- gnls
 data_file_format: parquet
-enable_curve_fit_parameter_tracking: 0
+enable_curve_fit_parameter_tracking: 1
 enable_data_subsetting: 0
 enable_dropping_new_tables: 1
 enable_fancy_logging: 1

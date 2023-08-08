@@ -41,8 +41,6 @@ def launch(config, config_path):
     DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['enable_fancy_logging']
 
     aeid_list = read_aeids()
-
-    print(f"{status('balloon')} Hi :)")
     print(f"{status('rocket')} Pytcpl launched!")
     print(f"{status('gear')} Configuration located in {config_path}")
     print(f"{status('scroll')} Running pipeline for {len(aeid_list)} assay endpoints (spec in 'config/aeid_list.in')")
@@ -112,7 +110,7 @@ def track_fitted_params(fit_params):
         num_params = len(param_names)
         for i, param_name in enumerate(param_names):
             plt.subplot(1, num_params, i + 1)
-            plt.hist(params[:, i])
+            plt.hist(params[:, i], bins=100)
             plt.title(f"{param_name}")
             plt.xlabel('Value')
             plt.ylabel('Frequency')
