@@ -1,17 +1,20 @@
 import os
 from datetime import datetime
 
+START_TIME = datetime.now()
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 CONFIG_DIR_PATH = os.path.join(ROOT_DIR, '../config')
-EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../export')
-CSV_DIR_PATH = os.path.join(EXPORT_DIR_PATH, 'csv')
-LOG_DIR_PATH = os.path.join(EXPORT_DIR_PATH, 'logs')
 CONFIG_PATH = os.path.join(CONFIG_DIR_PATH, 'config.yaml')
 AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
-PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
 
-START_TIME = datetime.now()
+EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../export')
+
+LOG_DIR_PATH = os.path.join(ROOT_DIR, '../logs')
+PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
+ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.out')
 
 COLORS_DICT = {
     "WHITE": "\033[37m",

@@ -1,185 +1,40 @@
 import json
 
 import numpy as np
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-
-
-from fit_models import get_model
-from pipeline_helper import get_assay_info, print_
-from pipeline_helper import load_config
+from fit_models import get_model, powspace
+from pipeline_helper import load_config, get_assay_info, print_
 from query_db import query_db
 
 # Run command `streamlit run pytcpl/app.py`
 # Ensure: test = 0 in config.yaml
-
-# conn = st.experimental_connection('mysql', type='sql')
-# output_wow = conn.query('select * invitrodb_v3o5.from output')
-# wow = st.dataframe(output_wow)
-# print(wow)
-
-
-def powspace(start, stop, power, num):
-    start = np.power(start, 1 / float(power))
-    stop = np.power(stop, 1 / float(power))
-    return np.power(np.linspace(start, stop, num=num), power)
+# Suppress the specific warning
+pd.options.mode.chained_assignment = None  # default='warn'
 
 
 # Load data initially or when id changes, and cache the result
 @st.cache_data
 def fetch_data(aeid):  # aeid parameter used to handle correct caching
-    print_(f"Fetch data from DB with assay ID {aeid}...")
-    check_reset()
+    print_(f"Fetch data from DB with assay ID {aeid}..")
     qstring = f"SELECT * FROM output WHERE aeid = {st.session_state.aeid};"
-    dat = query_db(query=qstring)
-    print_(f"Data fetched: {dat.shape[0]} rows.")
-    return dat
+    df = query_db(query=qstring)
+    print_(f"{df.shape[0]} series loaded")
+    qstring = f"SELECT * FROM cutoffs WHERE aeid = {st.session_state.aeid};"
+    cutoff = query_db(query=qstring)['cutoff'].iloc[0]
+    return df, cutoff
 
 
-def update():
-    df = fetch_data(st.session_state.aeid)  # needs input for unique caching
-    check_reset()
-
-    if st.session_state.option == "hitcall desc":
-        df = df.sort_values(by="hitcall", ascending=False)
-    elif st.session_state.option == "hitcall asc":
-        df = df.sort_values(by="hitcall", ascending=True)
-    else:
-        pass
-
-    ids = df["id"]
-    ids = ids.values.tolist()
-
-    st.session_state.id = ids[st.session_state.spid_row]
-
-    spid = get_spid(df, st.session_state.trigger)
-    if spid is None:
-        return
-
-    row = df[df["id"] == st.session_state.id]
-
-    row.loc[:, 'conc'] = row['conc'].apply(json.loads)
-    row.loc[:, 'response'] = row['response'].apply(json.loads)
-    row.loc[:, 'fit_params'] = row['fit_params'].apply(json.loads)
-    row = row.to_dict()
-    # Remove all nested dictionaries using dictionary comprehension
-    row = {key: value for key, nested_dict in row.items() for value in nested_dict.values()}
-
-    fig = go.Figure()
-
-    add_title(fig, row)
-
-    fig.add_trace(
-        go.Scatter(x=np.log10(row["conc"]), y=row["response"], mode='markers', legendgroup="Response",
-                   legendgrouptitle_text="Repsonse",
-                   marker=dict(color="black", symbol="x-thin-open", size=10),
-                   name="response", showlegend=False))
-
-    return fig, add_curves(fig, row)
-
-
-def add_title(fig, row):
-    try:
-        casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
-    except Exception as e:
-        print(e)
-        return
-    fig.update_layout(height=600, width=1400)
-    # fig.update_layout(hovermode="x unified")
-    fig.update_xaxes(showspikes=True)
-    fig.update_yaxes(showspikes=True)
-    assay_infos = get_assay_info(st.session_state.aeid)
-    normalized_data_type = assay_infos["normalized_data_type"]
-    assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
-    assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
-
-    with st.expander("Details"):
-        st.write(f"spid: {st.session_state.spid}")
-        st.write(f"Chemical: {chnm if chnm else 'N/A'}")
-        link = f"[{dsstox_substance_id}](https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id})" if dsstox_substance_id else "N/A"
-        st.write(f"DSSTOX Substance ID: {link}")
-        st.write(f"CASN: {casn if casn else 'N/A'}")
-        st.write(f"Assay Endpoint: {assay_component_endpoint_name}")
-        st.write(f"{assay_component_endpoint_desc}")
-
-    fig.update_layout(
-        title=(f"Assay Endpoint: <i>{assay_component_endpoint_name}</i>"
-               f"<br>Chemical: <i>{chnm if chnm else 'N/A'}</i><br>"
-               f"Best Model Fit: <i>{row['fit_model']}</i>, hitcall: <i>{round(row['hitcall'], 7)}</i>"),
-        margin=dict(t=150),
-        xaxis_title="log10(Concentration) μM",
-        yaxis_title=str(normalized_data_type),
-    )
-
-
-def add_curves(fig, row):
-    fit_params = row['fit_params']
-    conc = row['conc']
-    curve_fit_models = list(fit_params.keys())
-    pars_dict = {}
-    for m, model in enumerate(curve_fit_models):
-        params = fit_params[model]["pars"]
-        params = {param: value for param, value in params.items() if param in get_model(model).__code__.co_varnames}
-
-        min_val = np.min(conc)
-        # min_val = min_val if row['hitcall'] >= 0 else min(min_val, row['ac50'])
-
-        x = powspace(min_val, np.max(conc), 100, 500)
-        y = np.array(get_model(model)(x, **params))
-        color = px.colors.qualitative.Bold[m]
-        aic = {round(fit_params[model]['aic'], 2)}
-        rmse = {round(fit_params[model]['rmse'], 2)}
-        try:
-            if model != row['fit_model'] and model != "none":
-                fig.add_trace(
-                    go.Scatter(x=np.log10(x), y=y, opacity=.7, marker=dict(color=color), mode='lines',
-                               name=f"{model} {aic} {rmse}", line=dict(width=2, dash='dash')))
-
-            elif model == row['fit_model']:
-                fig.add_trace(
-                    go.Scatter(x=np.log10(x), y=y, legendgroup=model, marker=dict(color=color), mode='lines',
-                               name=f"{model} (BEST FIT) {aic} {rmse}", line=dict(width=3)))
-
-                if row['hitcall'] > 0.0:
-                    # potencies = ["bmd", "acc", "ac1sd", "ac10", "ac20", "ac50", "ac95"]
-                    potencies = ["acc", "ac50"]
-                    for p in potencies:
-                        if p in row:
-                            fig.add_vline(x=np.log10(row[p]), line_color=color, line_width=2,
-                                          annotation_position="bottom left",
-                                          annotation_text=f"{p}", layer="below")
-
-                    # efficacies = ["top", "bmr"]
-                    efficacies = ["top"]
-                    for e in efficacies:
-                        if e in row:
-                            fig.add_hline(y=row[e], line_color=color, line_width=2,
-                                          annotation_position="bottom left",
-                                          annotation_text=f"{e}", layer="below")
-
-        except Exception as e:
-            print(f"{e}")
-            pass
-        else:  # model == "none"
-            pass
-
-    cutoff = row['cutoff']
-    fig.add_hline(y=cutoff, line_color="LightSkyBlue")
-
-    fig.add_hrect(
-        y0=-cutoff,
-        y1=cutoff,
-        fillcolor='LightSkyBlue',
-        opacity=0.4,
-        layer='below',
-        line=dict(width=0),
-        annotation_text="efficacy cutoff", annotation_position="top left",
-    )
-
-    fig.update_layout(legend=dict(groupclick="toggleitem"))
-    return pars_dict
+def get_series(df):
+    st.session_state.length = df.shape[0]
+    series = df.iloc[st.session_state.id]
+    series['conc'] = json.loads(series['conc'])
+    series['resp'] = json.loads(series['resp'])
+    series['fit_params'] = json.loads(series['fit_params'])
+    return series.to_dict()
 
 
 def get_chem_info(spid):
@@ -202,80 +57,188 @@ def get_chem_info(spid):
     return casn, chnm, dsstox_substance_id
 
 
-def get_spid(df, trigger):
-    spid = st.session_state.spid
-    if spid in df['spid'].values and trigger == "spid":
-        st.session_state.spid_row = df[df['spid'] == spid].index[0]
-    elif trigger == "new_sample":
-        dir = st.session_state.direction
-        if dir == "next":
-            new_spid_row = st.session_state.spid_row + 1
-        elif dir == "previous":
-            new_spid_row = st.session_state.spid_row - 1
-        else:
-            new_spid_row = st.session_state.spid_row
+def init_figure(series, cutoff):
+    fig = go.Figure()
+    casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
+    fig.update_layout(height=600, width=1400)
+    # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
+    fig.update_xaxes(showspikes=True)
+    fig.update_yaxes(showspikes=True)
+    assay_infos = get_assay_info(st.session_state.aeid)
+    normalized_data_type = assay_infos["normalized_data_type"]
+    assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
+    assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
 
-        st.session_state.spid_row = new_spid_row % df.shape[0]
-        spid = df.iloc[st.session_state.spid_row]["spid"]
-        st.session_state.spid = spid
-    else:
-        return None
-    return spid
+    with st.expander("Details"):
+        st.write(f"spid: {series['spid']}")
+        st.write(f"Chemical: {chnm if chnm else 'N/A'}")
+        link = f"[{dsstox_substance_id}](https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id})" if dsstox_substance_id else "N/A"
+        st.write(f"DSSTOX Substance ID: {link}")
+        st.write(f"CASN: {casn if casn else 'N/A'}")
+        st.write(f"Assay Endpoint: {assay_component_endpoint_name}")
+        st.write(f"{assay_component_endpoint_desc}")
+
+    fig.update_layout(title=(f"Assay Endpoint: <i>{assay_component_endpoint_name}</i>"
+               f"<br>Chemical: <i>{chnm if chnm else 'N/A'}</i><br>"
+               f"Best Model Fit: <i>{series['best_aic_model']}</i>, hitcall: <i>{round(series['hitcall'], 7)}</i>"),
+                margin=dict(t=150), xaxis_title="log10(Concentration) μM", yaxis_title=str(normalized_data_type))
+
+    fig.add_hline(y=cutoff, line_color="LightSkyBlue")
+    fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='LightSkyBlue', opacity=0.4, layer='below', line=dict(width=0), 
+                  annotation_text="efficacy cutoff", annotation_position="top left")
+    fig.update_layout(legend=dict(groupclick="toggleitem"))
+
+    return fig
 
 
-def load_new_sample(direction):
-    check_reset()
-    st.session_state.direction = direction
-    st.session_state.trigger = "new_sample"
+def add_curves(series, fig):
+    conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
+    
+    fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse", 
+                   marker=dict(color="black", symbol="x-thin-open", size=10), name="response", showlegend=False))
+    
+    if fit_params is None or series['hitcall'] <= 0:
+        return
+    
+    ac50 = series["ac50"]
+    potencies = ["acc", "ac50", "actop"]
+    efficacies = ["top"]
+    iterator = fit_params.items()
+    pars_dict = {}
+    for index, (fit_model, fit_params) in enumerate(iterator):
+        params = fit_params["pars"]
+        pars_dict[fit_model] = params
+        er = params.pop('er')
+        aic = round(fit_params["aic"], 2)
+        min_val, max_val = np.min(conc), np.max(conc)
+        min_val = min_val if ac50 is None else min(min_val, ac50)
+        x = powspace(min_val, max_val, 10, 200)
+        y = np.array(get_model(fit_model)(x, **params))
+        color = px.colors.qualitative.Bold[index]
+        best = fit_model == series['best_aic_model']
+        best_fit = f"(BEST FIT)" if best else ""
+        dash = 'solid' if best else "dash"
+        name = f"{fit_model} {best_fit} {aic}"
+        width = 3 if best else 2
+        legendgroup = fit_model if best else None
+        opacity = 1 if best else .8
+
+        fig.add_trace(go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup=legendgroup, marker=dict(color=color), mode='lines',
+                                    name=name, line=dict(width=width, dash=dash)))
+
+        # Todo: Makes it slow!!
+        for p in potencies:
+            if p in series:
+                fig.add_vline(x=np.log10(series[p]), line_color=color, line_width=2, annotation_position="bottom left", annotation_text=p,
+                            layer="below", opacity=0.5)
+
+        for eff in efficacies:
+            if eff in series:
+                fig.add_hline(y=series[eff], line_color=color, line_width=2, annotation_position="bottom left", annotation_text=eff,
+                      layer="below", opacity=0.5)
+
+    return pars_dict
+
 
 
 def check_reset():
-    if "spid_row" not in st.session_state:
-        reset_spid_row()
-    if "direction" not in st.session_state:
-        st.session_state.direction = "stay"
-    if "trigger" not in st.session_state:
-        st.session_state.trigger = "new_sample"
+    if "id" not in st.session_state:
+        reset_id()
+    if "aeid" not in st.session_state:
+        st.session_state.aeid = 0
     if "spid" not in st.session_state:
         st.session_state.spid = ""
-    if "id" not in st.session_state:
-        st.session_state.id = ""
-    if "option" not in st.session_state:
-        st.session_state.option = "hitcall desc"
+    if "sort_by" not in st.session_state:
+        st.session_state.sort_by = "hitcall"
+    if "asc" not in st.session_state:
+        st.session_state.asc = False
+    if "length" not in st.session_state:
+        st.session_state.length = 0
+    if "trigger" not in st.session_state:
+        st.session_state.trigger = ""
 
 
-def reset_spid_row():
-    st.session_state.spid_row = 0
+def reset_id():
+    st.session_state.id = 0
 
+def next_id():
+    st.session_state.trigger = "next"
+    length = st.session_state.length
+    if length:
+        st.session_state.id = (st.session_state.id + 1) % length
+
+def prev_id():
+    st.session_state.trigger = "prev"
+    length = st.session_state.length
+    if length:
+        st.session_state.id = (st.session_state.id - 1) % length
+
+def trigger(trigger):
+    st.session_state.trigger = trigger
 
 def filter_spid():
     st.session_state.trigger = "spid"
+    df, cutoff = fetch_data(st.session_state.aeid)  # requires id parameter for unique caching
+    res = df[df['spid'] == st.session_state.spid]
+    if res.empty:
+        print(f"Input string '{st.session_state.spid}' not found")
+    else:
+        st.session_state.id = res.index[0]
 
+def update():
+    if "df" not in st.session_state:
+        df, cutoff = fetch_data(st.session_state.aeid)  # requires id parameter for unique caching
+        st.session_state.df = df
+        st.session_state.cutoff = cutoff
+    else:
+        df = st.session_state.df
+        cutoff = st.session_state.cutoff
+    if st.session_state.trigger == "hitcall_slider":
+        interval = st.session_state.hitcall_slider
+        df = df.query(f'{interval[0]} <= hitcall <= {interval[1]}').reset_index(drop=True)
+        st.session_state.df = df
+        reset_id()
+    st.session_state.length = len(df)
+    st.write(f"Number of series: {st.session_state.length}")
+    if st.session_state.length == 0:
+        st.session_state.id = 0
+        return None, None
+        
+    st.session_state.length = len(df)
+    if st.session_state.trigger == "sort_by" or st.session_state.trigger == "hitcall_slider":
+        df = df.sort_values(by=st.session_state.sort_by, ascending=st.session_state.asc).reset_index(drop=True)
+        reset_id()
+    series = get_series(df)
+    fig = init_figure(series, cutoff)
+    pars_dict = add_curves(series, fig)
+    return fig, pars_dict
 
-st.set_page_config(page_title="Curve surfer", page_icon="✅", layout="wide",
-                   )
 
 config, _ = load_config()
-# st.title("Curve surfer")
-st.session_state.aeid = int(
-    st.number_input(label="Enter assay id (aeid)", value=int(config['aeid']), on_change=reset_spid_row))
+check_reset()
+st.set_page_config(page_title="Curve surfer", page_icon="☣️", layout="wide")
+st.title("Curve surfer")
+st.session_state.aeid = int(st.number_input(label="Enter assay id (aeid)", value=int(config['aeid'])))
 st.session_state.spid = st.text_input(label="Filter sample id (spid)", on_change=filter_spid)
-col1, col2, col3 = st.columns(3)
+if st.button("Process"):
+    filter_spid()
+st.session_state.hitcall_slider = st.slider('Select the range of hitcalls', 0.0, 1.0, (0.0, 1.0), on_change=trigger, args=("hitcall_slider",))
+col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.button("Previous sample", on_click=load_new_sample, args=("previous",))
+    st.button("Previous", on_click=prev_id)
 with col2:
-    st.button("Next sample", on_click=load_new_sample, args=("next",))
+    st.button("Next", on_click=next_id)
 with col3:
-    st.session_state.option = st.selectbox(
-        "Sort by",
-        ("hitcall desc", "hitcall asc", "random"),
-        on_change=reset_spid_row,
-    )
+    st.session_state.sort_by = st.selectbox("Sort By", ("hitcall", "ac50", "actop"), on_change=trigger, args=("sort_by",))
+with col4:
+    st.session_state.asc = st.selectbox("Ascending", (False, True))
 
 try:
     fig, pars_dict = update()
+    if fig is None:
+        raise Exception("No data found")
     st.plotly_chart(fig)
-    # st.json(pars_dict)
+    st.json(pars_dict, expanded=False)
 except Exception as e:
     print(e)
-    st.write("No data found")
+    st.write(f"Error: {e}")

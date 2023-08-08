@@ -10,7 +10,7 @@ import pandas as pd
 import yaml
 
 from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    CSV_DIR_PATH, LOG_DIR_PATH, START_TIME
+    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH
 from constants import symbols_dict
 from fit_models import get_params
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
@@ -33,6 +33,9 @@ def read_aeids():
 
 
 def launch(config, config_path):
+    with open(ERROR_PATH, "w") as f:
+        print("Failed assay endpoints:\n", file=f)
+
     global DISPLAY_EMOJI
     # disable verbose output if --unicode passed as runtime argument
     DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['enable_fancy_logging']
@@ -159,7 +162,7 @@ def get_assay_info(aeid):
 
 def load_raw_data():
     suffix = ".csv.gzip" if CONFIG['data_file_format'] == 'csv' else ".parquet.gzip"
-    csv_file_path = os.path.join(CSV_DIR_PATH, f"{CONFIG['aeid']}_in{suffix}")
+    csv_file_path = os.path.join(EXPORT_DIR_PATH, f"{CONFIG['aeid']}_in{suffix}")
     load_from_disk = os.path.exists(csv_file_path)
     data_source = "disk" if load_from_disk else "DB"
 
@@ -200,10 +203,10 @@ def db_delete(aeid, tbl):
 def store_output_in_db(df):
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
     print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
-    for col in ['conc', 'response', 'fit_params']:
+    for col in ['conc', 'resp', 'fit_params']:
         df.loc[:, col] = df[col].apply(json.dumps)
     db_delete(CONFIG['aeid'], "output")
-    db_append(df[CONFIG['z_output_columns']], "output")
+    db_append(df[CONFIG['z_output_db_columns']], "output")
 
 
 def export(df):
@@ -212,7 +215,7 @@ def export(df):
     df = tcpl_output(df, CONFIG['aeid'])
     df = df.rename(columns={'dsstox_substance_id': 'dtxsid'})
     df = df[['dtxsid', 'chit']]
-    df.to_csv(f"{CSV_DIR_PATH}/{CONFIG['aeid']}.csv", index=False)
+    df.to_csv(f"{EXPORT_DIR_PATH}/{CONFIG['aeid']}.csv", index=False)
 
 
 def text_to_blue(message):
@@ -240,3 +243,5 @@ def get_msg_with_elapsed_time(msg, color_only_time=True):
 def print_(msg):
     text = get_msg_with_elapsed_time(msg)
     print(text)
+
+

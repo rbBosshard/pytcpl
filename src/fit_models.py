@@ -1,31 +1,39 @@
-from scipy.optimize import fsolve
 import numpy as np
 
-x = 1000
-a = 0.1
+
+b = 1000
+a = 0.0
 c = 10
+d = 1e-8
+a1 = 0.01
 
-BOUNDS = {
-    'cnst': ((a, x), (-1, 1)),
-    'poly1': ((-c, c),),
-    'poly2': ((-c, x), (-c, x)),
-    'pow': ((-c, 100), (a, c)),
-    'exp4': ((a, x), (a, x)),
-    'exp5': ((a, x), (a, x), (a, c)),
-    'hill': ((a, x), (a, x), (a, c)),
-    'gnls': ((a, x), (a, x), (a, c), (a, x), (a, c)),
-}
 
-INITIAL_VALUES = {
-    'cnst': [a, 0.9],
-    'poly1': [0.8],
-    'poly2': [230, 340],
-    'pow': [1.5, 0.8],
-    'exp4': [110, 80],
-    'exp5': [100, 50, 1.5],
-    'hill': [90, 30, 1.9],
-    'gnls': [170, 45, 1.7, 70, 1.7],
-}
+def get_initial_values(fit_model, conc=[]):
+    return {
+        'cnst': [a, 0.9],
+        'poly1': [0.8],
+        'poly2': [230, 340],
+        'pow': [1.5, 0.8],
+        'exp4': [110, 80],
+        'exp5': [100, 50, 1.5],
+        'hill': [90, 30, 1.9],
+        'gnls': [170, 45, 1.7, 70, 1.7],
+        'sigmoid': [0.5, 0.5, 0.5, 0.1]
+    }.get(fit_model)
+
+
+def get_bounds(fit_model, conc=[]):
+    return {
+        'cnst': ((a, b), (-1, 1)),
+        'poly1': ((a1, c),),
+        'poly2': ((a1, b), (a1, b)),
+        'pow': ((a, 100), (0.1, c)),
+        'exp4': ((a, b), (a1, b)),
+        'exp5': ((a, b), (a1, b), (a, c)),
+        'hill': ((a, b), (a, b), (a, c)),
+        'gnls': ((a, b), (a, b), (a, c), (a1, b), (a, c)),
+        'sigmoid': ((a, b), (0.0001, b), (0, 5), (0, 1)),
+    }.get(fit_model)
 
 
 def get_model(fit_model):
@@ -38,13 +46,20 @@ def get_model(fit_model):
         'poly1': poly1,
         'poly2': poly2,
         'pow': pow_fn,
-        'exp4_': exp4_inverted,
-        'exp5_': exp5_inverted,
-        'gnls_': gnls_inverted,
-        'hill_': hill_inverted,
-        'poly1_': poly1_inverted,
-        'poly2_': poly2_inverted,
-        'pow_': pow_fn_inverted,
+        'sigmoid': sigmoid,
+    }.get(fit_model)
+
+
+def get_inverse_model(fit_model):
+    return {
+        'exp4': exp4_inverse,
+        'exp5': exp5_inverse,
+        'gnls': gnls_inverse,
+        'hill': hill_inverse,
+        'poly1': poly1_inverse,
+        'poly2': poly2_inverse,
+        'pow': pow_fn_inverse,
+        'sigmoid': sigmoid_inverse,
     }.get(fit_model)
 
 
@@ -57,6 +72,7 @@ def get_params(fit_model):
                 exp5=['tp', 'ga', 'p', 'er'],
                 hill=['tp', 'ga', 'p', 'er'],
                 gnls=['tp', 'ga', 'p', 'la', 'q', 'er'],
+                sigmoid=['tp', 'ga', 'p', 'q', 'er']
                 ).get(fit_model)
 
 
@@ -93,47 +109,95 @@ def gnls(x, tp, ga, p, la, q):
     return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
 
 
-# Inverted
-def poly1_inverted(y, a):
+def sigmoid(x, tp, ga, p, q):
+    return tp / (1 + (ga / x) ** p) / np.exp(q * x)
+
+
+# inverse
+def poly1_inverse(y, a, conc=[]):
     return y / a
 
 
-def poly2_inverted(y, a, b):
+def poly2_inverse(y, a, b, conc=[]):
     return b * (-1 + np.sqrt(1 + 4 * y / a)) / 2
 
 
-def pow_fn_inverted(y, a, p):
+def pow_fn_inverse(y, a, p, conc=[]):
     return (y / a) ** (1 / p)
 
 
-def exp4_inverted(y, tp, ga):
-    return -ga * np.log2(1 - y / tp)
+def exp4_inverse(y, tp, ga, conc=[]):
+    val = 1 - y / tp
+    if val == 0:
+        val += 1e-6
+    return -ga * np.log2(val)
 
 
-def exp5_inverted(y, tp, ga, p):
+def exp5_inverse(y, tp, ga, p, conc=[]):
     return ga * (-np.log2(1 - y / tp)) ** (1 / p)
 
 
-def hill_inverted(y, tp, ga, p):
-    return ga / ((tp / y) - 1) ** (1 / p)
+def hill_inverse(y, tp, ga, p, conc=[]):
+    val = (tp / y) - 1
+    if val == 0:
+        val += 1e-6
+    return ga / val ** (1 / p)
 
 
-def gnls_inverted(y, tp, ga, p, la, q):
-    def equation(x):
-        return gnls(x, tp, ga, p, la, q) - y
-    loc = fsolve(equation, x0=np.array([1.0]))
-    return gnls(loc, tp, ga, p, la, q)  # Todo: check correctness, compare with tcpl
+def gnls_inverse(y, tp, ga, p, la, q, conc=[], x_min_limit=1e-10):
+    param = [tp, ga, p, la, q]
+    x_min = np.min(conc)
+    x_max = np.max(conc)
+    x = get_inverse(gnls, y,  x_max, x_min, param)
+
+    # x was not found in visible range
+    if x_min == x:
+        x_min = x_min_limit
+        x_max = np.min(conc)
+        x = get_inverse(gnls, y, x_max, x_min, param)
+    return x
 
 
+def sigmoid_inverse(y, tp, ga, p, q, conc=[], x_min_limit=1e-10):
+    param = [tp, ga, p, q]
+    x_min = np.min(conc)
+    x_max = np.max(conc)
+    x = get_inverse(sigmoid, y, x_max, x_min, param)
+
+    # x was not found in visible range
+    if x_min == x:
+        x_min = x_min_limit
+        x_max = np.min(conc)
+        x = get_inverse(sigmoid, y, x_max, x_min, param)
+    return x
 
 
+def powspace(start, stop, power, num):
+    start = np.power(start, 1 / float(power))
+    stop = np.power(stop, 1 / float(power))
+    return np.power(np.linspace(start, stop, num=num), power)
 
 
+def get_inverse(fit_model, y, x_max, x_min, param, num_points=1000):
+    x_range = powspace(x_min, x_max, 10, num_points)
+    y_values = fit_model(x_range, *param)
+    x = x_min
+    for i in range(num_points - 1):
+        test = y_values[i] <= y <= y_values[i + 1]
+        if test:
+            x = x_range[i]
+            break
+    return x
 
 
-
-
-
-
-
-
+def scale_for_log_likelihood_at_cutoff(fit_model, cutoff, conc, params):
+    if fit_model in ["exp4", "exp5", "hill", "gnls", "sigmoid"]:
+        return cutoff
+    elif fit_model == "poly1":
+        return cutoff / np.max(conc)
+    elif fit_model == "poly2":
+        return cutoff / (np.max(conc) / params[1] + (np.max(conc) / params[1]) ** 2)
+    elif fit_model == "pow":
+        return cutoff / (np.max(conc) ** params[1])
+    else:
+        NotImplementedError()

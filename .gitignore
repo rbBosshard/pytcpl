@@ -4,6 +4,12 @@ __pycache__
 .vscode/
 pytcpl.egg-info/
 
+logs/*
+logs/.gitkeep
+
+export/*
+export/.gitkeep
+
 dist/*
 dist/.gitkeep
 

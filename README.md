@@ -44,6 +44,7 @@ python src/pipeline.py --unicode | tee export/logs/log.out
 ```
 </details>
 
+- Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id
 
 ### Visualize fitted curves (on assay endpoint & chemical pair basis)
 ```bash

@@ -1,20 +1,26 @@
 import cProfile
 import os
 
-from constants import ROOT_DIR, PROFILER_PATH
-from pipeline_helper import load_config, prolog, epilog, launch, load_raw_data, export, bye, store_output_in_db
-from processing import processing
+from constants import ROOT_DIR, PROFILER_PATH, ERROR_PATH
+from pipeline_helper import load_config, prolog, launch, load_raw_data, export, bye, store_output_in_db, epilog
+from processing import process_assay_endpoint
 
 
 def pipeline(config, confg_path):
     aeid_list = launch(config, confg_path)
     for aeid in aeid_list:
-        prolog(config, aeid)
-        df, cutoff = load_raw_data()
-        df = processing(df, cutoff, config)
-        store_output_in_db(df)
-        export(df)
-        epilog()
+        try:
+            prolog(config, aeid)
+            df, cutoff = load_raw_data()
+            df = process_assay_endpoint(df, cutoff, config)
+            store_output_in_db(df)
+            export(df)
+            epilog()
+        except Exception as e:
+            with open(ERROR_PATH, "a") as f:
+                err_msg = f"Assay endpoint with aeid={aeid} failed: {e}"
+                print(err_msg)
+                print(err_msg, file=f)
     bye()
 
 
