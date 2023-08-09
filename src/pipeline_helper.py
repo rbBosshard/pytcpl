@@ -12,7 +12,7 @@ import yaml
 from constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH
 from constants import symbols_dict
-from fit_models import get_params
+from fit_models import get_model
 from mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
 from query_db import get_sqlalchemy_engine
 from query_db import query_db
@@ -106,7 +106,7 @@ def track_fitted_params(fit_params):
     def plot_histograms(params, key):
         plt.figure(figsize=(10, 6))
         plt.suptitle(f'Fit model parameters histograms: {key}')
-        param_names = get_params(key)
+        param_names = get_model(key)('params')
         num_params = len(param_names)
         for i, param_name in enumerate(param_names):
             plt.subplot(1, num_params, i + 1)

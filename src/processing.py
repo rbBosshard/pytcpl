@@ -6,9 +6,9 @@ from scipy.stats import t, chi2
 from tqdm import tqdm
 
 from constants import custom_format
-from fit_models import get_model, get_inverse_model, get_params
+from fit_models import get_model
+from fit_models import scale_for_log_likelihood_at_cutoff
 from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_
-from fit_models import get_initial_values, get_bounds, scale_for_log_likelihood_at_cutoff
 from tcpl_obj_fn import tcpl_obj
 
 
@@ -37,11 +37,11 @@ def process_assay_endpoint(df, cutoff, config):
         out = {}
         for fit_model in config['curve_fit_models']:
             initial_value_er, bounds_er = ([0.9], ((-1, 5),)) if fit_model != 'cnst' else ([], ())
-            x0 = get_initial_values(fit_model) + initial_value_er
-            bounds = get_bounds(fit_model) + bounds_er
-            args = (np.array(series.conc), np.array(series.resp), get_model(fit_model))
+            x0 = get_model(fit_model)('x0')() + initial_value_er
+            bounds = get_model(fit_model)('bounds')() + bounds_er
+            args = (np.array(series.conc), np.array(series.resp), get_model(fit_model)('fun'))
             fit_result = minimize(tcpl_obj, x0=x0, bounds=bounds, args=args)
-            pars = {k: v for k, v in zip(get_params(fit_model), fit_result.x)}
+            pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
             aic = 2 * len(pars) - 2 * ll
             out[fit_model] = {'pars': pars, 'll': ll, 'aic': aic}
@@ -62,15 +62,15 @@ def process_assay_endpoint(df, cutoff, config):
         ps = params[best_aic_model]['pars']
         ps_list = list(ps.values())
         ll = params[best_aic_model]['ll']
-        pred = get_model(best_aic_model)(conc, *ps_list[:-1]).tolist()
+        pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
         rmse = np.sqrt(np.mean((resp - pred) ** 2))
         top = np.max(np.abs(pred))  # top is taken to be highest model value
-        ac50 = get_inverse_model(best_aic_model)(.5 * top, *ps_list[:-1], conc)
-        acc = get_inverse_model(best_aic_model)(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
-        actop = get_inverse_model(best_aic_model)(top, *ps_list[:-1], conc)
-        # ac1sd = get_inverse_model(onesd)(*ps_list[:-1], get_inverse_model)
+        ac50 = get_model(best_aic_model)('inv')(.5 * top, *ps_list[:-1], conc)
+        acc = get_model(best_aic_model)('inv')(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
+        actop = get_model(best_aic_model)('inv')(top, *ps_list[:-1], conc)
+        # ac1sd = get_model(best_aic_model)('inv')(onesd, *ps_list[:-1], conc)
         # bmr = onesd * bmr_scale  # bmr_scale is default 1.349
-        # bmd = get_inverse_model(bmr)(*ps_list[:-1], get_inverse_model)
+        # bmd = get_model(best_aic_model)('inv')(bmr, *ps_list[:-1], conc)
 
         # Each p_i represents the odds of the curve being a hit according to different criteria;
         p1 = 1 - rel_likelihood  # p1 represents probability that constant model is correct
@@ -83,8 +83,8 @@ def process_assay_endpoint(df, cutoff, config):
             p2 *= p if top < 0 else 1 - p
         p2 = 1 - p2  # odds of at least one point above cutoff
 
-        ps_list[0] = scale_for_log_likelihood_at_cutoff(best_aic_model, cutoff, conc, ps_list)
-        ll_cutoff = -tcpl_obj(params=ps_list, conc=conc, resp=resp, fit_model=get_model(best_aic_model))  # get log-likelihood at cutoff
+        ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
+        ll_cutoff = -tcpl_obj(params=ps_list, conc=conc, resp=resp, fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
         p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
         hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
 

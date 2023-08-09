@@ -1,9 +1,3 @@
-#bossh:
-#  db: invitrodb_v3o5
-#  host: localhost
-#  password: root
-#  port: 3306
-#  username: root
 bossh:
   db: invitrodb_v3o5
   host: localhost
@@ -22,7 +16,7 @@ kasia:
   password: kasia
   port: 3306
   username: kasia
-lil:
+lili:
   db: invitrodb_v3o5
   host: localhost
   password: lili

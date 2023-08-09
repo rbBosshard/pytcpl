@@ -47,7 +47,7 @@ def get_model(fit_model):
         'hill': hill,
         'poly1': poly1,
         'poly2': poly2,
-        'pow': pow_fn,
+        'pow': pow,
         'sigmoid': sigmoid,
     }.get(fit_model)
 
@@ -78,104 +78,250 @@ def get_params(fit_model):
                 ).get(fit_model)
 
 
-def cnst(x, a):
-    return np.zeros(len(x))
+def cnst(field):
+    return {
+        "fun": lambda x, a: np.zeros(len(x)),
+        "inv": None,
+        "params": ['a', 'er'],
+        "bounds": lambda conc=None, resp=None: ((d, b), (-1, 1)),
+        "x0": lambda conc=None, resp=None: [0.1, 0.5],
+        "scale": None
+    }.get(field)
 
 
-def poly1(x, a):
-    return a * x
+def pow(field):
+    return {
+        "fun": lambda x, a, p: a * x ** p,
+        "inv": lambda y, a, p, conc=None: (y / a) ** (1 / p),
+        "params": ['a', 'p', 'er'],
+        "bounds": lambda conc=None, resp=None: ((a2, 100), (0.1, c)),
+        "x0": lambda conc=None, resp=None: [1.5, 0.8],
+        "scale": lambda y, conc, params: y / (np.max(conc) ** params[1]),
+    }.get(field)
 
 
-def poly2(x, a, b):
-    frac = x / b
-    return a * (frac + frac ** 2)
+def poly1(field):
+    return {
+        "fun": lambda x, a: a * x,
+        "inv": lambda y, a, conc=None: y / a,
+        "params": ['a', 'er'],
+        "bounds": lambda conc=None, resp=None: ((a1, c),),
+        "x0": lambda conc=None, resp=None: [0.8],
+        "scale": lambda y, conc, params: y / np.max(conc),
+    }.get(field)
 
 
-def pow_fn(x, a, p):
-    return a * x ** p
+def poly2(field):
+    def poly2_(x, a, b):
+        frac = x / b
+        return a * (frac + frac ** 2)
+
+    return {
+        "fun": lambda x, a, b: poly2_(x, a, b),
+        "inv": lambda y, a, b, conc=None: b * (-1 + np.sqrt(1 + 4 * y / a)) / 2,
+        "params": ['a', 'b', 'er'],
+        "bounds": lambda conc=None, resp=None: ((a1, b), (a1, b)),
+        "x0": lambda conc=None, resp=None: [300, 500],
+        "scale": lambda y, conc, params: y / (np.max(conc) / params[1] + (np.max(conc) / params[1]) ** 2),
+    }.get(field)
 
 
-def exp4(x, tp, ga):
-    return tp * (1 - 2 ** (-x / ga))
+def exp4(field):
+    def exp4_inverse(y, tp, ga, conc=[]):
+        val = 1 - y / tp
+        if val == 0:
+            val = 1e-6
+        return -ga * np.log2(val)
+
+    return {
+        "fun": lambda x, tp, ga: tp * (1 - 2 ** (-x / ga)),
+        "inv": lambda y, tp, ga, conc=None: exp4_inverse(y, tp, ga),
+        "params": ['tp', 'ga', 'er'],
+        "bounds": lambda conc=None, resp=None: ((a2, b), (a1, b)),
+        "x0": lambda conc=None, resp=None: [100, 10],
+        "scale": lambda y, conc, params: y,
+    }.get(field)
 
 
-def exp5(x, tp, ga, p):
-    return tp * (1 - 2 ** (-(x / ga) ** p))
+def exp5(field):
+    def exp5_inverse(y, tp, ga, p, conc=[]):
+        val = 1 - y / tp
+        if val == 0:
+            val = 1e-6
+        return ga * (-np.log2(val)) ** (1 / p)
+
+    return {
+        "fun": lambda x, tp, ga, p: tp * (1 - 2 ** (-(x / ga) ** p)),
+        "inv": lambda y, tp, ga, p, conc=None: exp5_inverse(y, tp, ga, p),
+        "params": ['tp', 'ga', 'p', 'er'],
+        "bounds": lambda conc=None, resp=None: ((a2, b), (a1, b), (a1, c)),
+        "x0": lambda conc=None, resp=None: [100, 10, 2],
+        "scale": lambda y, conc, params: y,
+    }.get(field)
 
 
-def hill(x, tp, ga, p):
-    return tp / (1 + (ga / x) ** p)
+def hill(field):
+    def hill_inverse(y, tp, ga, p, conc=[]):
+        val = (tp / y) - 1
+        if val == 0:
+            val = 1e-6
+        return ga / val ** (1 / p)
+
+    return {
+        "fun": lambda x, tp, ga, p: tp / (1 + (ga / x) ** p),
+        "inv": lambda y, tp, ga, p, conc=None: hill_inverse(y, tp, ga, p),
+        "params": ['tp', 'ga', 'p', 'er'],
+        "bounds": lambda conc=None, resp=None: ((d, b), (d, b), (0.1, c)),
+        "x0": lambda conc=None, resp=None: [100, 10, 2],
+        "scale": lambda y, conc, params: y,
+    }.get(field)
 
 
-def gnls(x, tp, ga, p, la, q):
-    return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
+def gnls(field):
+    def gnls_inverse(y, tp, ga, p, la, q, conc=[], x_min_limit=1e-10):
+        param = [tp, ga, p, la, q]
+        x_min = np.min(conc)
+        x_max = np.max(conc)
+        x = get_inverse(gnls('fun'), y, x_max, x_min, param)
+
+        # x was not found in visible range
+        if x_min == x:
+            x_min = x_min_limit
+            x_max = np.min(conc)
+            x = get_inverse(gnls('fun'), y, x_max, x_min, param)
+        return x
+
+    return {
+        "fun": lambda x, tp, ga, p, la, q: tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q)),
+        "inv": lambda y, tp, ga, p, la, q, conc=None: gnls_inverse(y, tp, ga, p, la, q),
+        "params": ['tp', 'ga', 'p', 'la', 'q', 'er'],
+        "bounds": lambda conc=None, resp=None: ((d, b), (d, b), (d, c), (a1, b), (d, c)),
+        "x0": lambda conc=None, resp=None: [100, 10, 2, 10, 0.5],
+        "scale": lambda y, conc, params: y,
+    }.get(field)
 
 
-def sigmoid(x, tp, ga, p, q):
-    return tp / (1 + (ga / x) ** p) / np.exp(q * x)
+def sigmoid(field):
+    def sigmoid_inverse(y, tp, ga, p, q, conc=[], x_min_limit=1e-10):
+        param = [tp, ga, p, q]
+        x_min = np.min(conc)
+        x_max = np.max(conc)
+        x = get_inverse(sigmoid('fun'), y, x_max, x_min, param)
 
+        # x was not found in visible range
+        if x_min == x:
+            x_min = x_min_limit
+            x_max = np.min(conc)
+            x = get_inverse(sigmoid('fun'), y, x_max, x_min, param)
+        return x
 
-# inverse
-def poly1_inverse(y, a, conc=[]):
-    return y / a
+    return {
+        "fun": lambda x, tp, ga, p, q: tp / (1 + (ga / x) ** p) / np.exp(q * x),
+        "inv": lambda y, tp, ga, p, q, conc=None: sigmoid_inverse(y, tp, ga, p, q),
+        "params": ['tp', 'ga', 'p', 'q', 'er'],
+        "bounds": lambda conc=None, resp=None: ((d, b), (a2, b), (d, e), (d, 2)),
+        "x0": lambda conc=None, resp=None: [100, 10, 2, 0.5],
+        "scale": lambda y, conc, params: y,
+    }.get(field)
 
-
-def poly2_inverse(y, a, b, conc=[]):
-    return b * (-1 + np.sqrt(1 + 4 * y / a)) / 2
-
-
-def pow_fn_inverse(y, a, p, conc=[]):
-
-    return (y / a) ** (1 / p)
-
-
-def exp4_inverse(y, tp, ga, conc=[]):
-    val = 1 - y / tp
-    if val == 0:
-        val = 1e-6
-    return -ga * np.log2(val)
-
-
-def exp5_inverse(y, tp, ga, p, conc=[]):
-    val = 1 - y / tp
-    if val == 0:
-        val = 1e-6
-    return ga * (-np.log2(val)) ** (1 / p)
-
-
-def hill_inverse(y, tp, ga, p, conc=[]):
-    val = (tp / y) - 1
-    if val == 0:
-        val = 1e-6
-    return ga / val ** (1 / p)
-
-
-def gnls_inverse(y, tp, ga, p, la, q, conc=[], x_min_limit=1e-10):
-    param = [tp, ga, p, la, q]
-    x_min = np.min(conc)
-    x_max = np.max(conc)
-    x = get_inverse(gnls, y,  x_max, x_min, param)
-
-    # x was not found in visible range
-    if x_min == x:
-        x_min = x_min_limit
-        x_max = np.min(conc)
-        x = get_inverse(gnls, y, x_max, x_min, param)
-    return x
-
-
-def sigmoid_inverse(y, tp, ga, p, q, conc=[], x_min_limit=1e-10):
-    param = [tp, ga, p, q]
-    x_min = np.min(conc)
-    x_max = np.max(conc)
-    x = get_inverse(sigmoid, y, x_max, x_min, param)
-
-    # x was not found in visible range
-    if x_min == x:
-        x_min = x_min_limit
-        x_max = np.min(conc)
-        x = get_inverse(sigmoid, y, x_max, x_min, param)
-    return x
+# def cnst(x, a):
+#     return np.zeros(len(x))
+#
+#
+# def poly1(x, a):
+#     return a * x
+#
+#
+# def poly2(x, a, b):
+#     frac = x / b
+#     return a * (frac + frac ** 2)
+#
+#
+# def pow_fn(x, a, p):
+#     return a * x ** p
+#
+#
+# def exp4(x, tp, ga):
+#     return tp * (1 - 2 ** (-x / ga))
+#
+#
+# def exp5(x, tp, ga, p):
+#     return tp * (1 - 2 ** (-(x / ga) ** p))
+#
+#
+# def hill(x, tp, ga, p):
+#     return tp / (1 + (ga / x) ** p)
+#
+#
+# def gnls(x, tp, ga, p, la, q):
+#     return tp / ((1 + (ga / x) ** p) * (1 + (x / la) ** q))
+#
+#
+# def sigmoid(x, tp, ga, p, q):
+#     return tp / (1 + (ga / x) ** p) / np.exp(q * x)
+#
+#
+# # inverse
+# def poly1_inverse(y, a, conc=[]):
+#     return y / a
+#
+#
+# def poly2_inverse(y, a, b, conc=[]):
+#     return b * (-1 + np.sqrt(1 + 4 * y / a)) / 2
+#
+#
+# def pow_fn_inverse(y, a, p, conc=[]):
+#
+#     return (y / a) ** (1 / p)
+#
+#
+# def exp4_inverse(y, tp, ga, conc=[]):
+#     val = 1 - y / tp
+#     if val == 0:
+#         val = 1e-6
+#     return -ga * np.log2(val)
+#
+#
+# def exp5_inverse(y, tp, ga, p, conc=[]):
+#     val = 1 - y / tp
+#     if val == 0:
+#         val = 1e-6
+#     return ga * (-np.log2(val)) ** (1 / p)
+#
+#
+# def hill_inverse(y, tp, ga, p, conc=[]):
+#     val = (tp / y) - 1
+#     if val == 0:
+#         val = 1e-6
+#     return ga / val ** (1 / p)
+#
+#
+# def gnls_inverse(y, tp, ga, p, la, q, conc=[], x_min_limit=1e-10):
+#     param = [tp, ga, p, la, q]
+#     x_min = np.min(conc)
+#     x_max = np.max(conc)
+#     x = get_inverse(gnls, y,  x_max, x_min, param)
+#
+#     # x was not found in visible range
+#     if x_min == x:
+#         x_min = x_min_limit
+#         x_max = np.min(conc)
+#         x = get_inverse(gnls, y, x_max, x_min, param)
+#     return x
+#
+#
+# def sigmoid_inverse(y, tp, ga, p, q, conc=[], x_min_limit=1e-10):
+#     param = [tp, ga, p, q]
+#     x_min = np.min(conc)
+#     x_max = np.max(conc)
+#     x = get_inverse(sigmoid, y, x_max, x_min, param)
+#
+#     # x was not found in visible range
+#     if x_min == x:
+#         x_min = x_min_limit
+#         x_max = np.min(conc)
+#         x = get_inverse(sigmoid, y, x_max, x_min, param)
+#     return x
 
 
 def powspace(start, stop, power, num):

@@ -42,14 +42,15 @@ python src/pipeline.py
 ```bash
 python src/pipeline.py --unicode | tee export/logs/log.out
 ```
-</details>
 
 - Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id
+</details>
+
 
 ### Visualize fitted curves (on assay endpoint & chemical pair basis)
 ```bash
 streamlit run src/app.py --server.address="localhost"
 ```
-- The [Curve Surfer](http://localhost:8501/) web app should open as a new browser tab
+- The [Curve Surfer](http://localhost:8501/) web app should open as a new browser tab if you run the command
 - Curve Surfer only works for assay endpoints already processed by pipeline
 - Goto official [https://streamlit.io](https://streamlit.io) website

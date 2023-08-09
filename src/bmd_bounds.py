@@ -2,7 +2,7 @@ import numpy as np
 import scipy.optimize as optimize
 from scipy.stats import chi2
 
-from fit_models import get_params, get_model
+from fit_models import get_model
 from tcpl_obj_fn import tcpl_obj
 
 
@@ -14,14 +14,14 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
 
     # calculate bmd, if necessary
     if bmd is None:
-        bmd = get_model(fit_model + "_")(bmr, *pars[:-1])
+        bmd = get_model(fit_model)('inv')(bmr, *pars[:-1], conc)
     if bmd is None or not np.isfinite(bmd):
         return None
 
-    params = [pars[key] for key in get_params(fit_model)]
+    params = [pars[key] for key in get_model(fit_model)("params")]
 
     # negated minimized negative loglikelihood. Todo: recheck if everything is correct like this
-    maxloglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model))
+    maxloglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model)('fun'))
 
     # search for bounds to ensure sign change
     bmdrange = None
@@ -35,7 +35,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
 
     elif which_bound == "upper":
         if fit_model == "gnls":
-            toploc = get_model("gnls" + "_")(bmr, *pars[:-1])  # Todo: should return toploc
+            toploc = get_model('gnls')('inv')(bmr, *pars[:-1], conc)  # Todo: should return toploc
             xs = 10 ** np.linspace(np.log10(bmd), np.log10(toploc), num=100)
         else:
             xs = 10 ** np.linspace(np.log10(bmd), 5, num=100)
@@ -121,7 +121,7 @@ def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
         elif partype == 3:
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
-    params = [ps[key] for key in get_params(fit_model)]
+    params = [ps[key] for key in get_model(fit_model)('params')]
     loglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model))
 
     # for bmd bounds, we want the difference between the max log-likelihood and the
