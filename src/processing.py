@@ -7,7 +7,6 @@ from tqdm import tqdm
 
 from constants import custom_format
 from fit_models import get_model
-from fit_models import scale_for_log_likelihood_at_cutoff
 from pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_
 from tcpl_obj_fn import tcpl_obj
 

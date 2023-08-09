@@ -41,10 +41,8 @@ def main():
     height = 600
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
-    st.caption(f"ac50: {st.session_state.series['ac50']:.2f} | actop: {st.session_state.series['actop']:.2f} | acc: {st.session_state.series['acc']:.2f} ")
     
     # Todo: Provide curve fit model functions
-
     with st.expander("Curve fit parameters"):
         st.json(pars_dict)
     with st.expander("Assay component endpoint description "):

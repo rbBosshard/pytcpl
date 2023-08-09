@@ -6,7 +6,7 @@ import streamlit as st
 from plotly import graph_objects as go, express as px
 
 
-from fit_models import powspace, get_model
+from fit_models import pow_space, get_model
 from pipeline_helper import print_, get_assay_info
 from query_db import query_db
 
@@ -96,7 +96,7 @@ def add_curves(series, fig):
         aic = round(fit_params["aic"], 2)
         min_val, max_val = np.min(conc), np.max(conc)
         min_val = min_val if ac50 is None else min(min_val, ac50)
-        x = powspace(min_val, max_val, 10, 200)
+        x = pow_space(min_val, max_val, 10, 200)
         y = np.array(get_model(fit_model)('fun')(x, **params))
         color = px.colors.qualitative.Bold[index]
         best = fit_model == series['best_aic_model']
