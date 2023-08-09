@@ -57,7 +57,8 @@ def process(df, cutoff, config):
             return {"best_aic_model": "cnst", "hitcall": 0}
 
         best_aic_model = min({m: aics[m] for m in aics if m != "cnst"}, key=lambda k: aics[k])
-        rel_likelihood = np.exp((aics[best_aic_model] - aics["cnst"]) / 2) if aics[best_aic_model] <= aics["cnst"] else 1
+        rel_likelihood = np.exp((aics[best_aic_model] - aics["cnst"]) / 2) if aics[best_aic_model] <= aics[
+            "cnst"] else 1
         ps = params[best_aic_model]['pars']
         ps_list = list(ps.values())
         ll = params[best_aic_model]['ll']
@@ -83,11 +84,13 @@ def process(df, cutoff, config):
         p2 = 1 - p2  # odds of at least one point above cutoff
 
         ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
-        ll_cutoff = -tcpl_obj(params=ps_list, conc=conc, resp=resp, fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
+        ll_cutoff = -tcpl_obj(params=ps_list, conc=conc, resp=resp,
+                              fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
         p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
         hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
 
-        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'acc': acc, 'actop': actop}
+        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'acc': acc,
+               'actop': actop}
         return out
 
     # Preprocessing
@@ -121,12 +124,3 @@ def process(df, cutoff, config):
     df = pd.concat([df_fitted, df_no_fit])
     print_(f"{status('carrot')} Assay endpoint processing completed")
     return df
-
-
-
-
-
-
-
-
-

@@ -10,7 +10,7 @@ import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 pd.options.mode.chained_assignment = None  # default='warn'
 
-from helper import check_reset, trigger, filter_spid, update, get_assay_and_sample_info
+from surf_utils import check_reset, trigger, filter_spid, update, get_assay_and_sample_info
 from src.utils.pipeline_helper import load_config
 
 
@@ -27,7 +27,8 @@ def main():
             st.button(":arrow_left: Previous", on_click=trigger, args=("prev",))
         with col2:
             st.button("Next :arrow_right:", on_click=trigger, args=("next",))
-        st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=trigger, args=("sort_by",))
+        st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=trigger,
+                                                args=("sort_by",))
         st.session_state.asc = st.selectbox("Ascending", (True, False), on_change=trigger, args=("asc",))
         with st.form("Select hitcall range"):
             st.session_state.hitcall_slider = st.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0))
@@ -45,7 +46,7 @@ def main():
     height = 600
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
-    
+
     # Todo: Provide curve fit model functions
     with st.expander("Curve fit parameters"):
         st.json(pars_dict)

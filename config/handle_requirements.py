@@ -26,9 +26,3 @@ with open(output_file, 'w') as out_file:
     out_file.writelines(merged_lines)
 
 print("Done.")
-
-
-
-
-
-

@@ -25,9 +25,9 @@ conda install pip
 pip install -r requirements.txt
 ```
 
-### Before running main pipeline script:
+### Running pipeline:
 #### Required
-- Goto [config_db.yaml](config/config_db.yaml) to add/set MySQL your database login credentials
+- Goto [config_db.yaml](config/config_db.yaml) to add/set your MySQL database credentials
 - Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline
 #### Optional
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour

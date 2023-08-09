@@ -1,59 +1,59 @@
 aeid: '784'
 bmr_scale: 1.349
 curve_fit_models:
-- cnst
-- poly1
-- poly2
-- pow
-- exp4
-- exp5
-- hill
-- sigmoid
-- gnls
+  - cnst
+  - poly1
+  - poly2
+  - pow
+  - exp4
+  - exp5
+  - hill
+  - sigmoid
+  - gnls
 data_file_format: parquet
 enable_curve_fit_parameter_tracking: 0
 enable_data_subsetting: 0
 enable_dropping_new_tables: 1
 enable_fancy_logging: 1
-enable_profiling: 1
+enable_profiling: 0
 max_num_datapoints_per_series_threshold: 1000
 min_num_median_responses_threshold: 4
 n_jobs: -1
 new_db_tables:
-- cutoffs
-- output
+  - cutoffs
+  - output
 z_assay_info_keys:
-- acid
-- analysis_direction
-- assay_component_endpoint_desc
-- assay_component_endpoint_name
-- assay_function_type
-- burst_assay
-- intended_target_family
-- intended_target_family_sub
-- intended_target_type
-- intended_target_type_sub
-- key_positive_control
-- normalized_data_type
-- signal_direction
+  - acid
+  - analysis_direction
+  - assay_component_endpoint_desc
+  - assay_component_endpoint_name
+  - assay_function_type
+  - burst_assay
+  - intended_target_family
+  - intended_target_family_sub
+  - intended_target_type
+  - intended_target_type_sub
+  - key_positive_control
+  - normalized_data_type
+  - signal_direction
 z_export_cols:
-- ac50
-- acc
-- actop
-- aeid
-- best_aic_model
-- hitcall
-- spid
-- top
+  - ac50
+  - acc
+  - actop
+  - aeid
+  - best_aic_model
+  - hitcall
+  - spid
+  - top
 z_output_db_columns:
-- ac50
-- acc
-- actop
-- aeid
-- best_aic_model
-- conc
-- fit_params
-- hitcall
-- resp
-- spid
-- top
+  - ac50
+  - acc
+  - actop
+  - aeid
+  - best_aic_model
+  - conc
+  - fit_params
+  - hitcall
+  - resp
+  - spid
+  - top

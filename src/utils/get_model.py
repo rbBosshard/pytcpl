@@ -21,5 +21,3 @@ def get_model(fit_model):
         'pow': pow,
         'sigmoid': sigmoid,
     }.get(fit_model)
-
-
