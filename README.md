@@ -54,4 +54,4 @@ streamlit run src/app/curve_surfer.py --server.address="localhost"
 - Curve Surfer only works for assay endpoints already processed by pipeline
 - Goto official [https://streamlit.io](https://streamlit.io) website
 
-[streamlit-curve_surfer-2023-08-09-22-08-26.webm](config%2Fstreamlit-curve_surfer-2023-08-09-22-08-26.webm)
+[streamlit-curve_surfer-2023-08-09-22-08-26.webm](https://github.com/rbBosshard/pytcpl/assets/100019212/0578d442-826b-4c78-b95e-9f0447408123)
