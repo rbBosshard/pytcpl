@@ -11,7 +11,7 @@ curve_fit_models:
 - sigmoid
 - gnls
 data_file_format: parquet
-enable_curve_fit_parameter_tracking: 1
+enable_curve_fit_parameter_tracking: 0
 enable_data_subsetting: 0
 enable_dropping_new_tables: 1
 enable_fancy_logging: 1

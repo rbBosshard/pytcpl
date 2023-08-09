@@ -1,9 +1,9 @@
 import cProfile
 import os
 
-from constants import ROOT_DIR, PROFILER_PATH, ERROR_PATH
-from pipeline_helper import load_config, prolog, launch, load_raw_data, export, bye, store_output_in_db, epilog
-from processing import process_assay_endpoint
+from utils.constants import ROOT_DIR, PROFILER_PATH, ERROR_PATH
+from utils.pipeline_helper import load_config, prolog, launch, load_raw_data, export, bye, store_output_in_db, epilog
+from utils.process import process
 
 
 def pipeline(config, confg_path):
@@ -12,7 +12,7 @@ def pipeline(config, confg_path):
         try:
             prolog(config, aeid)
             df, cutoff = load_raw_data()
-            df = process_assay_endpoint(df, cutoff, config)
+            df = process(df, cutoff, config)
             store_output_in_db(df)
             export(df)
             epilog()
