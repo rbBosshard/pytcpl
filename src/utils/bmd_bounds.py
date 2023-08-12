@@ -54,7 +54,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
 
 
 def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
-    # implements the BMD substitutions in Appendix A of the Technical Report.
+    # implements the BMD substitutions raw Appendix A of the Technical Report.
     # Changes one of the existing parameters to an explicit bmd parameter through
     # the magic of algebra.
     if fit_model == "exp2":

@@ -10,7 +10,7 @@ def sigmoid(field):
         x_max = np.max(conc)
         x = get_inverse(sigmoid('fun'), y, x_max, x_min, param)
 
-        # x was not found in visible range
+        # x was not found raw visible range
         if x_min == x:
             x_min = x_min_limit
             x_max = np.min(conc)

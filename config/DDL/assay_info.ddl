@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `cutoffs` (
+CREATE TABLE IF NOT EXISTS `cutoff` (
   `aeid` int unsigned NOT NULL,
   `bmad` double NOT NULL,
   `bmed` double NOT NULL,

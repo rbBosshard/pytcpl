@@ -34,9 +34,13 @@ def query_db(query):
             cursor = db_conn.cursor()
             cursor.execute(query)
             db_conn.commit()
+            db_conn.close()
         else:
             engine = get_sqlalchemy_engine()
-            df = pd.read_sql(text(query), con=engine.connect())
+            con = engine.connect()
+            df = pd.read_sql(text(query), con=con)
+            con.close()
+            engine.dispose()
             return df
     except Exception as e:
         print(f"Error querying MySQL: {e}")

@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ### Running pipeline:
 #### Required
-- Goto [config_db.yaml](config/config_db.yaml) to add/set your MySQL database credentials
+- Goto [config_db.yaml](config/config_db.yaml) to add/set your MySQL database connection parameters
 - Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline
 #### Optional
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour
@@ -40,7 +40,7 @@ python src/pipeline.py
 <details><summary>(Optional) redirect terminal output to log file</summary>
 
 ```bash
-python src/pipeline.py --unicode | tee export/logs/log.out
+python src/pipeline.py --unicode | tee logs/log.out
 ```
 
 - Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id

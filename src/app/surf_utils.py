@@ -26,7 +26,7 @@ def load_data(aeid):  # aeid parameter used to handle correct caching
     if length == 0:
         st.error(f"No data found for AEID {aeid}", icon="🚨")
     print_(f"{length} series loaded")
-    qstring = f"SELECT * FROM cutoffs WHERE aeid = {st.session_state.aeid};"
+    qstring = f"SELECT * FROM cutoff WHERE aeid = {st.session_state.aeid};"
     cutoff = query_db(query=qstring)['cutoff'].iloc[0]
     return df, cutoff
 
@@ -65,7 +65,7 @@ def init_figure(series, cutoff):
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
-    assay_infos = get_assay_info(st.session_state.aeid)
+    assay_infos = get_assay_info(st.session_state.aeid, 1)
     normalized_data_type = assay_infos["normalized_data_type"]
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     title = "AEID: " + str(st.session_state.aeid) + " | " + assay_component_endpoint_name
@@ -242,7 +242,7 @@ def update():
 
 
 def get_assay_and_sample_info():
-    assay_infos = get_assay_info(st.session_state.aeid)
+    assay_infos = get_assay_info(st.session_state.aeid, 1)
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
     st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
@@ -270,7 +270,7 @@ def get_assay_and_sample_info():
             "SPID": st.column_config.TextColumn(label="SPID", help="Sample :id:"),
             "DSSTOXSID": st.column_config.LinkColumn("DSSTOXSID",
                                                      help="Distributed Structure-Searchable Toxicity Substance ID. Link to dashboard :bar_chart:"),
-            "CASRN": st.column_config.TextColumn(label="CASN",
+            "CASRN": st.column_config.TextColumn(label="CASRN",
                                                  help="CAS Registry Number :information_source:"),
         },
                      hide_index=True,

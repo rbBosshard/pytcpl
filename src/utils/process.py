@@ -12,7 +12,7 @@ from .tcpl_obj_fn import tcpl_obj
 
 
 def process(df, cutoff, config):
-    def group_datapoints_to_series(df):
+    def group_datapoints_to_series(groups):
         def shrink_series(series):
             # Shrink series containing too many datapoints to handle. Often the case for positive control chemical
             conc, resp = series.conc, series.resp
@@ -20,10 +20,9 @@ def process(df, cutoff, config):
             exceeded = len(conc) > config['max_num_datapoints_per_series_threshold']
             return (list(uconc), [pd.Series(resp)[conc == c].median() for c in uconc]) if exceeded else (conc, resp)
 
-        df = df.groupby(['aeid', 'spid']).agg(conc=('logc', lambda x: list(10 ** x)), resp=('resp', list)).reset_index()
+        df = groups.agg(conc=('logc', lambda x: list(10 ** x)), resp=('resp', list)).reset_index()
         df = df[df.conc.apply(lambda x: not any(pd.isna(x)))]
         df = df[:config['enable_data_subsetting']] if config['enable_data_subsetting'] else df
-        print_(f"{status('laptop')} Processing {df.shape[0]} concentration-response series")
         df['conc'], df['resp'] = zip(*df.apply(shrink_series, axis=1))
         return df
 
@@ -51,10 +50,10 @@ def process(df, cutoff, config):
         aics = {fit_model: params[fit_model]['aic'] for fit_model in params.keys()}
 
         if len(aics) == 0:
-            return {"best_aic_model": "none", "hitcall": 0}
+            return {"best_aic_model": "none"}
 
         if 'cnst' in aics and len(aics) == 1:
-            return {"best_aic_model": "cnst", "hitcall": 0}
+            return {"best_aic_model": "cnst"}
 
         best_aic_model = min({m: aics[m] for m in aics if m != "cnst"}, key=lambda k: aics[k])
         rel_likelihood = np.exp((aics[best_aic_model] - aics["cnst"]) / 2) if aics[best_aic_model] <= aics[
@@ -96,7 +95,9 @@ def process(df, cutoff, config):
     # Preprocessing
     nj = config['n_jobs']
     p = nj != 1
-    df = group_datapoints_to_series(df)
+    sample_groups = df.groupby(['aeid', 'spid'])
+    print_(f"{status('laptop')} Processing {len(sample_groups)} concentration-response series")
+    df = group_datapoints_to_series(sample_groups)
     desc = get_msg_with_elapsed_time(f"{status('hammer_and_wrench')}  -> Preprocessing:  ", color_only_time=False)
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
     mask = Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it]
@@ -114,13 +115,17 @@ def process(df, cutoff, config):
         track_fitted_params(df_fitted['fit_params'])
 
     # Hit-Calling
+    df_fitted['hitcall'] = 0
+    df_no_fit['hitcall'] = 0
     desc = get_msg_with_elapsed_time(f"{status('horizontal_traffic_light')}  -> Hit-Calling:   ", color_only_time=False)
     it = tqdm(df_fitted.iterrows(), desc=desc, total=df_fitted.shape[0], bar_format=custom_format)
     res = pd.DataFrame(Parallel(n_jobs=nj)(delayed(hit)(i) for _, i in it)) if p \
         else df_fitted.apply(lambda i: hit(i), axis=1, result_type='expand')
     df_fitted[res.columns] = res
-    df_no_fit[res.columns] = None
 
     df = pd.concat([df_fitted, df_no_fit])
-    print_(f"{status('carrot')} Assay endpoint processing completed")
+    for col in config['output_cols_filter']:
+        if col not in df.columns:
+            df[col] = None
+
     return df

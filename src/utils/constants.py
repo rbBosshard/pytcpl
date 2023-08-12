@@ -11,6 +11,11 @@ AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 
 EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../export')
+RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'raw')
+INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'input')
+OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'output')
+OUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'out')
+CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')

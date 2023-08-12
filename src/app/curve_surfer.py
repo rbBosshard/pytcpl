@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 # Run command `streamlit run pytcpl/curve_surfer.py`
-# Ensure: enable_data_subsetting: 0 in config/config.yaml
+# Ensure: enable_data_subsetting: 0 raw config/config.yaml
 # Add the src dir to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 pd.options.mode.chained_assignment = None  # default='warn'
