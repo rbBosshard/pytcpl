@@ -2,16 +2,11 @@ import numpy as np
 import scipy.optimize as optimize
 from scipy.stats import chi2
 
-from .models import get_model
-from .tcpl_obj_fn import tcpl_obj
+from .fit_models import get_model
+from .objective_function import get_negative_log_likelihood
 
 
 def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which_bound="lower"):
-    """
-    BMD Bounds
-
-    """
-
     # calculate bmd, if necessary
     if bmd is None:
         bmd = get_model(fit_model)('inv')(bmr, *pars[:-1], conc)
@@ -21,7 +16,7 @@ def bmd_bounds(fit_model, bmr, pars, conc, resp, onesidedp=0.05, bmd=None, which
     params = [pars[key] for key in get_model(fit_model)("params")]
 
     # negated minimized negative loglikelihood. Todo: recheck if everything is correct like this
-    maxloglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model)('fun'))
+    maxloglik = -get_negative_log_likelihood(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model)('fun'))
 
     # search for bounds to ensure sign change
     bmdrange = None
@@ -122,7 +117,7 @@ def bmd_obj(bmd, fit_model, bmr, conc, resp, ps, mll, onesp, partype=2):
             ps["p"] = np.log(bmr / ps["a"]) / np.log(bmd)
 
     params = [ps[key] for key in get_model(fit_model)('params')]
-    loglik = -tcpl_obj(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model))
+    loglik = -get_negative_log_likelihood(params=params, conc=conc, resp=resp, fit_model=get_model(fit_model))
 
     # for bmd bounds, we want the difference between the max log-likelihood and the
     # bounds log-likelihood to be equal to chi-squared at 1-2*onesp (typically .9)

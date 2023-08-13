@@ -1,4 +1,4 @@
-aeid: 790
+aeid: 5
 bmr_scale: 1.349
 curve_fit_models:
 - cnst
@@ -27,6 +27,8 @@ output_cols_filter:
 - ac50
 - acc
 - actop
+- bmd
+- ac1sd
 - aeid
 - best_aic_model
 - conc

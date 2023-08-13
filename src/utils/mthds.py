@@ -48,7 +48,7 @@ def mc5_mthds(mthd, bmad):
     }.get(mthd)
 
 
-def tcpl_mthd_load(lvl, aeid):
+def load_method(lvl, aeid):
     flds = [f"b.mc{lvl}_mthd AS mthd"]
     tbls = [f"mc{lvl}_aeid AS a", f"mc{lvl}_methods AS b"]
     qstring = f"SELECT {', '.join(flds)} " \

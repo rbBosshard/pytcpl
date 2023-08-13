@@ -6,12 +6,16 @@ from scipy.stats import t, chi2
 from tqdm import tqdm
 
 from .constants import custom_format
-from .get_model import get_model
-from .pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_
-from .tcpl_obj_fn import tcpl_obj
+from .fit_models import get_model
+from .pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_, get_cutoff
+from .objective_function import get_negative_log_likelihood
 
 
-def process(df, cutoff, config):
+def process(df, config):
+    cutoffs = get_cutoff()
+    cutoff = cutoffs.iloc[0]['cutoff']
+    onesd = cutoffs.iloc[0]['onesd']
+
     def group_datapoints_to_series(groups):
         def shrink_series(series):
             # Shrink series containing too many datapoints to handle. Often the case for positive control chemical
@@ -38,7 +42,7 @@ def process(df, cutoff, config):
             x0 = get_model(fit_model)('x0')() + initial_value_er
             bounds = get_model(fit_model)('bounds')() + bounds_er
             args = (np.array(series.conc), np.array(series.resp), get_model(fit_model)('fun'))
-            fit_result = minimize(tcpl_obj, x0=x0, bounds=bounds, args=args)
+            fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args)
             pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
             aic = 2 * len(pars) - 2 * ll
@@ -62,34 +66,36 @@ def process(df, cutoff, config):
         ps_list = list(ps.values())
         ll = params[best_aic_model]['ll']
         pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
-        rmse = np.sqrt(np.mean((resp - pred) ** 2))
+        # rmse = np.sqrt(np.mean((resp - pred) ** 2))
         top = np.max(np.abs(pred))  # top is taken to be highest model value
         ac50 = get_model(best_aic_model)('inv')(.5 * top, *ps_list[:-1], conc)
         acc = get_model(best_aic_model)('inv')(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
         actop = get_model(best_aic_model)('inv')(top, *ps_list[:-1], conc)
-        # ac1sd = get_model(best_aic_model)('inv')(onesd, *ps_list[:-1], conc)
-        # bmr = onesd * bmr_scale  # bmr_scale is default 1.349
-        # bmd = get_model(best_aic_model)('inv')(bmr, *ps_list[:-1], conc)
+        ac1sd = get_model(best_aic_model)('inv')(onesd, *ps_list[:-1], conc)
+        bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
+        bmd = get_model(best_aic_model)('inv')(bmr, *ps_list[:-1], conc)
 
         # Each p_i represents the odds of the curve being a hit according to different criteria;
         p1 = 1 - rel_likelihood  # p1 represents probability that constant model is correct
 
         p2 = 1
-        for y in np.array([np.median(resp[conc == c]) for c in np.unique(conc)]):
+        unique_conc = np.unique(conc)
+        for c in unique_conc:
             # multiply odds of each point falling below cutoff to get odds of all falling below,
             # use lower tail for positive top and upper tail for neg top
-            p = t.cdf(x=y, loc=np.sign(top) * cutoff, scale=np.exp(ps['er']), df=4)
+            median_resp = np.median(resp[conc == c])
+            p = t.cdf(x=median_resp, loc=np.sign(top) * cutoff, scale=np.exp(ps['er']), df=4)
             p2 *= p if top < 0 else 1 - p
         p2 = 1 - p2  # odds of at least one point above cutoff
 
         ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
-        ll_cutoff = -tcpl_obj(params=ps_list, conc=conc, resp=resp,
-                              fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
+        ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
         p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
-        hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
 
-        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'acc': acc,
-               'actop': actop}
+        continuous_hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
+
+        out = {'best_aic_model': best_aic_model, 'hitcall': continuous_hitcall, 'top': top, 'ac50': ac50, 'acc': acc,
+               'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd}
         return out
 
     # Preprocessing

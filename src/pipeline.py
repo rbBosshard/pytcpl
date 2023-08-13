@@ -11,8 +11,8 @@ def pipeline(config, confg_path):
     for aeid in aeid_list:
         try:
             prolog(config, aeid)
-            df, cutoff = load_raw_data()
-            df = process(df, cutoff, config)
+            df = load_raw_data()
+            df = process(df, config)
             write_output(df)
             epilog()
         except Exception as e:

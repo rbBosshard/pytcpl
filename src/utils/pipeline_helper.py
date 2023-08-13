@@ -11,10 +11,10 @@ import yaml
 
 from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, OUTPUT_DIR_PATH, OUT_DIR_PATH, INPUT_DIR_PATH, \
-    CUTOFF_DIR_PATH
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, OUTPUT_TABLE
 from .constants import symbols_dict
-from .get_model import get_model
-from .mthds import mc4_mthds, mc5_mthds, tcpl_mthd_load
+from .fit_models import get_model
+from .mthds import mc4_mthds, mc5_mthds, load_method
 from .query_db import get_sqlalchemy_engine, query_db
 from .query_db import query_db
 
@@ -53,13 +53,12 @@ def launch(config, config_path):
 
 def load_config():
     with open(CONFIG_PATH, 'r') as file:
-        CONFIG = yaml.safe_load(file)
-    return CONFIG, CONFIG_DIR_PATH
+        config = yaml.safe_load(file)
+    return config, CONFIG_DIR_PATH
 
 
 def prolog(config, new_aeid):
-    global CONFIG
-    CONFIG = config
+    set_config(config)
 
     # print  boundary
     print("\n" + f"#-" * 55 + "\n")
@@ -74,6 +73,12 @@ def prolog(config, new_aeid):
     assay_component_endpoint_name = get_assay_info(CONFIG['aeid'], CONFIG['enable_output_to_db'])['assay_component_endpoint_name']
     assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})")
     print_(f"{status('seedling')} Start processing new assay endpoint: {assay_info}")
+
+
+def set_config(config):
+    global CONFIG, SUFFIX
+    CONFIG = config
+    SUFFIX = f".{config['data_file_format']}.gzip"
 
 
 def epilog():
@@ -131,7 +136,7 @@ def track_fitted_params(fit_params):
             file.write(f"{key}:\n >> median {median}\n >> min {minimum}\n >> max {maximum}\n\n")
 
 
-def get_cutoffs(df):
+def compute_cutoffs(df):
     print_(f"{status('thermometer')} Computing efficacy cutoff")
     aeid = CONFIG['aeid']
 
@@ -142,14 +147,14 @@ def get_cutoffs(df):
     else:
         values = {}
         other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-        for mthd in tcpl_mthd_load(lvl=4, aeid=aeid) + other_mthds:
+        for mthd in load_method(lvl=4, aeid=aeid) + other_mthds:
             values.update({mthd: mc4_mthds(mthd, df)})
 
         bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values['bmad.aeid.lowconc.nwells']
         bmed = values['bmed.aeid.lowconc.twells']
         sd = values['onesd.aeid.lowconc.twells']
 
-        cutoffs = [mc5_mthds(mthd, bmad) for mthd in tcpl_mthd_load(lvl=5, aeid=aeid)]
+        cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=aeid)]
         cutoffs = list(filter(lambda item: item is not None, cutoffs))
         cutoff = max(cutoffs, default=0)
         out = pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
@@ -157,7 +162,6 @@ def get_cutoffs(df):
     if CONFIG['enable_output_to_db']:
         db_delete('cutoff')
         db_append(out, 'cutoff')
-    return cutoff
 
 
 def get_assay_info(aeid, from_db):
@@ -197,9 +201,10 @@ def load_raw_data():
         df.to_parquet(csv_file_path, compression='gzip')
 
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
-    cutoff = get_cutoffs(df)
 
-    return df, cutoff
+    compute_cutoffs(df)
+
+    return df
 
 
 def db_append(dat, tbl):
@@ -332,3 +337,16 @@ def get_assay_component_endpoint(aeid):
         return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
 
 
+def get_cutoff():
+    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    if not os.path.exists(path):
+        qstring = f"""
+            SELECT bmad, bmed, onesd, cutoff
+            FROM {CUTOFF_TABLE} 
+            WHERE aeid = {CONFIG['aeid']};
+            """
+        df = query_db(query=qstring)
+        return df
+    else:
+        df = pd.read_parquet(path)
+        return df[['bmad', 'bmed', 'onesd', 'cutoff']]

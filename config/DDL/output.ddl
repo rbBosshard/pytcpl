@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS `output` (
   `ac50` double DEFAULT NULL,
   `acc` double DEFAULT NULL,
   `actop` double DEFAULT NULL,
+  `bmd` double DEFAULT NULL,
+  `ac1sd` double DEFAULT NULL,
   `top` double DEFAULT NULL,
   `conc` JSON,
   `resp` JSON,

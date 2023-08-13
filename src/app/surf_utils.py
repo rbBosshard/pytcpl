@@ -7,28 +7,50 @@ import pandas as pd
 import streamlit as st
 from plotly import graph_objects as go, express as px
 
-from src.utils.get_model import get_model
+from src.utils.fit_models import get_model
 from src.utils.models.get_inverse import pow_space
-from src.utils.pipeline_helper import print_, get_assay_info
+from src.utils.pipeline_helper import print_, get_assay_info, get_cutoff, set_config
 from src.utils.query_db import query_db
+from src.utils.constants import OUTPUT_DIR_PATH
 
 # Add the parent folder to sys.path
 parent_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_folder_path)
 
 
+CONFIG = {}
+SUFFIX = ''
+ERR_MSG = f"No data found for this query"
+
+
 @st.cache_data
 def load_data(aeid):  # aeid parameter used to handle correct caching
-    print_(f"Fetch data from DB with assay ID {aeid}..")
-    qstring = f"SELECT * FROM output WHERE aeid = {st.session_state.aeid};"
-    df = query_db(query=qstring)
+    df = get_output_data()
+    cutoff_df = get_cutoff()
+    return df, cutoff_df
+
+
+def get_output_data():
+    tbl = 'output'
+    path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    print_(f"Fetch data with assay ID {CONFIG['aeid']}..")
+    if not os.path.exists(path):
+        qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
+        df = query_db(query=qstring)
+    else:
+        df = pd.read_parquet(path)
     length = df.shape[0]
     if length == 0:
-        st.error(f"No data found for AEID {aeid}", icon="🚨")
+        st.error(f"No data found for AEID {CONFIG['aeid']}", icon="🚨")
     print_(f"{length} series loaded")
-    qstring = f"SELECT * FROM cutoff WHERE aeid = {st.session_state.aeid};"
-    cutoff = query_db(query=qstring)['cutoff'].iloc[0]
-    return df, cutoff
+    return df
+
+
+def set_config_app(config):
+    global CONFIG, SUFFIX
+    CONFIG = config
+    set_config(config)
+    SUFFIX = f".{config['data_file_format']}.gzip"
 
 
 def get_series():
@@ -59,7 +81,11 @@ def get_chem_info(spid):
     return casn, chnm, dsstox_substance_id
 
 
-def init_figure(series, cutoff):
+def init_figure(series, cutoff_df):
+    cutoff = cutoff_df['cutoff'].iloc[0]
+    bmad = cutoff_df['bmad'].iloc[0]
+    onesd = cutoff_df['onesd'].iloc[0]
+    st.session_state.series.update({"cutoff": cutoff, "bmad": bmad, "onesd": onesd})
     fig = go.Figure()
     casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
@@ -71,13 +97,11 @@ def init_figure(series, cutoff):
     title = "AEID: " + str(st.session_state.aeid) + " | " + assay_component_endpoint_name
     hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
     subtitle = f"<br><sup>Hitcall: {hitcall} | {str(series['spid'])} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
-    fig.update_layout(title=title + subtitle)
+    fig.update_layout(title=title + subtitle, title_font=dict(size=26))
     fig.update_layout(margin=dict(t=150), xaxis_title="log10(Concentration) μM", yaxis_title=str(normalized_data_type))
-    fig.add_hline(y=cutoff, line_color="LightSkyBlue")
-    fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='LightSkyBlue', opacity=0.4, layer='below', line=dict(width=0),
+    fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='black', opacity=0.1, layer='below', line=dict(width=0),
                   annotation_text="efficacy cutoff", annotation_position="top left")
     fig.update_layout(legend=dict(groupclick="toggleitem"))
-
     return fig
 
 
@@ -86,63 +110,84 @@ def add_curves(series, fig):
 
     fig.add_trace(
         go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
-                   marker=dict(color="black", symbol="x-thin-open", size=10), name="response", showlegend=False))
+                   marker=dict(color="gray", symbol="x-thin-open", size=10), name="Repsonse", showlegend=True))
 
-    if fit_params is None or series['hitcall'] <= 0:
-        return
+    potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd"] if potency in series]
+    efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
 
-    ac50 = series["ac50"]
-    potencies = ["acc", "ac50", "actop"]
-    efficacies = ["top"]
-    iterator = fit_params.items()
+    potency_values = [series[potency] for potency in potencies]
+    efficacy_values = [series[efficacy] for efficacy in efficacies]
+
+    sorted_pairs = sorted(zip(potency_values, potencies))
+    potency_values, potencies = zip(*sorted_pairs)
+
+    sorted_pairs = sorted(zip(efficacy_values, efficacies))
+    efficacy_values, efficacies = zip(*sorted_pairs)
+
     pars_dict = {}
-    for index, (fit_model, fit_params) in enumerate(iterator):
-        params = fit_params["pars"]
-        pars_dict[fit_model] = params
-        er = params.pop('er')
-        aic = round(fit_params["aic"], 2)
-        min_val, max_val = np.min(conc), np.max(conc)
-        min_val = min_val if ac50 is None else min(min_val, ac50)
-        x = pow_space(min_val, max_val, 10, 200)
-        y = np.array(get_model(fit_model)('fun')(x, **params))
-        color = px.colors.qualitative.Bold[index]
-        best = fit_model == series['best_aic_model']
-        best_fit = f"(BEST)" if best else ""
-        dash = 'solid' if best else "dash"
-        name = f"{fit_model} {best_fit}"
-        width = 3 if best else 2
-        legendgroup = "Fit models"  # fit_model if best else None
-        opacity = 1 if best else .8
+    min_val, max_val = np.min(conc), np.max(conc)
+    min_potencies = np.min(potency_values) if len(potency_values) > 0 else 10000000
 
-        fig.add_trace(
-            go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup=legendgroup, legendgrouptitle_text=legendgroup,
-                       marker=dict(color=color), mode='lines',
-                       name=name, line=dict(width=width, dash=dash)))
+    min_val = min(min_val, min_potencies)
+    x = pow_space(min_val, max_val, 10, 200)
+    best_model = series['best_aic_model']
+    color_best = "gray"
+    if fit_params is not None and series['hitcall'] > 0:
+        iterator = fit_params.items()
+        for index, (fit_model, fit_parameters) in enumerate(iterator):
+            params = fit_parameters["pars"].copy()
+            pars_dict[fit_model] = params
+            er = params.pop('er')
+            aic = round(fit_parameters["aic"], 2)
+            y = np.array(get_model(fit_model)('fun')(x, **params))
+            color = px.colors.qualitative.Bold[index]
+            is_best = fit_model == best_model
+            color_best = color if is_best else color_best
+            is_best_tag = f"(BEST)" if is_best else ""
+            dash = 'solid' if is_best else "dash"
+            name = f"{fit_model} {is_best_tag}"
+            width = 4 if is_best else 2
+            opacity = 0.9
 
-        if best:
-            for efficacy in efficacies:
-                if efficacy in series:
-                    eff = series[efficacy]
-                    if eff is not None and not np.isnan(eff):
-                        fig.add_hline(y=eff, line_color=color, line_width=2, annotation_position="bottom left",
-                                      annotation_text=efficacy,
-                                      layer="below", opacity=0.5)
+            fig.add_trace(
+                go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup="Fit models", legendgrouptitle_text="Fit models",
+                           marker=dict(color=color), mode='lines', visible="legendonly" if fit_model == 'cnst' else True,
+                           name=name, line=dict(width=width, dash=dash)))
 
-            for potency in potencies:
-                if potency in series:
-                    pot = series[potency]
-                    pot_log = np.log10(series[potency])
-                    if pot is not None and not np.isnan(pot):
-                        pot_y = get_model(fit_model)('fun')(np.array([pot]), **params)[0]
-                        fig.add_trace(go.Scatter(
-                            name=f"{potency} = {pot:0.1f}",
-                            x=[pot_log, pot_log],
-                            y=[0, pot_y],
-                            mode='lines',
-                            line=dict(color=color, width=2),
-                            legendgroup="Potency estimates",
-                            legendgrouptitle_text="Potency estimates",
-                        ))
+    for i, efficacy in enumerate(efficacies):
+        eff = efficacy_values[i]
+        if eff is not None and not np.isnan(eff):
+            fig.add_trace(go.Scatter(
+                name=f"{efficacy} = {eff:0.2f}",
+                x=[min(np.log10(x)), max(np.log10(x))],
+                y=[eff, eff],
+                mode='lines',
+                opacity=0.8,
+                line=dict(color='gray', width=2, dash='dashdot'),
+                legendgroup="Efficacy",
+                legendgrouptitle_text="Efficacy",
+                visible="legendonly"
+            ))
+
+    for i, potency in enumerate(potencies):
+            pot = potency_values[i]
+            if pot is not None and not np.isnan(pot):
+                pot_log = np.log10(series[potency])
+                params = fit_params[best_model]['pars'].copy()
+                params.pop('er')
+                pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
+                fig.add_trace(go.Scatter(
+                    name=f"{potency} = {pot:0.1f}",
+                    x=[pot_log, pot_log],
+                    y=[0, pot_y],
+                    mode='lines',
+                    opacity=0.8,
+                    line=dict(color=color_best, width=3, dash='dot'),
+                    legendgroup="Potency estimates",
+                    legendgrouptitle_text="Potency estimates",
+                ))
+
+
     return pars_dict
 
 
@@ -158,7 +203,7 @@ def check_reset():
     if "sort_by" not in st.session_state:
         st.session_state.sort_by = "hitcall"
     if "asc" not in st.session_state:
-        st.session_state.asc = True
+        st.session_state.asc = False
     if "length" not in st.session_state:
         st.session_state.length = 0
     if "trigger" not in st.session_state:
@@ -218,8 +263,7 @@ def update():
         length = st.session_state.length
 
     if length == 0:
-        st.error(f"Input string {st.session_state.spid}' not found", icon="🚨")
-        return None, None
+        raise Exception(ERR_MSG)
 
     st.session_state.id = st.session_state.id % st.session_state.length
 
@@ -234,7 +278,7 @@ def update():
 
     st.session_state.series = get_series()
     if st.session_state.series is None:
-        st.error("No data not found", icon="🚨")
+        raise Exception(ERR_MSG)
 
     fig = init_figure(st.session_state.series, st.session_state.cutoff)
     pars_dict = add_curves(st.session_state.series, fig)
@@ -245,7 +289,7 @@ def get_assay_and_sample_info():
     assay_infos = get_assay_info(st.session_state.aeid, 1)
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
-    st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
+    # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
     casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
     dsstox_substance_id = f"https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id}" if dsstox_substance_id else "N/A"
     df = pd.DataFrame(

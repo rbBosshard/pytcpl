@@ -21,6 +21,10 @@ LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
 ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.out')
 
+OUTPUT_TABLE = "output"
+CUTOFF_TABLE = "cutoff"
+
+
 COLORS_DICT = {
     "WHITE": "\033[37m",
     "BLUE": "\033[34m",
@@ -30,6 +34,7 @@ COLORS_DICT = {
     "VIOLET": "\033[35m",
     "RESET": "\033[0m",
 }
+
 
 # tqdm format
 custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
