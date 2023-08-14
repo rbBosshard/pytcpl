@@ -1,4 +1,4 @@
-aeid: 5
+aeid: 800
 bmr_scale: 1.349
 curve_fit_models:
 - cnst
@@ -13,10 +13,11 @@ curve_fit_models:
 data_file_format: parquet
 enable_curve_fit_parameter_tracking: 0
 enable_data_subsetting: 0
-enable_dropping_new_tables: 1
+enable_dropping_all_new_tables: 1
 enable_fancy_logging: 1
-enable_output_to_db: 0
 enable_profiling: 0
+enable_reading_db: 0
+enable_writing_db: 0
 max_num_datapoints_per_series_threshold: 1000
 min_num_median_responses_threshold: 4
 n_jobs: -1

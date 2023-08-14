@@ -91,7 +91,7 @@ def init_figure(series, cutoff_df):
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
-    assay_infos = get_assay_info(st.session_state.aeid, 1)
+    assay_infos = get_assay_info(st.session_state.aeid)
     normalized_data_type = assay_infos["normalized_data_type"]
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     title = "AEID: " + str(st.session_state.aeid) + " | " + assay_component_endpoint_name
@@ -286,7 +286,7 @@ def update():
 
 
 def get_assay_and_sample_info():
-    assay_infos = get_assay_info(st.session_state.aeid, 1)
+    assay_infos = get_assay_info(st.session_state.aeid)
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
     # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")

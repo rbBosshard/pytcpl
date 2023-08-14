@@ -10,12 +10,11 @@ import pandas as pd
 import yaml
 
 from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, OUTPUT_DIR_PATH, OUT_DIR_PATH, INPUT_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE, OUTPUT_TABLE
+    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, OUT_DIR_PATH, INPUT_DIR_PATH, \
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, BMAD_CONSTANT
 from .constants import symbols_dict
 from .fit_models import get_model
-from .mthds import mc4_mthds, mc5_mthds, load_method
-from .query_db import get_sqlalchemy_engine, query_db
+from .query_db import get_sqlalchemy_engine
 from .query_db import query_db
 
 CONFIG = {}
@@ -70,7 +69,7 @@ def prolog(config, new_aeid):
     with open(CONFIG_PATH, 'w') as file:
         yaml.dump(CONFIG, file)
 
-    assay_component_endpoint_name = get_assay_info(CONFIG['aeid'], CONFIG['enable_output_to_db'])['assay_component_endpoint_name']
+    assay_component_endpoint_name = get_assay_info(CONFIG['aeid'])['assay_component_endpoint_name']
     assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})")
     print_(f"{status('seedling')} Start processing new assay endpoint: {assay_info}")
 
@@ -90,18 +89,20 @@ def bye():
     print(f"{status('waving_hand')} Goodbye")
 
 
-def check_db(CONFIG):
-    if CONFIG['enable_output_to_db']:
-        if CONFIG['enable_dropping_new_tables']:
-            new_table_names = CONFIG['new_db_tables']
+def check_db(config):
+    if config['enable_writing_db']:
+        if config['enable_dropping_all_new_tables']:
+            new_table_names = config['new_db_tables']
             tables = ", ".join(new_table_names)
             drop_stmt = f"DROP TABLE IF EXISTS {tables};"
             query_db(drop_stmt)  # Permanently removes tables from db!
             print(f"{status('broom')} Dropped all relevant tables")
+
         for ddl_file in os.scandir(DDL_PATH):
             with open(ddl_file, 'r') as f:
                 ddl_query = f.read()
                 query_db(ddl_query)
+
         print(f"{status('thumbs_up')} Verified the existence of required DB tables")
 
 
@@ -140,41 +141,40 @@ def compute_cutoffs(df):
     print_(f"{status('thermometer')} Computing efficacy cutoff")
     aeid = CONFIG['aeid']
 
-    path = os.path.join(CUTOFF_DIR_PATH, f"{aeid}{SUFFIX}")
-    if os.path.exists(path):
-        out = pd.read_parquet(path)
-        cutoff = out.iloc[0]['cutoff']
-    else:
-        values = {}
-        other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-        for mthd in load_method(lvl=4, aeid=aeid) + other_mthds:
-            values.update({mthd: mc4_mthds(mthd, df)})
+    values = {}
+    other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
+    for mthd in load_method(lvl=4, aeid=aeid) + other_mthds:
+        values.update({mthd: mc4_mthds(mthd, df)})
 
-        bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values['bmad.aeid.lowconc.nwells']
-        bmed = values['bmed.aeid.lowconc.twells']
-        sd = values['onesd.aeid.lowconc.twells']
+    bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values['bmad.aeid.lowconc.nwells']
+    bmed = values['bmed.aeid.lowconc.twells']
+    sd = values['onesd.aeid.lowconc.twells']
 
-        cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=aeid)]
-        cutoffs = list(filter(lambda item: item is not None, cutoffs))
-        cutoff = max(cutoffs, default=0)
-        out = pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=aeid)]
+    cutoffs = list(filter(lambda item: item is not None, cutoffs))
+    cutoff = max(cutoffs, default=0)
+    out = pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
 
-    if CONFIG['enable_output_to_db']:
+    if CONFIG['enable_writing_db']:
         db_delete('cutoff')
         db_append(out, 'cutoff')
 
+    path = os.path.join(CUTOFF_DIR_PATH, f"{aeid}{SUFFIX}")
+    out.to_parquet(path)
 
-def get_assay_info(aeid, from_db):
+
+def get_assay_info(aeid):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
 
-    if from_db:
+    if CONFIG['enable_reading_db']:
         endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
         acid = query_db(endpoint_query).iloc[0]['acid']
         component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
         assay_info_dict = pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
     else:
         endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}"))
+        endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
         component_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}"))
         assay_info_dict = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
 
@@ -208,24 +208,24 @@ def load_raw_data():
 
 
 def db_append(dat, tbl):
-    if CONFIG['enable_output_to_db']:
+    if CONFIG['enable_writing_db']:
         try:
             engine = get_sqlalchemy_engine()
             dat.to_sql(tbl, engine, if_exists='append', index=False)
         except Exception as err:
             print(err)
-    else:
-        file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
-        dat.to_parquet(file_path, compression='gzip')
+
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
+    dat.to_parquet(file_path, compression='gzip')
 
 
 def db_delete(tbl):
-    if CONFIG['enable_output_to_db']:
+    if CONFIG['enable_writing_db']:
         query_db(f"DELETE FROM {tbl} WHERE aeid = {CONFIG['aeid']};")
-    else:
-        file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
-        if os.path.exists(file_path):
-            os.remove(file_path)
+
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 def write_output(df):
@@ -272,9 +272,9 @@ def print_(msg):
 
 def subset_chemicals(dat):
     # A chemical id (chid) can have more than one sample id (spid). Use consensus hit (chit) logic: max
-    dat = dat.sort_values(by=['chid', 'hitcall'], ascending=[True, False])
+    dat = dat.sort_values(by=['dsstox_substance_id', 'hitcall'], ascending=[True, False])
     # Drop duplicates based on 'chid' and keep the first occurrence (max 'hitcall' value)
-    return dat.drop_duplicates(subset='chid', keep="first")
+    return dat.drop_duplicates(subset='dsstox_substance_id', keep="first")
 
 
 def get_metadata(df, aeid):
@@ -350,3 +350,77 @@ def get_cutoff():
     else:
         df = pd.read_parquet(path)
         return df[['bmad', 'bmed', 'onesd', 'cutoff']]
+
+
+def mc4_mthds(mthd, df):
+    cndx = df['cndx'].isin([1, 2])
+    wllt_t = df['wllt'] == 't'
+    mask = df.loc[cndx & wllt_t, 'resp']
+
+    if mthd == 'bmad.aeid.lowconc.twells':
+        return mad(mask)
+    elif mthd == 'bmad.aeid.lowconc.nwells':
+        return mad(df.loc[df['wllt'] == 'n', 'resp'])
+    elif mthd == 'onesd.aeid.lowconc.twells':
+        return mask.std()
+    elif mthd == 'bmed.aeid.lowconc.twells':
+        return mask.median()
+
+
+def mc5_mthds(mthd, bmad):
+    return {
+        'pc20': 20,
+        'pc50': 50,
+        'pc70': 70,
+        'log2_1.2': np.log2(1.2),
+        'log10_1.2': np.log10(1.2),
+        'log2_2': np.log2(2),
+        'log10_2': np.log10(2),
+        'neglog2_0.88': -1 * np.log2(0.88),
+        'coff_2.32': 2.32,
+        'fc0.2': 0.2,
+        'fc0.3': 0.3,
+        'fc0.5': 0.5,
+        'pc05': 5,
+        'pc10': 10,
+        'pc25': 25,
+        'pc30': 30,
+        'pc95': 95,
+        'bmad1': bmad,
+        'bmad2': bmad * 2,
+        'bmad3': bmad * 3,
+        'bmad4': bmad * 4,
+        'bmad5': bmad * 5,
+        'bmad6': bmad * 6,
+        'bmad10': bmad * 10,
+        # 'maxmed20pct': lambda df: df['max_med'].aggregate(lambda x: np.max(x) * 0.20),  # is never used
+    }.get(mthd)
+
+
+def load_method(lvl, aeid):
+    tbl_aeid = f"mc{lvl}_aeid"
+    tbl_methods = f"mc{lvl}_methods"
+    path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{SUFFIX}")
+    path_methods = os.path.join(INPUT_DIR_PATH, f"{tbl_methods}{SUFFIX}")
+    if CONFIG['enable_reading_db'] or not os.path.exists(path_aeid) or not os.path.exists(path_methods):
+        flds = [f"b.mc{lvl}_mthd AS mthd"]
+        tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
+        qstring = f"SELECT {', '.join(flds)} " \
+                  f"FROM {', '.join(tbls)} " \
+                  f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
+                  f"AND aeid = {aeid};"
+        return query_db(query=qstring)["mthd"].tolist()
+    else:
+        df_aeid = pd.read_parquet(path_aeid)
+        df_aeid = df_aeid[df_aeid['aeid'] == aeid]
+        df_methods = pd.read_parquet(path_methods)
+        level_col = f"mc{lvl}_mthd"
+        merged_df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
+
+        # Select the method column
+        return merged_df[level_col].tolist()
+
+
+def mad(x):
+    """Calculate the median absolute deviation (MAD) of an array"""
+    return BMAD_CONSTANT * np.median(np.abs(x - np.median(x)))

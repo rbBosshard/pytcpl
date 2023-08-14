@@ -10,8 +10,9 @@ host = 'localhost'
 user = 'root'
 password = 'root'
 database = 'invitrodb_v3o5'
-table_name = 'assay_component_endpoint_descriptions'
-# assay_component, assay_component_endpoint, sample, chemical, assay_component_endpoint_descriptions
+table_name = 'mc5_methods'
+# assay_component, assay_component_endpoint, sample, chemical, assay_component_endpoint_descriptions,
+# mc4_aeid, mc5_aeid, mc4_methods, mc5_methods
 
 # Establish a connection
 connection = mysql.connector.connect(host=host, user=user, password=password, database=database)

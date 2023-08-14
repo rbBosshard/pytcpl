@@ -142,3 +142,4 @@ symbols_dict = {
     "x-ray": "🦴",
     "yin_yang": "☯️",
 }
+BMAD_CONSTANT = 1.4826

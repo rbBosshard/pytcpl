@@ -3,7 +3,6 @@ SQLAlchemy
 build
 joblib
 mysql-connector-python
-mysqlclient
 numpy
 pandas
 pipreqs

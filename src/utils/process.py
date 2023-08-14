@@ -5,6 +5,7 @@ from scipy.optimize import minimize
 from scipy.stats import t, chi2
 from tqdm import tqdm
 
+from .bmd_bounds import bmd_bounds
 from .constants import custom_format
 from .fit_models import get_model
 from .pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_, get_cutoff
@@ -68,12 +69,13 @@ def process(df, config):
         pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
         # rmse = np.sqrt(np.mean((resp - pred) ** 2))
         top = np.max(np.abs(pred))  # top is taken to be highest model value
-        ac50 = get_model(best_aic_model)('inv')(.5 * top, *ps_list[:-1], conc)
-        acc = get_model(best_aic_model)('inv')(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
-        actop = get_model(best_aic_model)('inv')(top, *ps_list[:-1], conc)
-        ac1sd = get_model(best_aic_model)('inv')(onesd, *ps_list[:-1], conc)
+        inverse_function = get_model(best_aic_model)('inv')
+        ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
+        acc = inverse_function(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
+        actop = inverse_function(top, *ps_list[:-1], conc)
+        ac1sd = inverse_function(onesd, *ps_list[:-1], conc)
         bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
-        bmd = get_model(best_aic_model)('inv')(bmr, *ps_list[:-1], conc)
+        bmd = inverse_function(bmr, *ps_list[:-1], conc)
 
         # Each p_i represents the odds of the curve being a hit according to different criteria;
         p1 = 1 - rel_likelihood  # p1 represents probability that constant model is correct
@@ -96,6 +98,7 @@ def process(df, config):
 
         out = {'best_aic_model': best_aic_model, 'hitcall': continuous_hitcall, 'top': top, 'ac50': ac50, 'acc': acc,
                'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd}
+
         return out
 
     # Preprocessing
