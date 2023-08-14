@@ -172,7 +172,7 @@ def get_assay_info(aeid):
     path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}")
     path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}")
     available = os.path.exists(path_endpoint) and os.path.exists(path_component)
-    if not available:
+    if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
             acid = query_db(endpoint_query).iloc[0]['acid']
@@ -183,7 +183,7 @@ def get_assay_info(aeid):
             path_endpoint = os.path.join(CONFIG['bucket'], "input", f"{tbl_endpoint}{SUFFIX}")
             path_component = os.path.join(CONFIG['bucket'], "input", f"{tbl_component}{SUFFIX}")
             endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
-            endpoint_df = path_endpoint[path_endpoint['aeid'] == aeid]
+            endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
             component_df = conn.read(path_component, input_format="parquet", ttl=600)
             assay_info_dict = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
     else:
@@ -196,15 +196,9 @@ def get_assay_info(aeid):
 
 
 def load_raw_data():
-    csv_file_path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
-    load_from_disk = os.path.exists(csv_file_path)
-    data_source = "disk" if load_from_disk else "DB"
-
-    print_(f"{status('hourglass_not_done')} Fetching raw data from {data_source}..")
-
-    if load_from_disk:
-        df = pd.read_parquet(csv_file_path)
-    else:
+    print_(f"{status('hourglass_not_done')} Fetching raw data..")
+    path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    if not os.path.exists(path):
         select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
         table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
         join_string = ' AND '.join([f"{key} = {value}" for key, value in table_mapping.items()])
@@ -212,7 +206,9 @@ def load_raw_data():
                   f"FROM mc0, mc1, mc3 " \
                   f"WHERE {join_string} AND aeid = {CONFIG['aeid']};"
         df = query_db(query=qstring)
-        df.to_parquet(csv_file_path, compression='gzip')
+        df.to_parquet(path, compression='gzip')
+    else:
+        df = pd.read_parquet(path)
 
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
 
@@ -318,7 +314,7 @@ def get_chemical(spids):
     path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{SUFFIX}")
     path_chemical = os.path.join(INPUT_DIR_PATH, f"{chemical}{SUFFIX}")
     available = os.path.exists(path_sample) and os.path.exists(path_chemical)
-    if not available:
+    if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
               SELECT spid, chid, dsstox_substance_id, chnm, casn
@@ -349,7 +345,7 @@ def get_chemical(spids):
 def get_assay_component_endpoint(aeid):
     tbl = 'assay_component_endpoint'
     path = os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}")
-    if not os.path.exists(path):
+    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
                 SELECT aeid, assay_component_endpoint_name, normalized_data_type
@@ -371,7 +367,7 @@ def get_assay_component_endpoint(aeid):
 def get_cutoff():
     path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     if not os.path.exists(path):
-        if CONFIG['enable_reading_db']:
+        if CONFIG['enable_reading_db'] or CONFIG['enable_allowing_reading_remote']:
             qstring = f"""
                 SELECT bmad, bmed, onesd, cutoff
                 FROM {CUTOFF_TABLE} 
@@ -438,14 +434,26 @@ def load_method(lvl, aeid):
     tbl_methods = f"mc{lvl}_methods"
     path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{SUFFIX}")
     path_methods = os.path.join(INPUT_DIR_PATH, f"{tbl_methods}{SUFFIX}")
-    if CONFIG['enable_reading_db'] or not os.path.exists(path_aeid) or not os.path.exists(path_methods):
-        flds = [f"b.mc{lvl}_mthd AS mthd"]
-        tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
-        qstring = f"SELECT {', '.join(flds)} " \
-                  f"FROM {', '.join(tbls)} " \
-                  f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
-                  f"AND aeid = {aeid};"
-        return query_db(query=qstring)["mthd"].tolist()
+    available = os.path.exists(path_aeid) and os.path.exists(path_methods)
+    if not available or CONFIG['enable_allowing_reading_remote']:
+        if CONFIG['enable_reading_db']:
+            flds = [f"b.mc{lvl}_mthd AS mthd"]
+            tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
+            qstring = f"SELECT {', '.join(flds)} " \
+                      f"FROM {', '.join(tbls)} " \
+                      f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
+                      f"AND aeid = {aeid};"
+            return query_db(query=qstring)["mthd"].tolist()
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            path_aeid = os.path.join(CONFIG['bucket'], "input", f"{tbl_aeid}{SUFFIX}")
+            path_methods = os.path.join(CONFIG['bucket'], "input", f"{tbl_methods}{SUFFIX}")
+            df_aeid = conn.read(path_aeid, input_format="parquet", ttl=600)
+            df_aeid = df_aeid[df_aeid['aeid'] == aeid]
+            df_methods = conn.read(path_methods, input_format="parquet", ttl=600)
+            level_col = f"mc{lvl}_mthd"
+            merged_df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
+            return merged_df[level_col].tolist()
     else:
         df_aeid = pd.read_parquet(path_aeid)
         df_aeid = df_aeid[df_aeid['aeid'] == aeid]

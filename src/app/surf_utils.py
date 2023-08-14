@@ -35,7 +35,7 @@ def get_output_data():
     tbl = 'output'
     path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     print_(f"Fetch data with assay ID {CONFIG['aeid']}..")
-    if not os.path.exists(path):
+    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
             df = query_db(query=qstring)
