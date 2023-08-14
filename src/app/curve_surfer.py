@@ -78,7 +78,7 @@ def test():
 
     # Print results.
     for row in df.itertuples():
-        st.write(f"{row.Owner} has a :{row.Pet}:")
+        st.write(f"{row}")
 
 
 if __name__ == "__main__":
