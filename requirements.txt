@@ -1,7 +1,9 @@
+
 PyYAML
 SQLAlchemy
 build
 joblib
+matplotlib
 mysql-connector-python
 numpy
 pandas

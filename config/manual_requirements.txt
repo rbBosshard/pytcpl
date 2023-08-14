@@ -3,4 +3,4 @@ pipreqs
 sphinx
 sphinx_rtd_theme
 build
-
+matplotlib
