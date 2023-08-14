@@ -3,6 +3,7 @@ import sys
 
 import pandas as pd
 import streamlit as st
+import traceback
 
 # Run command `streamlit run pytcpl/curve_surfer.py`
 # Ensure: enable_data_subsetting: 0 raw config/config.yaml
@@ -89,3 +90,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
         st.error(e, icon="🚨")
+        st.error(traceback.print_exc(), icon="🚨")
+
