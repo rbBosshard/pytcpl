@@ -165,7 +165,7 @@ def compute_cutoffs(df):
     out.to_parquet(path)
 
 
-def get_assay_info(aeid):
+def get_assay_info(aeid, conn=None):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
 
@@ -180,8 +180,8 @@ def get_assay_info(aeid):
             assay_info_dict = pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_endpoint = os.path.join(CONFIG['bucket'], "input", f"{tbl_endpoint}{SUFFIX}")
-            path_component = os.path.join(CONFIG['bucket'], "input", f"{tbl_component}{SUFFIX}")
+            path_endpoint = f"{CONFIG['bucket']}/input/{tbl_endpoint}{SUFFIX}"
+            path_component = f"{CONFIG['bucket']}/input/{tbl_component}{SUFFIX}"
             endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
             endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
             component_df = conn.read(path_component, input_format="parquet", ttl=600)
@@ -308,7 +308,7 @@ def get_metadata(df, aeid):
     return df
 
 
-def get_chemical(spids):
+def get_chemical(spids, conn=None):
     sample = 'sample'
     chemical = 'chemical'
     path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{SUFFIX}")
@@ -325,8 +325,8 @@ def get_chemical(spids):
             df = query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_sample = os.path.join(CONFIG['bucket'], "input", f"{sample}{SUFFIX}")
-            path_chemical = os.path.join(CONFIG['bucket'], "input", f"{chemical}{SUFFIX}")
+            path_sample = f"{CONFIG['bucket']}/input/{sample}{SUFFIX}"
+            path_chemical = f"{CONFIG['bucket']}/input/{chemical}{SUFFIX}"
             sample_df = conn.read(path_sample, input_format="parquet", ttl=600)
             chemical_df = conn.read(path_chemical, input_format="parquet", ttl=600)
             df = sample_df.merge(chemical_df, on='chid', how='left')
@@ -342,7 +342,7 @@ def get_chemical(spids):
     return df
 
 
-def get_assay_component_endpoint(aeid):
+def get_assay_component_endpoint(aeid, conn=None):
     tbl = 'assay_component_endpoint'
     path = os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
@@ -356,7 +356,7 @@ def get_assay_component_endpoint(aeid):
             return df
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path = os.path.join(CONFIG['bucket'], "input", f"{tbl}{SUFFIX}")
+            path = f"{CONFIG['bucket']}/input/{tbl}{SUFFIX}"
             df = conn.read(path, input_format="parquet", ttl=600)
             return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
     else:
@@ -364,7 +364,7 @@ def get_assay_component_endpoint(aeid):
         return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
 
 
-def get_cutoff():
+def get_cutoff(conn=None):
     path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     if not os.path.exists(path):
         if CONFIG['enable_reading_db'] or CONFIG['enable_allowing_reading_remote']:
@@ -377,7 +377,7 @@ def get_cutoff():
             return df
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = os.path.join(CONFIG['bucket'], CUTOFF_TABLE, f"{CONFIG['aeid']}{SUFFIX}")
+            data_source = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{SUFFIX}"
             return conn.read(data_source, input_format="parquet", ttl=600)[['bmad', 'bmed', 'onesd', 'cutoff']]
     else:
         df = pd.read_parquet(path)
@@ -429,7 +429,7 @@ def mc5_mthds(mthd, bmad):
     }.get(mthd)
 
 
-def load_method(lvl, aeid):
+def load_method(lvl, aeid, conn=None):
     tbl_aeid = f"mc{lvl}_aeid"
     tbl_methods = f"mc{lvl}_methods"
     path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{SUFFIX}")
@@ -446,8 +446,8 @@ def load_method(lvl, aeid):
             return query_db(query=qstring)["mthd"].tolist()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_aeid = os.path.join(CONFIG['bucket'], "input", f"{tbl_aeid}{SUFFIX}")
-            path_methods = os.path.join(CONFIG['bucket'], "input", f"{tbl_methods}{SUFFIX}")
+            path_aeid = f"{CONFIG['bucket']}/input/{tbl_aeid}{SUFFIX}"
+            path_methods = f"{CONFIG['bucket']}/input/{tbl_methods}{SUFFIX}"
             df_aeid = conn.read(path_aeid, input_format="parquet", ttl=600)
             df_aeid = df_aeid[df_aeid['aeid'] == aeid]
             df_methods = conn.read(path_methods, input_format="parquet", ttl=600)

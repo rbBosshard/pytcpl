@@ -27,7 +27,7 @@ ERR_MSG = f"No data found for this query"
 @st.cache_data
 def load_data(aeid):  # aeid parameter used to handle correct caching
     df = get_output_data()
-    cutoff_df = get_cutoff()
+    cutoff_df = get_cutoff(conn=st.experimental_connection('s3', type=FilesConnection))
     return df, cutoff_df
 
 
@@ -41,7 +41,7 @@ def get_output_data():
             df = query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = os.path.join(CONFIG['bucket'], tbl, f"{CONFIG['aeid']}{SUFFIX}")
+            data_source = f"{CONFIG['bucket']}{tbl}/{CONFIG['aeid']}{SUFFIX}"
             df = conn.read(data_source, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
@@ -68,7 +68,7 @@ def get_series():
 
 
 def get_chem_info(spid):
-    chem = get_chemical([spid]).iloc[0]
+    chem = get_chemical([spid], conn=st.experimental_connection('s3', type=FilesConnection)).iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
     dsstox_substance_id = chem['dsstox_substance_id']
@@ -85,7 +85,7 @@ def init_figure(series, cutoff_df):
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
-    assay_infos = get_assay_info(st.session_state.aeid)
+    assay_infos = get_assay_info(st.session_state.aeid, conn=st.experimental_connection('s3', type=FilesConnection))
     normalized_data_type = assay_infos["normalized_data_type"]
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     title = "AEID: " + str(st.session_state.aeid) + " | " + assay_component_endpoint_name
@@ -280,7 +280,7 @@ def update():
 
 
 def get_assay_and_sample_info():
-    assay_infos = get_assay_info(st.session_state.aeid)
+    assay_infos = get_assay_info(st.session_state.aeid, conn=st.experimental_connection('s3', type=FilesConnection))
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
     # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
