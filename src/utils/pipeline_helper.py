@@ -366,8 +366,8 @@ def get_assay_component_endpoint(aeid, conn=None):
 
 def get_cutoff():
     path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
-    if not os.path.exists(path):
-        if CONFIG['enable_reading_db'] or CONFIG['enable_allowing_reading_remote']:
+    if not os.path.exists(path) or  CONFIG['enable_allowing_reading_remote']:
+        if CONFIG['enable_reading_db']:
             qstring = f"""
                 SELECT bmad, bmed, onesd, cutoff
                 FROM {CUTOFF_TABLE} 
@@ -377,8 +377,8 @@ def get_cutoff():
             return df
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{SUFFIX}"
-            return conn.read(data_source, input_format="parquet", ttl=600)[['bmad', 'bmed', 'onesd', 'cutoff']]
+            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{SUFFIX}"
+            return conn.read(path, input_format="parquet", ttl=600)[['bmad', 'bmed', 'onesd', 'cutoff']]
     else:
         df = pd.read_parquet(path)
         return df[['bmad', 'bmed', 'onesd', 'cutoff']]
