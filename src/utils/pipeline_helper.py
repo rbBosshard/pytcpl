@@ -165,7 +165,7 @@ def compute_cutoffs(df):
     out.to_parquet(path)
 
 
-def get_assay_info(aeid, conn=None):
+def get_assay_info(aeid):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
 
@@ -308,7 +308,7 @@ def get_metadata(df, aeid):
     return df
 
 
-def get_chemical(spids, conn=None):
+def get_chemical(spids):
     sample = 'sample'
     chemical = 'chemical'
     path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{SUFFIX}")
@@ -364,7 +364,7 @@ def get_assay_component_endpoint(aeid, conn=None):
         return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
 
 
-def get_cutoff(conn=None):
+def get_cutoff():
     path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     if not os.path.exists(path):
         if CONFIG['enable_reading_db'] or CONFIG['enable_allowing_reading_remote']:
