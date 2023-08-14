@@ -75,11 +75,10 @@ def test():
     # Create connection object and retrieve file contents.
     # Specify input format is a csv and to cache the result for 600 seconds.
     conn = st.experimental_connection('s3', type=FilesConnection)
-    df = conn.read("datapytcpl/5.parquet.gzip", input_format="parquet", ttl=600)
+    df = conn.read("datapytcpl/cutoff/5.parquet.gzip", input_format="parquet", ttl=600)
 
     # Print results.
-    for row in df.itertuples():
-        st.write(f"{row}")
+    st.write(f"{df.iloc[0]}")
 
 
 if __name__ == "__main__":
