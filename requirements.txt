@@ -2,6 +2,7 @@
 PyYAML
 SQLAlchemy
 build
+git+https://github.com/streamlit/files-connection
 joblib
 matplotlib
 mysql-connector-python
@@ -9,6 +10,7 @@ numpy
 pandas
 pipreqs
 plotly
+s3fs
 scipy
 snakeviz
 sphinx

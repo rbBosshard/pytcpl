@@ -4,3 +4,5 @@ sphinx
 sphinx_rtd_theme
 build
 matplotlib
+s3fs
+git+https://github.com/streamlit/files-connection
