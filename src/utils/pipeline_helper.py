@@ -12,7 +12,7 @@ import streamlit as st
 from st_files_connection import FilesConnection
 
 from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, OUT_DIR_PATH, INPUT_DIR_PATH, \
+    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
     CUTOFF_DIR_PATH, CUTOFF_TABLE, BMAD_CONSTANT
 from .constants import symbols_dict
 from .fit_models import get_model
@@ -177,22 +177,21 @@ def get_assay_info(aeid):
             endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
             acid = query_db(endpoint_query).iloc[0]['acid']
             component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
-            assay_info_dict = pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
+            return pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
             path_endpoint = f"{CONFIG['bucket']}/input/{tbl_endpoint}{SUFFIX}"
             path_component = f"{CONFIG['bucket']}/input/{tbl_component}{SUFFIX}"
             endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
-            endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
             component_df = conn.read(path_component, input_format="parquet", ttl=600)
-            assay_info_dict = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
     else:
         endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}"))
-        endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
         component_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}"))
-        assay_info_dict = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
 
-    return assay_info_dict
+    endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
+    df = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
+    print_(f"Read from {path_endpoint} and {path_endpoint}")
+    return df
 
 
 def load_raw_data():
@@ -208,6 +207,7 @@ def load_raw_data():
         df = query_db(query=qstring)
         df.to_parquet(path, compression='gzip')
     else:
+        print_(f"Read from {path}")
         df = pd.read_parquet(path)
 
     print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
@@ -250,7 +250,7 @@ def write_output(df):
     db_append(df, "output")
 
     # Custom data
-    file_path = os.path.join(OUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     df[['dsstox_substance_id', 'hitcall']].to_parquet(file_path, compression='gzip')
 
 
@@ -322,23 +322,22 @@ def get_chemical(spids):
               LEFT JOIN {chemical} ON {chemical}.chid = {sample}.chid
               WHERE spid IN {str(tuple(spids))};
               """
-            df = query_db(query=qstring)
+            return query_db(query=qstring).drop_duplicates()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
             path_sample = f"{CONFIG['bucket']}/input/{sample}{SUFFIX}"
             path_chemical = f"{CONFIG['bucket']}/input/{chemical}{SUFFIX}"
             sample_df = conn.read(path_sample, input_format="parquet", ttl=600)
             chemical_df = conn.read(path_chemical, input_format="parquet", ttl=600)
-            df = sample_df.merge(chemical_df, on='chid', how='left')
-            df = df[df['spid'].isin(spids)]
-            df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
     else:
         sample_df = pd.read_parquet(path_sample)
         chemical_df = pd.read_parquet(path_chemical)
-        df = sample_df.merge(chemical_df, on='chid', how='left')
-        df = df[df['spid'].isin(spids)]
-        df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
+
+    df = sample_df.merge(chemical_df, on='chid', how='left')
+    df = df[df['spid'].isin(spids)]
+    df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
     df = df.drop_duplicates()
+    print_(f"Read from {path_sample} and {path_chemical}")
     return df
 
 
@@ -352,16 +351,16 @@ def get_assay_component_endpoint(aeid, conn=None):
                 FROM {tbl} 
                 WHERE aeid = {aeid};
                 """
-            df = query_db(query=qstring)
-            return df
+            return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
             path = f"{CONFIG['bucket']}/input/{tbl}{SUFFIX}"
             df = conn.read(path, input_format="parquet", ttl=600)
-            return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
     else:
         df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}"))
-        return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
+    df = df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
+    print_(f"Read from {path}")
+    return df
 
 
 def get_cutoff():
@@ -373,15 +372,16 @@ def get_cutoff():
                 FROM {CUTOFF_TABLE} 
                 WHERE aeid = {CONFIG['aeid']};
                 """
-            df = query_db(query=qstring)
-            return df
+            return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
             path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{SUFFIX}"
-            return conn.read(path, input_format="parquet", ttl=600)[['bmad', 'bmed', 'onesd', 'cutoff']]
+            df = conn.read(path, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
-        return df[['bmad', 'bmed', 'onesd', 'cutoff']]
+    df = df[['bmad', 'bmed', 'onesd', 'cutoff']]
+    print_(f"Read from {path}")
+    return df
 
 
 def mc4_mthds(mthd, df):
@@ -449,20 +449,18 @@ def load_method(lvl, aeid, conn=None):
             path_aeid = f"{CONFIG['bucket']}/input/{tbl_aeid}{SUFFIX}"
             path_methods = f"{CONFIG['bucket']}/input/{tbl_methods}{SUFFIX}"
             df_aeid = conn.read(path_aeid, input_format="parquet", ttl=600)
-            df_aeid = df_aeid[df_aeid['aeid'] == aeid]
             df_methods = conn.read(path_methods, input_format="parquet", ttl=600)
-            level_col = f"mc{lvl}_mthd"
-            merged_df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
-            return merged_df[level_col].tolist()
+
     else:
         df_aeid = pd.read_parquet(path_aeid)
-        df_aeid = df_aeid[df_aeid['aeid'] == aeid]
         df_methods = pd.read_parquet(path_methods)
-        level_col = f"mc{lvl}_mthd"
-        merged_df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
 
-        # Select the method column
-        return merged_df[level_col].tolist()
+    df_aeid = df_aeid[df_aeid['aeid'] == aeid]
+    level_col = f"mc{lvl}_mthd"
+    df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
+    df = df[level_col].tolist()
+    print_(f"Read from {path_aeid} and {path_methods}")
+    return df
 
 
 def mad(x):

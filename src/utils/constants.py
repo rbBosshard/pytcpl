@@ -14,12 +14,12 @@ EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../data')
 RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'raw')
 INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'input')
 OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'output')
-OUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'custom_output')
+CUSTOM_OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'custom_output')
 CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
-ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.custom_output')
+ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.out')
 
 OUTPUT_TABLE = "output"
 CUTOFF_TABLE = "cutoff"
