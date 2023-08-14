@@ -40,7 +40,7 @@ python src/pipeline.py
 <details><summary>(Optional) redirect terminal output to log file</summary>
 
 ```bash
-python src/pipeline.py --unicode | tee logs/log.out
+python src/pipeline.py --unicode | tee logs/log.custom_output
 ```
 
 - Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id

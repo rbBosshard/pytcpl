@@ -83,8 +83,8 @@ def test():
 
 if __name__ == "__main__":
     try:
-        # main()
-        test()
+        main()
+        # test()
 
     except Exception as e:
         print(e)

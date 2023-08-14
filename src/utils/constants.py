@@ -10,16 +10,16 @@ CONFIG_PATH = os.path.join(CONFIG_DIR_PATH, 'config.yaml')
 AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 
-EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../export')
-RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'raw')
-INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'input')
-OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'output')
-OUT_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'out')
-CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../export', 'cutoff')
+EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../data')
+RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'raw')
+INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'input')
+OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'output')
+OUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'custom_output')
+CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
-ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.out')
+ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.custom_output')
 
 OUTPUT_TABLE = "output"
 CUTOFF_TABLE = "cutoff"

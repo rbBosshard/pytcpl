@@ -6,10 +6,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from plotly import graph_objects as go, express as px
+from st_files_connection import FilesConnection
 
 from src.utils.fit_models import get_model
 from src.utils.models.get_inverse import pow_space
-from src.utils.pipeline_helper import print_, get_assay_info, get_cutoff, set_config
+from src.utils.pipeline_helper import print_, get_assay_info, get_cutoff, set_config, get_chemical
 from src.utils.query_db import query_db
 from src.utils.constants import OUTPUT_DIR_PATH
 
@@ -35,8 +36,13 @@ def get_output_data():
     path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     print_(f"Fetch data with assay ID {CONFIG['aeid']}..")
     if not os.path.exists(path):
-        qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
-        df = query_db(query=qstring)
+        if CONFIG['enable_reading_db']:
+            qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
+            df = query_db(query=qstring)
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            data_source = os.path.join(CONFIG['bucket'], tbl, f"{CONFIG['aeid']}{SUFFIX}")
+            df = conn.read(data_source, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
     length = df.shape[0]
@@ -62,19 +68,7 @@ def get_series():
 
 
 def get_chem_info(spid):
-    try:
-        chid = query_db(query=f"SELECT chid FROM sample WHERE spid = '{str(spid)}';").iloc[0]['chid']
-    except:
-        try:
-            chid = query_db(query=f"SELECT chid FROM chemical WHERE chnm = '{str(spid)}';").iloc[0]['chid']
-        except:
-            try:
-                chid = query_db(query=f"SELECT chid FROM chemical WHERE chnm LIKE '%{str(spid)}%';").iloc[0]['chid']
-            except Exception as e:
-                print(f"Error on spid {spid}: {e}")
-                return None, None, None
-
-    chem = query_db(query=f"SELECT * FROM chemical WHERE chid = {str(chid)};").iloc[0]
+    chem = get_chemical([spid]).iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
     dsstox_substance_id = chem['dsstox_substance_id']

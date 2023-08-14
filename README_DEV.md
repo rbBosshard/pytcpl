@@ -12,7 +12,7 @@ python config/handle_requirements.py
 - Activate profiling by setting `apply_profiler: 1` in [config.yaml](config/config.yaml) and run `python src/pipeline.py`
 The call stack with performance details should open in new browser tab:
 ```bash
-snakeviz export/logs/pipeline.prof
+snakeviz data/logs/pipeline.prof
 ```
 - Goto [SnakeViz](https://jiffyclub.github.io/snakeviz/) website
 

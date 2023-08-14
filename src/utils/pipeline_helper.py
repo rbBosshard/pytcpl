@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
+import streamlit as st
+from st_files_connection import FilesConnection
 
 from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, OUT_DIR_PATH, INPUT_DIR_PATH, \
@@ -167,11 +169,23 @@ def get_assay_info(aeid):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
 
-    if CONFIG['enable_reading_db']:
-        endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
-        acid = query_db(endpoint_query).iloc[0]['acid']
-        component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
-        assay_info_dict = pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
+    path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}")
+    path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}")
+    available = os.path.exists(path_endpoint) and os.path.exists(path_component)
+    if not available:
+        if CONFIG['enable_reading_db']:
+            endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
+            acid = query_db(endpoint_query).iloc[0]['acid']
+            component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
+            assay_info_dict = pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            path_endpoint = os.path.join(CONFIG['bucket'], "input", f"{tbl_endpoint}{SUFFIX}")
+            path_component = os.path.join(CONFIG['bucket'], "input", f"{tbl_component}{SUFFIX}")
+            endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
+            endpoint_df = path_endpoint[path_endpoint['aeid'] == aeid]
+            component_df = conn.read(path_component, input_format="parquet", ttl=600)
+            assay_info_dict = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
     else:
         endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}"))
         endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
@@ -229,9 +243,9 @@ def db_delete(tbl):
 
 
 def write_output(df):
-    df = df[CONFIG['output_cols_filter']]
     df = get_metadata(df, CONFIG['aeid'])
     df = subset_chemicals(df)
+    df = df[CONFIG['output_cols_filter']]
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
     print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
     for col in ['conc', 'resp', 'fit_params']:
@@ -239,7 +253,7 @@ def write_output(df):
     db_delete("output")
     db_append(df, "output")
 
-    # Custom export
+    # Custom data
     file_path = os.path.join(OUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     df[['dsstox_substance_id', 'hitcall']].to_parquet(file_path, compression='gzip')
 
@@ -278,7 +292,8 @@ def subset_chemicals(dat):
 
 
 def get_metadata(df, aeid):
-    chemical_df = get_chemical("spid", df["spid"].unique())
+    df = df.drop(columns=['dsstox_substance_id'])
+    chemical_df = get_chemical(df["spid"].unique())
     df = pd.merge(chemical_df, df, on="spid", how="right")
     df['chid'].fillna(0, inplace=True)
     df['chid'] = df['chid'].astype(int)
@@ -297,26 +312,36 @@ def get_metadata(df, aeid):
     return df
 
 
-def get_chemical(field, spids):
+def get_chemical(spids):
     sample = 'sample'
     chemical = 'chemical'
     path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{SUFFIX}")
     path_chemical = os.path.join(INPUT_DIR_PATH, f"{chemical}{SUFFIX}")
     available = os.path.exists(path_sample) and os.path.exists(path_chemical)
     if not available:
-        qstring = f"""
-          SELECT spid, chid, dsstox_substance_id
-          FROM {sample}
-          LEFT JOIN {chemical} ON {chemical}.chid = {sample}.chid
-          WHERE spid IN {str(tuple(spids))};
-          """
-        df = query_db(query=qstring)
+        if CONFIG['enable_reading_db']:
+            qstring = f"""
+              SELECT spid, chid, dsstox_substance_id, chnm, casn
+              FROM {sample}
+              LEFT JOIN {chemical} ON {chemical}.chid = {sample}.chid
+              WHERE spid IN {str(tuple(spids))};
+              """
+            df = query_db(query=qstring)
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            path_sample = os.path.join(CONFIG['bucket'], "input", f"{sample}{SUFFIX}")
+            path_chemical = os.path.join(CONFIG['bucket'], "input", f"{chemical}{SUFFIX}")
+            sample_df = conn.read(path_sample, input_format="parquet", ttl=600)
+            chemical_df = conn.read(path_chemical, input_format="parquet", ttl=600)
+            df = sample_df.merge(chemical_df, on='chid', how='left')
+            df = df[df['spid'].isin(spids)]
+            df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
     else:
         sample_df = pd.read_parquet(path_sample)
         chemical_df = pd.read_parquet(path_chemical)
         df = sample_df.merge(chemical_df, on='chid', how='left')
-        df = df[df[field].isin(spids)]
-        df = df[['spid', 'chid', 'dsstox_substance_id']]
+        df = df[df['spid'].isin(spids)]
+        df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
     df = df.drop_duplicates()
     return df
 
@@ -325,13 +350,19 @@ def get_assay_component_endpoint(aeid):
     tbl = 'assay_component_endpoint'
     path = os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}")
     if not os.path.exists(path):
-        qstring = f"""
-            SELECT aeid, assay_component_endpoint_name, normalized_data_type
-            FROM {tbl} 
-            WHERE aeid = {aeid};
-            """
-        df = query_db(query=qstring)
-        return df
+        if CONFIG['enable_reading_db']:
+            qstring = f"""
+                SELECT aeid, assay_component_endpoint_name, normalized_data_type
+                FROM {tbl} 
+                WHERE aeid = {aeid};
+                """
+            df = query_db(query=qstring)
+            return df
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            path = os.path.join(CONFIG['bucket'], "input", f"{tbl}{SUFFIX}")
+            df = conn.read(path, input_format="parquet", ttl=600)
+            return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
     else:
         df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}"))
         return df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
@@ -340,13 +371,18 @@ def get_assay_component_endpoint(aeid):
 def get_cutoff():
     path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
     if not os.path.exists(path):
-        qstring = f"""
-            SELECT bmad, bmed, onesd, cutoff
-            FROM {CUTOFF_TABLE} 
-            WHERE aeid = {CONFIG['aeid']};
-            """
-        df = query_db(query=qstring)
-        return df
+        if CONFIG['enable_reading_db']:
+            qstring = f"""
+                SELECT bmad, bmed, onesd, cutoff
+                FROM {CUTOFF_TABLE} 
+                WHERE aeid = {CONFIG['aeid']};
+                """
+            df = query_db(query=qstring)
+            return df
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            data_source = os.path.join(CONFIG['bucket'], CUTOFF_TABLE, f"{CONFIG['aeid']}{SUFFIX}")
+            return conn.read(data_source, input_format="parquet", ttl=600)[['bmad', 'bmed', 'onesd', 'cutoff']]
     else:
         df = pd.read_parquet(path)
         return df[['bmad', 'bmed', 'onesd', 'cutoff']]
