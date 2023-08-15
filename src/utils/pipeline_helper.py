@@ -13,9 +13,10 @@ from st_files_connection import FilesConnection
 
 from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE, BMAD_CONSTANT
+    CUTOFF_DIR_PATH, CUTOFF_TABLE
 from .constants import symbols_dict
 from .fit_models import get_model
+from .models.helper import get_mad
 from .query_db import get_sqlalchemy_engine
 from .query_db import query_db
 
@@ -390,9 +391,9 @@ def mc4_mthds(mthd, df):
     mask = df.loc[cndx & wllt_t, 'resp']
 
     if mthd == 'bmad.aeid.lowconc.twells':
-        return mad(mask)
+        return get_mad(mask)
     elif mthd == 'bmad.aeid.lowconc.nwells':
-        return mad(df.loc[df['wllt'] == 'n', 'resp'])
+        return get_mad(df.loc[df['wllt'] == 'n', 'resp'])
     elif mthd == 'onesd.aeid.lowconc.twells':
         return mask.std()
     elif mthd == 'bmed.aeid.lowconc.twells':
@@ -461,8 +462,3 @@ def load_method(lvl, aeid, conn=None):
     df = df[level_col].tolist()
     print_(f"Read from {path_aeid} and {path_methods}")
     return df
-
-
-def mad(x):
-    """Calculate the median absolute deviation (MAD) of an array"""
-    return BMAD_CONSTANT * np.median(np.abs(x - np.median(x)))

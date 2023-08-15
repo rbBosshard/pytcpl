@@ -9,7 +9,7 @@ from plotly import graph_objects as go, express as px
 from st_files_connection import FilesConnection
 
 from src.utils.fit_models import get_model
-from src.utils.models.get_inverse import pow_space
+from src.utils.models.helper import pow_space
 from src.utils.pipeline_helper import print_, get_assay_info, get_cutoff, set_config, get_chemical
 from src.utils.query_db import query_db
 from src.utils.constants import OUTPUT_DIR_PATH
@@ -152,7 +152,7 @@ def add_curves(series, fig):
         eff = efficacy_values[i]
         if eff is not None and not np.isnan(eff):
             fig.add_trace(go.Scatter(
-                name=f"{efficacy} = {eff:0.2f}",
+                name=f"{efficacy} = {eff:.1e}",
                 x=[min(np.log10(x)), max(np.log10(x))],
                 y=[eff, eff],
                 mode='lines',
@@ -171,7 +171,7 @@ def add_curves(series, fig):
                 params.pop('er')
                 pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
                 fig.add_trace(go.Scatter(
-                    name=f"{potency} = {pot:0.1f}",
+                    name=f"{potency} = {pot:.1e}",
                     x=[pot_log, pot_log],
                     y=[0, pot_y],
                     mode='lines',

@@ -3,7 +3,6 @@ import mysql.connector
 import os
 
 from src.utils.constants import INPUT_DIR_PATH
-from src.utils.constants import INPUT_DIR_PATH
 
 # MySQL connection parameters
 host = 'localhost'

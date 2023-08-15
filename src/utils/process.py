@@ -39,10 +39,11 @@ def process(df, config):
     def fit(series):
         out = {}
         for fit_model in config['curve_fit_models']:
-            initial_value_er, bounds_er = ([0.9], ((-1, 5),)) if fit_model != 'cnst' else ([], ())
-            x0 = get_model(fit_model)('x0')() + initial_value_er
-            bounds = get_model(fit_model)('bounds')() + bounds_er
-            args = (np.array(series.conc), np.array(series.resp), get_model(fit_model)('fun'))
+            conc = np.array(series.conc)
+            resp = np.array(series.resp)
+            x0 = get_model(fit_model)('x0')(conc, resp)
+            bounds = get_model(fit_model)('bounds')(conc, resp)
+            args = (conc, resp, get_model(fit_model)('fun'))
             fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args)
             pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
