@@ -198,7 +198,6 @@ def get_assay_info(aeid):
 def load_raw_data():
     print_(f"{status('hourglass_not_done')} Fetching raw data..")
     path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
-    print_(f"Read from {path}")
     if not os.path.exists(path):
         select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
         table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
