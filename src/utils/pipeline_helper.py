@@ -169,9 +169,10 @@ def compute_cutoffs(df):
 def get_assay_info(aeid):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
-
     path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}")
     path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}")
+    print_(path_endpoint)
+    print_(path_component)
     available = os.path.exists(path_endpoint) and os.path.exists(path_component)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
