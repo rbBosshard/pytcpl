@@ -1,0 +1,5 @@
+output/*
+output/.gitkeep
+
+custom_output/*
+custom_output/.gitkeep
