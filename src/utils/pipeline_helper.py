@@ -21,6 +21,7 @@ from .query_db import query_db
 CONFIG = {}
 logger = logging.getLogger(__name__)
 START_TIME = 0
+AEID = 0
 
 
 def launch(config, config_path):
@@ -35,9 +36,6 @@ def launch(config, config_path):
 
     instance_id = args.instance_id
     instances_total = args.instances_total
-    CONFIG['instance_id'] = int(instance_id)
-    CONFIG['instances_total'] = int(instances_total)
-    update_config()
 
     global START_TIME
     START_TIME = datetime.now()
@@ -88,11 +86,13 @@ def launch(config, config_path):
 
 
 def prolog(new_aeid):
+    global AEID
+    AEID = int(new_aeid)
+    with open(os.path.join(CONFIG_DIR_PATH, 'aeid.in'), 'w') as f:
+        f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
-    CONFIG['aeid'] = int(new_aeid)
-    update_config()
-    assay_component_endpoint_name = get_assay_info(CONFIG['aeid'])['assay_component_endpoint_name']
-    assay_info = f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})"
+    assay_component_endpoint_name = get_assay_info(AEID)['assay_component_endpoint_name']
+    assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
     logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
 
 
@@ -147,14 +147,14 @@ def get_assay_info(aeid):
 
 def fetch_raw_data():
     logger.info(f"⏳ Fetching raw data..")
-    path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    path = os.path.join(RAW_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
     if not os.path.exists(path):
         select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
         table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
         join_string = ' AND '.join([f"{key} = {value}" for key, value in table_mapping.items()])
         qstring = f"SELECT {', '.join(select_cols)} " \
                   f"FROM mc0, mc1, mc3 " \
-                  f"WHERE {join_string} AND aeid = {CONFIG['aeid']};"
+                  f"WHERE {join_string} AND aeid = {AEID};"
         df = query_db(query=qstring)
         df.to_parquet(path, compression='gzip')
     else:
@@ -166,7 +166,7 @@ def fetch_raw_data():
     logger.info(f"🌡️ Computing efficacy cutoff")
     values = {}
     other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-    for mthd in load_method(lvl=4, aeid=CONFIG['aeid']) + other_mthds:
+    for mthd in load_method(lvl=4, aeid=AEID) + other_mthds:
         values.update({mthd: mc4_mthds(mthd, df)})
 
     bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values[
@@ -174,15 +174,15 @@ def fetch_raw_data():
     bmed = values['bmed.aeid.lowconc.twells']
     sd = values['onesd.aeid.lowconc.twells']
 
-    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=CONFIG['aeid'])]
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=AEID)]
     cutoff = max(list(filter(lambda item: item is not None, cutoffs)), default=0)
-    out = pd.DataFrame({'aeid': [CONFIG['aeid']], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
+    out = pd.DataFrame({'aeid': [AEID], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
 
     if CONFIG['enable_writing_db']:
         db_delete('cutoff')
         db_append(out, 'cutoff')
 
-    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    path = os.path.join(CUTOFF_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
     out.to_parquet(path)
 
     return df
@@ -196,15 +196,15 @@ def db_append(dat, tbl):
         except Exception as err:
             logger.error(err)
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
     dat.to_parquet(file_path, compression='gzip')
 
 
 def db_delete(tbl):
     if CONFIG['enable_writing_db']:
-        query_db(f"DELETE FROM {tbl} WHERE aeid = {CONFIG['aeid']};")
+        query_db(f"DELETE FROM {tbl} WHERE aeid = {AEID};")
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
     if os.path.exists(file_path):
         os.remove(file_path)
 
@@ -221,7 +221,7 @@ def write_output(df):
     db_append(df, "output")
 
     # Custom data
-    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
     df[['dsstox_substance_id', 'hitcall']].to_parquet(file_path, compression='gzip')
 
 
@@ -305,18 +305,18 @@ def get_assay_component_endpoint(aeid):
 
 
 def get_cutoff():
-    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    path = os.path.join(CUTOFF_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
     if not os.path.exists(path) or  CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
                 SELECT bmad, bmed, onesd, cutoff
                 FROM {CUTOFF_TABLE} 
-                WHERE aeid = {CONFIG['aeid']};
+                WHERE aeid = {AEID};
                 """
             return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{CONFIG['file_format']}"
+            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{AEID}{CONFIG['file_format']}"
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
@@ -413,11 +413,6 @@ def load_config():
 def init_config(config):
     global CONFIG
     CONFIG = config
-
-
-def update_config():
-    with open(CONFIG_PATH, 'w') as file:
-        yaml.dump(CONFIG, file)
 
 
 def get_partition(instance_id, instances_total):

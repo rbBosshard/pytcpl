@@ -33,21 +33,21 @@ def load_data(aeid):  # aeid parameter used to handle correct caching
 
 def get_output_data():
     tbl = 'output'
-    path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
-    print(f"Fetch data with assay ID {CONFIG['aeid']}..")
+    path = os.path.join(OUTPUT_DIR_PATH, f"{st.session_state.aeid}{CONFIG['file_format']}")
+    print(f"Fetch data with assay ID {st.session_state.aeid}..")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
             df = query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = f"{CONFIG['bucket']}/{tbl}/{CONFIG['aeid']}{CONFIG['file_format']}"
+            data_source = f"{CONFIG['bucket']}/{tbl}/{st.session_state.aeid}{CONFIG['file_format']}"
             df = conn.read(data_source, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
     length = df.shape[0]
     if length == 0:
-        st.error(f"No data found for AEID {CONFIG['aeid']}", icon="🚨")
+        st.error(f"No data found for AEID {st.session_state.aeid}", icon="🚨")
     print(f"{length} series loaded")
     return df
 
