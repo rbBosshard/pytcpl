@@ -1,7 +1,18 @@
 [00:00:00:00] 🚀 Pytcpl launched!
 [00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
-[00:00:00:00] 📜 Running pipeline for 0 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=2, instances_total=6
+[00:00:00:00] 📜 Running pipeline for 1 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=2, instances_total=4
 
-[00:00:00:00] 🎊 Pipeline completed!
-[00:00:00:00] 👋 Goodbye
+[00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:02:46] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
+[00:00:02:46] ⏳ Fetching raw data..
+[00:00:02:48] ℹ️ Loaded 3200 single datapoints
+[00:00:02:48] 🌡️ Computing efficacy cutoff
+[00:00:02:69] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:06:24] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:06:29] 🥕 Assay endpoint processing completed
+
+[00:00:06:29] Assay endpoint with aeid=7 failed: klsdf
+[00:00:06:29] 🎊 Pipeline completed!
+[00:00:06:29] 👋 Goodbye
