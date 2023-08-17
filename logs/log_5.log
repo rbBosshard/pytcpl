@@ -1,0 +1,7 @@
+[00:00:00:00] 🚀 Pytcpl launched!
+[00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
+[00:00:00:00] 📜 Running pipeline for 0 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=5, instances_total=7
+
+[00:00:00:00] 🎊 Pipeline completed!
+[00:00:00:00] 👋 Goodbye
