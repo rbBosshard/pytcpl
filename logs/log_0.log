@@ -1,29 +1,7 @@
 [00:00:00:00] 🚀 Pytcpl launched!
 [00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
-[00:00:00:00] 📜 Running pipeline for 2 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=2
+[00:00:00:00] 📜 Running pipeline for 0 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=6
 
-[00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-
-[00:00:01:89] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
-[00:00:01:89] ⏳ Fetching raw data..
-[00:00:01:91] ℹ️ Loaded 6400 single datapoints
-[00:00:01:91] 🌡️ Computing efficacy cutoff
-[00:00:02:12] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:06:68] 💽 Writing output data to DB (~0.21 MB)..
-[00:00:06:75] 🥕 Assay endpoint processing completed
-
-[00:00:06:75] Assay endpoint with aeid=5 failed: klsdf
-[00:00:06:75] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-
-[00:00:06:78] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_up (aeid=6)
-[00:00:06:78] ⏳ Fetching raw data..
-[00:00:06:82] ℹ️ Loaded 6400 single datapoints
-[00:00:06:82] 🌡️ Computing efficacy cutoff
-[00:00:06:86] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:07:54] 💽 Writing output data to DB (~0.23 MB)..
-[00:00:07:57] 🥕 Assay endpoint processing completed
-
-[00:00:07:57] Assay endpoint with aeid=6 failed: klsdf
-[00:00:07:57] 🎊 Pipeline completed!
-[00:00:07:57] 👋 Goodbye
+[00:00:00:00] 🎊 Pipeline completed!
+[00:00:00:00] 👋 Goodbye
