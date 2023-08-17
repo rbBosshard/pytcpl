@@ -13,7 +13,7 @@ from st_files_connection import FilesConnection
 
 from .constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     EXPORT_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH
 from .models.helper import get_mad
 from .query_db import get_sqlalchemy_engine
 from .query_db import query_db
@@ -85,10 +85,10 @@ def launch(config, config_path):
     return instance_id, instances_total, aeid_list, logger
 
 
-def prolog(new_aeid):
+def prolog(new_aeid, instance_id):
     global AEID
     AEID = int(new_aeid)
-    with open(os.path.join(CONFIG_DIR_PATH, 'aeid.in'), 'w') as f:
+    with open(os.path.join(AEID_PATH, f'aeid_{instance_id}.in'), 'w') as f:
         f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
     assay_component_endpoint_name = get_assay_info(AEID)['assay_component_endpoint_name']

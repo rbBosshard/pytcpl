@@ -1,29 +1,62 @@
 [00:00:00:00] 🚀 Pytcpl launched!
-[00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
-[00:00:00:00] 📜 Running pipeline for 2 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=2
+[00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\utils\../../config
+[00:00:00:00] 📜 Running pipeline for 5 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:01:42] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
-[00:00:01:42] ⏳ Fetching raw data..
-[00:00:01:46] ℹ️ Loaded 6400 single datapoints
-[00:00:01:46] 🌡️ Computing efficacy cutoff
-[00:00:01:60] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:05:80] 💽 Writing output data to DB (~0.21 MB)..
-[00:00:05:86] 🥕 Assay endpoint processing completed
+[00:00:00:03] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
+[00:00:00:03] ⏳ Fetching raw data..
+[00:00:00:04] ℹ️ Loaded 6400 single datapoints
+[00:00:00:04] 🌡️ Computing efficacy cutoff
+[00:00:00:07] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:03:82] 💽 Writing output data to DB (~0.21 MB)..
+[00:00:03:85] 🥕 Assay endpoint processing completed
 
-[00:00:05:86] Assay endpoint with aeid=5 failed: klsdf
-[00:00:05:86] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:00:03:85] Assay endpoint with aeid=5 failed: klsdf
+[00:00:03:85] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:05:89] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_up (aeid=6)
-[00:00:05:89] ⏳ Fetching raw data..
-[00:00:05:91] ℹ️ Loaded 6400 single datapoints
-[00:00:05:91] 🌡️ Computing efficacy cutoff
-[00:00:05:95] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:06:64] 💽 Writing output data to DB (~0.23 MB)..
-[00:00:06:68] 🥕 Assay endpoint processing completed
+[00:00:03:86] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_up (aeid=6)
+[00:00:03:86] ⏳ Fetching raw data..
+[00:00:03:87] ℹ️ Loaded 6400 single datapoints
+[00:00:03:87] 🌡️ Computing efficacy cutoff
+[00:00:03:92] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:04:27] 💽 Writing output data to DB (~0.23 MB)..
+[00:00:04:30] 🥕 Assay endpoint processing completed
 
-[00:00:06:68] Assay endpoint with aeid=6 failed: klsdf
-[00:00:06:68] 🎊 Pipeline completed!
-[00:00:06:68] 👋 Goodbye
+[00:00:04:30] Assay endpoint with aeid=6 failed: klsdf
+[00:00:04:30] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:04:31] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
+[00:00:04:31] ⏳ Fetching raw data..
+[00:00:04:31] ℹ️ Loaded 3200 single datapoints
+[00:00:04:32] 🌡️ Computing efficacy cutoff
+[00:00:04:34] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:05:22] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:05:24] 🥕 Assay endpoint processing completed
+
+[00:00:05:24] Assay endpoint with aeid=7 failed: klsdf
+[00:00:05:24] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:05:26] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
+[00:00:05:26] ⏳ Fetching raw data..
+[00:00:05:26] ℹ️ Loaded 3200 single datapoints
+[00:00:05:26] 🌡️ Computing efficacy cutoff
+[00:00:05:28] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:05:97] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:05:99] 🥕 Assay endpoint processing completed
+
+[00:00:05:99] Assay endpoint with aeid=8 failed: klsdf
+[00:00:05:99] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:06:01] 🌱 Start processing new assay endpoint: APR_HepG2_MitoMass_1h_dn (aeid=9)
+[00:00:06:01] ⏳ Fetching raw data..
+[00:00:06:01] ℹ️ Loaded 3200 single datapoints
+[00:00:06:01] 🌡️ Computing efficacy cutoff
+[00:00:06:03] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:07:41] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:07:43] 🥕 Assay endpoint processing completed
+
+[00:00:07:43] Assay endpoint with aeid=9 failed: klsdf
+[00:00:07:43] 🎊 Pipeline completed!
+[00:00:07:43] 👋 Goodbye

@@ -13,7 +13,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 from surf_utils import check_reset, trigger, filter_spid, update, get_assay_and_sample_info, set_config_app
 from src.utils.pipeline_helper import load_config
-from src.utils.constants import CONFIG_DIR_PATH
+from src.utils.constants import CONFIG_DIR_PATH, AEID_PATH
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
     check_reset()
     with st.sidebar:
         st.header(title + "🏄")
-        with open(os.path.join(CONFIG_DIR_PATH, 'aeid.in'), 'r') as f:
+        with open(os.path.join(AEID_PATH, f'aeid_{0}.in'), 'r') as f:
             aeid_value = int(f.readline().strip())
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
         col1, col2 = st.columns(2)

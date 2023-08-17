@@ -5,6 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR_PATH = os.path.join(ROOT_DIR, '../../config')
 CONFIG_PATH = os.path.join(CONFIG_DIR_PATH, 'config.yaml')
 AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
+AEID_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 
 EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../data')

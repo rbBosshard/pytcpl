@@ -10,7 +10,7 @@ def pipeline(config, confg_path):
     instance_id, instances_total, aeid_list, logger = launch(config, confg_path)
     for aeid in aeid_list:
         try:
-            prolog(aeid)
+            prolog(aeid, instance_id)
             df = fetch_raw_data()
             df = process(df, config, logger)
             write_output(df)
