@@ -1,29 +1,29 @@
-[00:00:00:03] 🚀 Pytcpl launched!
-[00:00:00:03] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
-[00:00:00:03] 📜 Running pipeline for 2 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:03] 🧩 Engine: instance_id=1, instances_total=2
+[00:00:00:01] 🚀 Pytcpl launched!
+[00:00:00:01] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
+[00:00:00:01] 📜 Running pipeline for 2 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:01] 🧩 Engine: instance_id=1, instances_total=2
 
-[00:00:00:03] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:00:00:01] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:46] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
-[00:00:00:47] ⏳ Fetching raw data..
-[00:00:00:51] ℹ️ Loaded 3200 single datapoints
-[00:00:00:51] 🌡️ Computing efficacy cutoff
-[00:00:00:58] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:03:83] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:03:86] 🥕 Assay endpoint processing completed
+[00:00:00:48] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
+[00:00:00:48] ⏳ Fetching raw data..
+[00:00:00:52] ℹ️ Loaded 3200 single datapoints
+[00:00:00:52] 🌡️ Computing efficacy cutoff
+[00:00:00:60] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:03:82] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:03:85] 🥕 Assay endpoint processing completed
 
 [00:00:03:86] Assay endpoint with aeid=7 failed: klsdf
 [00:00:03:86] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:03:89] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
-[00:00:03:89] ⏳ Fetching raw data..
-[00:00:03:91] ℹ️ Loaded 3200 single datapoints
-[00:00:03:91] 🌡️ Computing efficacy cutoff
-[00:00:03:95] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:06:04] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:06:08] 🥕 Assay endpoint processing completed
+[00:00:03:88] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
+[00:00:03:88] ⏳ Fetching raw data..
+[00:00:03:92] ℹ️ Loaded 3200 single datapoints
+[00:00:03:92] 🌡️ Computing efficacy cutoff
+[00:00:03:96] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:05:90] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:05:94] 🥕 Assay endpoint processing completed
 
-[00:00:06:08] Assay endpoint with aeid=8 failed: klsdf
-[00:00:06:08] 🎊 Pipeline completed!
-[00:00:06:08] 👋 Goodbye
+[00:00:05:94] Assay endpoint with aeid=8 failed: klsdf
+[00:00:05:94] 🎊 Pipeline completed!
+[00:00:05:94] 👋 Goodbye
