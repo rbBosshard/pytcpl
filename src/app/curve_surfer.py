@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 pd.options.mode.chained_assignment = None  # default='warn'
 
 from surf_utils import check_reset, trigger, filter_spid, update, get_assay_and_sample_info, set_config_app
-from src.utils.pipeline_helper import load_config
+from src.utils.pipeline_helper import load_config, init_aeid
 from src.utils.constants import CONFIG_DIR_PATH, AEID_PATH
 
 
@@ -27,6 +27,7 @@ def main():
         st.header(title + "🏄")
         with open(os.path.join(AEID_PATH, f'aeid_{0}.in'), 'r') as f:
             aeid_value = int(f.readline().strip())
+            init_aeid(aeid_value)
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
         col1, col2 = st.columns(2)
         with col1:

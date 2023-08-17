@@ -15,7 +15,6 @@ def pipeline(config, confg_path):
             df = process(df, config, logger)
             write_output(df)
             epilog()
-            raise Exception("klsdf")
         except Exception as e:
             error_file_path = os.path.join(LOG_DIR_PATH, f"errors_{instance_id}.log")
             with open(error_file_path, "a") as f:

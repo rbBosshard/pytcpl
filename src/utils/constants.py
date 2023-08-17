@@ -13,6 +13,7 @@ RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'raw')
 INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'input')
 OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'output')
 CUSTOM_OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'custom_output')
+CHEMICAL_RESULT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'chemical_results')
 CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')

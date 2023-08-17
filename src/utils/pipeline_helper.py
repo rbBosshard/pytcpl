@@ -86,14 +86,17 @@ def launch(config, config_path):
 
 
 def prolog(new_aeid, instance_id):
-    global AEID
-    AEID = int(new_aeid)
+    init_aeid(new_aeid)
     with open(os.path.join(AEID_PATH, f'aeid_{instance_id}.in'), 'w') as f:
         f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
     assay_component_endpoint_name = get_assay_info(AEID)['assay_component_endpoint_name']
     assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
     logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
+
+def init_aeid(new_aeid):
+    global AEID
+    AEID = int(new_aeid)
 
 
 def epilog():
