@@ -5,25 +5,25 @@
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:01:18] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
-[00:00:01:18] ⏳ Fetching raw data..
-[00:00:01:21] ℹ️ Loaded 3200 single datapoints
-[00:00:01:21] 🌡️ Computing efficacy cutoff
-[00:00:01:33] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:04:67] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:04:69] 🥕 Assay endpoint processing completed
+[00:00:00:41] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
+[00:00:00:41] ⏳ Fetching raw data..
+[00:00:00:43] ℹ️ Loaded 3200 single datapoints
+[00:00:00:43] 🌡️ Computing efficacy cutoff
+[00:00:00:50] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:03:83] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:03:86] 🥕 Assay endpoint processing completed
 
-[00:00:04:70] Assay endpoint with aeid=7 failed: klsdf
-[00:00:04:70] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:00:03:86] Assay endpoint with aeid=7 failed: klsdf
+[00:00:03:86] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:04:72] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
-[00:00:04:72] ⏳ Fetching raw data..
-[00:00:04:75] ℹ️ Loaded 3200 single datapoints
-[00:00:04:75] 🌡️ Computing efficacy cutoff
-[00:00:04:79] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:06:61] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:06:63] 🥕 Assay endpoint processing completed
+[00:00:03:88] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
+[00:00:03:88] ⏳ Fetching raw data..
+[00:00:03:90] ℹ️ Loaded 3200 single datapoints
+[00:00:03:90] 🌡️ Computing efficacy cutoff
+[00:00:03:93] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:05:97] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:06:00] 🥕 Assay endpoint processing completed
 
-[00:00:06:63] Assay endpoint with aeid=8 failed: klsdf
-[00:00:06:63] 🎊 Pipeline completed!
-[00:00:06:63] 👋 Goodbye
+[00:00:06:00] Assay endpoint with aeid=8 failed: klsdf
+[00:00:06:00] 🎊 Pipeline completed!
+[00:00:06:00] 👋 Goodbye
