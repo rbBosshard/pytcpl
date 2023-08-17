@@ -6,13 +6,13 @@
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
 [00:00:00:07] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
-[00:00:00:07] ⏳ Fetching raw data..
-[00:00:00:07] ℹ️ Loaded 3200 single datapoints
-[00:00:00:07] 🌡️ Computing efficacy cutoff
-[00:00:00:11] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:03:25] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:03:27] 🥕 Assay endpoint processing completed
+[00:00:00:08] ⏳ Fetching raw data..
+[00:00:00:08] ℹ️ Loaded 3200 single datapoints
+[00:00:00:08] 🌡️ Computing efficacy cutoff
+[00:00:00:20] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:04:10] 💽 Writing output data to DB (~0.16 MB)..
+[00:00:04:13] 🥕 Assay endpoint processing completed
 
-[00:00:03:27] Assay endpoint with aeid=7 failed: klsdf
-[00:00:03:27] 🎊 Pipeline completed!
-[00:00:03:27] 👋 Goodbye
+[00:00:04:13] Assay endpoint with aeid=7 failed: klsdf
+[00:00:04:13] 🎊 Pipeline completed!
+[00:00:04:13] 👋 Goodbye

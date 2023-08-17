@@ -1,29 +1,18 @@
 [00:00:00:00] 🚀 Pytcpl launched!
 [00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
-[00:00:00:00] 📜 Running pipeline for 2 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=1, instances_total=2
+[00:00:00:00] 📜 Running pipeline for 1 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=1, instances_total=4
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:73] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_dn (aeid=7)
-[00:00:00:73] ⏳ Fetching raw data..
-[00:00:00:75] ℹ️ Loaded 3200 single datapoints
-[00:00:00:75] 🌡️ Computing efficacy cutoff
-[00:00:00:86] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:04:06] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:04:11] 🥕 Assay endpoint processing completed
+[00:00:00:08] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_up (aeid=6)
+[00:00:00:08] ⏳ Fetching raw data..
+[00:00:00:09] ℹ️ Loaded 6400 single datapoints
+[00:00:00:09] 🌡️ Computing efficacy cutoff
+[00:00:00:29] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:02:26] 💽 Writing output data to DB (~0.23 MB)..
+[00:00:02:30] 🥕 Assay endpoint processing completed
 
-[00:00:04:11] Assay endpoint with aeid=7 failed: klsdf
-[00:00:04:11] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-
-[00:00:04:13] 🌱 Start processing new assay endpoint: APR_HepG2_MicrotubuleCSK_1h_up (aeid=8)
-[00:00:04:13] ⏳ Fetching raw data..
-[00:00:04:15] ℹ️ Loaded 3200 single datapoints
-[00:00:04:15] 🌡️ Computing efficacy cutoff
-[00:00:04:19] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:06:25] 💽 Writing output data to DB (~0.16 MB)..
-[00:00:06:27] 🥕 Assay endpoint processing completed
-
-[00:00:06:27] Assay endpoint with aeid=8 failed: klsdf
-[00:00:06:28] 🎊 Pipeline completed!
-[00:00:06:28] 👋 Goodbye
+[00:00:02:30] Assay endpoint with aeid=6 failed: klsdf
+[00:00:02:30] 🎊 Pipeline completed!
+[00:00:02:30] 👋 Goodbye
