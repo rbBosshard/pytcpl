@@ -23,7 +23,7 @@ instance_id: 0
 instances_total: 1
 max_num_datapoints_per_series_threshold: 1000
 min_num_median_responses_threshold: 4
-n_jobs: 1
+n_jobs: -1
 new_db_tables:
 - cutoff
 - output
