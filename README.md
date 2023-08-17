@@ -34,17 +34,11 @@ pip install -r requirements.txt
 - Goto [DDL](config/DDL) to set Data Definition Language (DDL) statements, used to create new MySQL database schema objects
 #### Run pipeline
 ```bash 
-python src/pipeline.py --instance_id 0 --instances_total 1
+python pytcpl/src/pipeline.py --instance_id 0 --instances_total 1
 ```
 
-<details><summary>(Optional) redirect terminal output to log file</summary>
+- Goto [logs](logs) to see the redirected terminal logs and check in the error logs what went wrong for which assay endpoint id
 
-```bash
-python src/pipeline.py --instance_id 0 --instances_total 1 # --unicode | tee logs/log.out
-```
-
-- Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id
-</details>
 
 ### _Curve surfer_: Inspect fitted curves, hitcall labels and potency estimates
 ```bash

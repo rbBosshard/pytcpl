@@ -6,8 +6,8 @@ from scipy.stats import t, chi2
 from tqdm import tqdm
 
 from .constants import custom_format
-from src.utils.models.models import get_model
-from src.utils.models.objective_function import get_negative_log_likelihood
+from .models.models import get_model
+from .models.objective_function import get_negative_log_likelihood
 from .pipeline_helper import get_msg_with_elapsed_time, get_cutoff
 from .track_fitted_params import track_fitted_params
 

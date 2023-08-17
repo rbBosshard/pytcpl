@@ -4,8 +4,8 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
-from src.utils.constants import LOG_DIR_PATH
-from src.utils.models.models import get_model
+from .constants import LOG_DIR_PATH
+from .models.models import get_model
 
 
 def track_fitted_params(fit_params):
