@@ -12,8 +12,7 @@ def hill(field):
             result = np.clip(result, 0, 1000)  # Clip the result to a reasonable range
             return result
         except (ValueError, ZeroDivisionError, RuntimeWarning):
-            print("Error: Invalid input values")
-            return None
+            raise Exception("Error: Invalid input values")
 
     return {
         "fun": lambda x, tp, ga, p: tp / (1 + (ga / x) ** p),

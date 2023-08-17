@@ -2,15 +2,16 @@ import os
 import shutil
 from src.utils.constants import EXPORT_DIR_PATH
 
+dir = "raw"
 # Directory where the original files are located
-source_directory = os.path.join(EXPORT_DIR_PATH, 'raw')
+source_directory = os.path.join(EXPORT_DIR_PATH, dir)
 
 # Directory where the renamed files will be moved
-destination_directory = os.path.join(EXPORT_DIR_PATH, 'raw')
+destination_directory = os.path.join(EXPORT_DIR_PATH, dir)
 
 # Iterate through all files in the source directory
 for filename in os.listdir(source_directory):
-    if filename.endswith('_raw.parquet.gzip'):
+    if filename.endswith(f'_{dir}.parquet.gzip'):
         # Extract the id from the filename
         id = filename.split('_')[0]
 

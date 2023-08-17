@@ -1,178 +1,127 @@
+import argparse
 import json
+import logging
 import os
 import sys
 from datetime import datetime
 
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import yaml
 import streamlit as st
+import yaml
 from st_files_connection import FilesConnection
 
-from .constants import COLORS_DICT, CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    EXPORT_DIR_PATH, LOG_DIR_PATH, START_TIME, ERROR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
+from .constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    EXPORT_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
     CUTOFF_DIR_PATH, CUTOFF_TABLE
-from .constants import symbols_dict
-from .fit_models import get_model
 from .models.helper import get_mad
 from .query_db import get_sqlalchemy_engine
 from .query_db import query_db
 
 CONFIG = {}
-DISPLAY_EMOJI = 1
-SUFFIX = ''
-
-
-def status(symbol, replacement=""):
-    return symbols_dict.get(symbol, "") if DISPLAY_EMOJI else replacement
-
-
-def read_aeids():
-    with open(AEIDS_LIST_PATH, 'r') as file:
-        ids_list = [line.strip() for line in file]
-    return ids_list
+logger = logging.getLogger(__name__)
+START_TIME = 0
 
 
 def launch(config, config_path):
-    with open(ERROR_PATH, "w") as f:
-        print("Failed assay endpoints:\n", file=f)
+    init_config(config)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--instance_id", type=int, help="Instance ID for workload distribution")
+    parser.add_argument("-n", "--instances_total", type=int, help="Total number of instances")
+    args = parser.parse_args()
+    if args.instance_id is None or args.instances_total is None:
+        print("Error: Please provide both --instance_id or -i and --instances_total or -n arguments")
+        sys.exit(1)
 
-    global DISPLAY_EMOJI, SUFFIX
-    # disable verbose output if --unicode passed as runtime argument
-    DISPLAY_EMOJI = 0 if '--unicode' in sys.argv else config['enable_fancy_logging']
+    instance_id = args.instance_id
+    instances_total = args.instances_total
+    CONFIG['instance_id'] = int(instance_id)
+    CONFIG['instances_total'] = int(instances_total)
+    update_config()
 
-    aeid_list = read_aeids()
-    print(f"{status('rocket')} Pytcpl launched!")
-    print(f"{status('gear')} Configuration located in {config_path}")
-    print(f"{status('scroll')} Running pipeline for {len(aeid_list)} assay endpoints (spec in 'config/aeid_list.in')")
+    global START_TIME
+    START_TIME = datetime.now()
 
-    check_db(config)
-    SUFFIX = f".{config['data_file_format']}.gzip"
-    return aeid_list
+    def create_empty_log_file(filename):
+        with open(filename, 'w', encoding='utf-8'):
+            pass
+
+    log_filename = os.path.join(LOG_DIR_PATH, f"log_{instance_id}.log")
+    error_filename = os.path.join(LOG_DIR_PATH, f"errors_{instance_id}.log")
+    create_empty_log_file(log_filename)
+    create_empty_log_file(error_filename)
+
+    class ElapsedTimeFormatter(logging.Formatter):
+        def __init__(self, fmt=None, datefmt=None, style='%'):
+
+            super().__init__(fmt, datefmt, style)
+            self.start_time = START_TIME
+
+        def format(self, record):
+            delta = datetime.now() - self.start_time
+            hours, remainder = divmod(delta.total_seconds(), 3600)
+            minutes, seconds = divmod(remainder, 60)
+            hundredths = int((delta.microseconds / 10000) % 100)
+            elapsed_time_formatted = f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
+            return f"{elapsed_time_formatted} {super().format(record)}"
+
+    logger.setLevel(logging.INFO)
+    file_handler = logging.FileHandler(log_filename, encoding='utf-8')
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = ElapsedTimeFormatter('%(message)s')
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    aeid_list = get_partition(instance_id, instances_total)
+
+    logger.info(f"🚀 Pytcpl launched!")
+    logger.info(f"⚙️ Configuration located in {config_path}")
+    logger.info(f"📜 Running pipeline for {len(aeid_list)} assay endpoints (See 'config/aeid_list.in')")
+    logger.info(f"🧩 Engine: instance_id={instance_id}, instances_total={instances_total}\n")
+
+    if CONFIG['enable_writing_db']:
+        check_db()
+
+    return instance_id, instances_total, aeid_list, logger
 
 
-def load_config():
-    with open(CONFIG_PATH, 'r') as file:
-        config = yaml.safe_load(file)
-    return config, CONFIG_DIR_PATH
-
-
-def prolog(config, new_aeid):
-    set_config(config)
-
-    # print  boundary
-    print("\n" + f"#-" * 55 + "\n")
-
-    # Update the specific key with the new value
+def prolog(new_aeid):
+    logger.info(f"#-" * 50 + "\n")
     CONFIG['aeid'] = int(new_aeid)
-
-    # Write the updated YAML content back to the file
-    with open(CONFIG_PATH, 'w') as file:
-        yaml.dump(CONFIG, file)
-
+    update_config()
     assay_component_endpoint_name = get_assay_info(CONFIG['aeid'])['assay_component_endpoint_name']
-    assay_info = text_to_blue(f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})")
-    print_(f"{status('seedling')} Start processing new assay endpoint: {assay_info}")
-
-
-def set_config(config):
-    global CONFIG, SUFFIX
-    CONFIG = config
-    SUFFIX = f".{config['data_file_format']}.gzip"
+    assay_info = f"{assay_component_endpoint_name} (aeid={CONFIG['aeid']})"
+    logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
 
 
 def epilog():
-    print_(f"{status('carrot')} Assay endpoint processing completed")
+    logger.info(f"🥕 Assay endpoint processing completed\n")
 
 
 def bye():
-    print(f"\n{status('confetti_ball')} Pipeline completed!")
-    print(f"{status('waving_hand')} Goodbye")
+    logger.info(f"🎊 Pipeline completed!")
+    logger.info(f"👋 Goodbye")
 
 
-def check_db(config):
-    if config['enable_writing_db']:
-        if config['enable_dropping_all_new_tables']:
-            new_table_names = config['new_db_tables']
-            tables = ", ".join(new_table_names)
-            drop_stmt = f"DROP TABLE IF EXISTS {tables};"
-            query_db(drop_stmt)  # Permanently removes tables from db!
-            print(f"{status('broom')} Dropped all relevant tables")
+def check_db():
+    if CONFIG['enable_dropping_all_new_tables']:
+        query_db(f"DROP TABLE IF EXISTS {', '.join(CONFIG['new_db_tables'])};")
+        logger.info(f"🧹 Dropped all relevant tables")
 
-        for ddl_file in os.scandir(DDL_PATH):
-            with open(ddl_file, 'r') as f:
-                ddl_query = f.read()
-                query_db(ddl_query)
+    for ddl_file in os.scandir(DDL_PATH):
+        with open(ddl_file, 'r') as f:
+            query_db(f.read())
 
-        print(f"{status('thumbs_up')} Verified the existence of required DB tables")
-
-
-def track_fitted_params(fit_params):
-    parameters = {}
-    for result in fit_params:
-        for model, params in result.items():
-            parameters.setdefault(model, []).append(list(params['pars'].values()))
-
-    def plot_histograms(params, key):
-        plt.figure(figsize=(10, 6))
-        plt.suptitle(f'Fit model parameters histograms: {key}')
-        param_names = get_model(key)('params')
-        num_params = len(param_names)
-        for i, param_name in enumerate(param_names):
-            plt.subplot(1, num_params, i + 1)
-            plt.hist(params[:, i], bins=50)
-            plt.title(f"{param_name}")
-            plt.xlabel('Value')
-            plt.ylabel('Frequency')
-        plt.tight_layout()
-        plt.savefig(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"{key}.png"))
-        plt.close()
-
-    matplotlib.use('Agg')
-
-    with open(os.path.join(LOG_DIR_PATH, "curve_fit_parameter_tracks", f"stats.out"), "w") as file:
-        for key, param_list in parameters.items():
-            param_array = np.array(param_list)
-            plot_histograms(param_array, key)
-            median, minimum, maximum = np.median(param_array, 0), np.min(param_array, 0), np.max(param_array, 0)
-            file.write(f"{key}:\n >> median {median}\n >> min {minimum}\n >> max {maximum}\n\n")
-
-
-def compute_cutoffs(df):
-    print_(f"{status('thermometer')} Computing efficacy cutoff")
-    aeid = CONFIG['aeid']
-
-    values = {}
-    other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-    for mthd in load_method(lvl=4, aeid=aeid) + other_mthds:
-        values.update({mthd: mc4_mthds(mthd, df)})
-
-    bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values['bmad.aeid.lowconc.nwells']
-    bmed = values['bmed.aeid.lowconc.twells']
-    sd = values['onesd.aeid.lowconc.twells']
-
-    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=aeid)]
-    cutoffs = list(filter(lambda item: item is not None, cutoffs))
-    cutoff = max(cutoffs, default=0)
-    out = pd.DataFrame({'aeid': [aeid], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
-
-    if CONFIG['enable_writing_db']:
-        db_delete('cutoff')
-        db_append(out, 'cutoff')
-
-    path = os.path.join(CUTOFF_DIR_PATH, f"{aeid}{SUFFIX}")
-    out.to_parquet(path)
+    print(f"👍 Verified the existence of required DB tables")
 
 
 def get_assay_info(aeid):
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
-    path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}")
-    path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}")
-    print_(path_endpoint)
-    print_(path_component)
+    path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}")
+    path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}")
     available = os.path.exists(path_endpoint) and os.path.exists(path_component)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -182,23 +131,23 @@ def get_assay_info(aeid):
             return pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_endpoint = f"{CONFIG['bucket']}/input/{tbl_endpoint}{SUFFIX}"
-            path_component = f"{CONFIG['bucket']}/input/{tbl_component}{SUFFIX}"
+            path_endpoint = f"{CONFIG['bucket']}/input/{tbl_endpoint}{CONFIG['file_format']}"
+            path_component = f"{CONFIG['bucket']}/input/{tbl_component}{CONFIG['file_format']}"
             endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
             component_df = conn.read(path_component, input_format="parquet", ttl=600)
     else:
-        endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{SUFFIX}"))
-        component_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_component}{SUFFIX}"))
+        endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}"))
+        component_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}"))
 
     endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
     df = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
-    print_(f"Read from {path_endpoint} and {path_endpoint}")
+    logger.debug(f"Read from {path_endpoint} and {path_endpoint}")
     return df
 
 
-def load_raw_data():
-    print_(f"{status('hourglass_not_done')} Fetching raw data..")
-    path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+def fetch_raw_data():
+    logger.info(f"⏳ Fetching raw data..")
+    path = os.path.join(RAW_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
     if not os.path.exists(path):
         select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
         table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
@@ -209,12 +158,32 @@ def load_raw_data():
         df = query_db(query=qstring)
         df.to_parquet(path, compression='gzip')
     else:
-        print_(f"Read from {path}")
+        logger.debug(f"Read from {path}")
         df = pd.read_parquet(path)
 
-    print_(f"{status('information')} Loaded {df.shape[0]} single datapoints")
+    logger.info(f"ℹ️ Loaded {df.shape[0]} single datapoints")
 
-    compute_cutoffs(df)
+    logger.info(f"🌡️ Computing efficacy cutoff")
+    values = {}
+    other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
+    for mthd in load_method(lvl=4, aeid=CONFIG['aeid']) + other_mthds:
+        values.update({mthd: mc4_mthds(mthd, df)})
+
+    bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values[
+        'bmad.aeid.lowconc.nwells']
+    bmed = values['bmed.aeid.lowconc.twells']
+    sd = values['onesd.aeid.lowconc.twells']
+
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=CONFIG['aeid'])]
+    cutoff = max(list(filter(lambda item: item is not None, cutoffs)), default=0)
+    out = pd.DataFrame({'aeid': [CONFIG['aeid']], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
+
+    if CONFIG['enable_writing_db']:
+        db_delete('cutoff')
+        db_append(out, 'cutoff')
+
+    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    out.to_parquet(path)
 
     return df
 
@@ -225,9 +194,9 @@ def db_append(dat, tbl):
             engine = get_sqlalchemy_engine()
             dat.to_sql(tbl, engine, if_exists='append', index=False)
         except Exception as err:
-            print(err)
+            logger.error(err)
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{CONFIG['file_format']}")
     dat.to_parquet(file_path, compression='gzip')
 
 
@@ -235,51 +204,25 @@ def db_delete(tbl):
     if CONFIG['enable_writing_db']:
         query_db(f"DELETE FROM {tbl} WHERE aeid = {CONFIG['aeid']};")
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{SUFFIX}")
+    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{CONFIG['aeid']}{CONFIG['file_format']}")
     if os.path.exists(file_path):
         os.remove(file_path)
 
 
 def write_output(df):
-    df = get_metadata(df, CONFIG['aeid'])
+    df = get_metadata(df)
     df = subset_chemicals(df)
     df = df[CONFIG['output_cols_filter']]
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
-    print_(f"{status('computer_disk')} Writing output data to DB (~{mb_value})..")
+    logger.info(f"💽 Writing output data to DB (~{mb_value})..")
     for col in ['conc', 'resp', 'fit_params']:
         df.loc[:, col] = df[col].apply(json.dumps)
     db_delete("output")
     db_append(df, "output")
 
     # Custom data
-    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
     df[['dsstox_substance_id', 'hitcall']].to_parquet(file_path, compression='gzip')
-
-
-def text_to_blue(message):
-    return f"{COLORS_DICT['BLUE']}{message}{COLORS_DICT['RESET']}" if DISPLAY_EMOJI else message
-
-
-def get_formatted_time_elapsed(start_time, blue=True):
-    delta = datetime.now() - start_time
-    hours, remainder = divmod(delta.total_seconds(), 3600)
-    minutes, seconds = divmod(remainder, 60)
-    hundredths = int((delta.microseconds / 10000) % 100)
-    elapsed_time_formatted = f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
-
-    if DISPLAY_EMOJI and blue:
-        return text_to_blue(f"{elapsed_time_formatted}")
-    else:
-        return elapsed_time_formatted
-
-
-def get_msg_with_elapsed_time(msg, color_only_time=True):
-    text = f"{get_formatted_time_elapsed(START_TIME, color_only_time)} {msg}"
-    return text
-
-
-def print_(msg):
-    print(get_msg_with_elapsed_time(msg))
 
 
 def subset_chemicals(dat):
@@ -289,17 +232,13 @@ def subset_chemicals(dat):
     return dat.drop_duplicates(subset='dsstox_substance_id', keep="first")
 
 
-def get_metadata(df, aeid):
+def get_metadata(df):
     df = df.drop(columns=['dsstox_substance_id'])
     chemical_df = get_chemical(df["spid"].unique())
     df = pd.merge(chemical_df, df, on="spid", how="right")
     df['chid'].fillna(0, inplace=True)
     df['chid'] = df['chid'].astype(int)
-    replacement_values = {
-        'DMSO':  'DTXSID2021735',
-        'Beta-Estradiol': 'DTXSID0020573',
-    }
-
+    replacement_values = {'DMSO': 'DTXSID2021735', 'Beta-Estradiol': 'DTXSID0020573',}
     index_mask = df['dsstox_substance_id'].isna()
     # Iterate through the DataFrame and replace masked values
     for index, row in df[index_mask].iterrows():
@@ -313,8 +252,8 @@ def get_metadata(df, aeid):
 def get_chemical(spids):
     sample = 'sample'
     chemical = 'chemical'
-    path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{SUFFIX}")
-    path_chemical = os.path.join(INPUT_DIR_PATH, f"{chemical}{SUFFIX}")
+    path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{CONFIG['file_format']}")
+    path_chemical = os.path.join(INPUT_DIR_PATH, f"{chemical}{CONFIG['file_format']}")
     available = os.path.exists(path_sample) and os.path.exists(path_chemical)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -327,8 +266,8 @@ def get_chemical(spids):
             return query_db(query=qstring).drop_duplicates()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_sample = f"{CONFIG['bucket']}/input/{sample}{SUFFIX}"
-            path_chemical = f"{CONFIG['bucket']}/input/{chemical}{SUFFIX}"
+            path_sample = f"{CONFIG['bucket']}/input/{sample}{CONFIG['file_format']}"
+            path_chemical = f"{CONFIG['bucket']}/input/{chemical}{CONFIG['file_format']}"
             sample_df = conn.read(path_sample, input_format="parquet", ttl=600)
             chemical_df = conn.read(path_chemical, input_format="parquet", ttl=600)
     else:
@@ -339,13 +278,13 @@ def get_chemical(spids):
     df = df[df['spid'].isin(spids)]
     df = df[['spid', 'chid', 'dsstox_substance_id', 'chnm', 'casn']]
     df = df.drop_duplicates()
-    print_(f"Read from {path_sample} and {path_chemical}")
+    logger.debug(f"Read from {path_sample} and {path_chemical}")
     return df
 
 
-def get_assay_component_endpoint(aeid, conn=None):
+def get_assay_component_endpoint(aeid):
     tbl = 'assay_component_endpoint'
-    path = os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}")
+    path = os.path.join(INPUT_DIR_PATH, f"{tbl}{CONFIG['file_format']}")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
@@ -356,17 +295,17 @@ def get_assay_component_endpoint(aeid, conn=None):
             return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/input/{tbl}{SUFFIX}"
+            path = f"{CONFIG['bucket']}/input/{tbl}{CONFIG['file_format']}"
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
-        df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl}{SUFFIX}"))
+        df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl}{CONFIG['file_format']}"))
     df = df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
-    print_(f"Read from {path}")
+    logger.debug(f"Read from {path}")
     return df
 
 
 def get_cutoff():
-    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
+    path = os.path.join(CUTOFF_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
     if not os.path.exists(path) or  CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
@@ -377,12 +316,12 @@ def get_cutoff():
             return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{SUFFIX}"
+            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{CONFIG['aeid']}{CONFIG['file_format']}"
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
     df = df[['bmad', 'bmed', 'onesd', 'cutoff']]
-    print_(f"Read from {path}")
+    logger.debug(f"Read from {path}")
     return df
 
 
@@ -431,11 +370,11 @@ def mc5_mthds(mthd, bmad):
     }.get(mthd)
 
 
-def load_method(lvl, aeid, conn=None):
+def load_method(lvl, aeid):
     tbl_aeid = f"mc{lvl}_aeid"
     tbl_methods = f"mc{lvl}_methods"
-    path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{SUFFIX}")
-    path_methods = os.path.join(INPUT_DIR_PATH, f"{tbl_methods}{SUFFIX}")
+    path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
+    path_methods = os.path.join(INPUT_DIR_PATH, f"{tbl_methods}{CONFIG['file_format']}")
     available = os.path.exists(path_aeid) and os.path.exists(path_methods)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -448,8 +387,8 @@ def load_method(lvl, aeid, conn=None):
             return query_db(query=qstring)["mthd"].tolist()
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path_aeid = f"{CONFIG['bucket']}/input/{tbl_aeid}{SUFFIX}"
-            path_methods = f"{CONFIG['bucket']}/input/{tbl_methods}{SUFFIX}"
+            path_aeid = f"{CONFIG['bucket']}/input/{tbl_aeid}{CONFIG['file_format']}"
+            path_methods = f"{CONFIG['bucket']}/input/{tbl_methods}{CONFIG['file_format']}"
             df_aeid = conn.read(path_aeid, input_format="parquet", ttl=600)
             df_methods = conn.read(path_methods, input_format="parquet", ttl=600)
 
@@ -461,5 +400,47 @@ def load_method(lvl, aeid, conn=None):
     level_col = f"mc{lvl}_mthd"
     df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
     df = df[level_col].tolist()
-    print_(f"Read from {path_aeid} and {path_methods}")
+    logger.debug(f"Read from {path_aeid} and {path_methods}")
     return df
+
+
+def load_config():
+    with open(CONFIG_PATH, 'r') as file:
+        config = yaml.safe_load(file)
+    return config, CONFIG_DIR_PATH
+
+
+def init_config(config):
+    global CONFIG
+    CONFIG = config
+
+
+def update_config():
+    with open(CONFIG_PATH, 'w') as file:
+        yaml.dump(CONFIG, file)
+
+
+def get_partition(instance_id, instances_total):
+    def read_aeids():
+        with open(AEIDS_LIST_PATH, 'r') as file:
+            ids_list = [line.strip() for line in file]
+        return ids_list
+
+    all_ids = read_aeids()
+    partition_size = len(all_ids) // instances_total
+    start_idx = instance_id * partition_size
+    end_idx = start_idx + partition_size
+    return all_ids[start_idx:end_idx]
+
+
+def get_formatted_time_elapsed(start_time):
+    delta = datetime.now() - start_time
+    hours, remainder = divmod(delta.total_seconds(), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    hundredths = int((delta.microseconds / 10000) % 100)
+    elapsed_time_formatted = f"[{int(hours):02}:{int(minutes):02}:{int(seconds):02}:{hundredths:02}]"
+    return elapsed_time_formatted
+
+
+def get_msg_with_elapsed_time(msg):
+    return f"{get_formatted_time_elapsed(START_TIME)} {msg}"

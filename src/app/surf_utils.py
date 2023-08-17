@@ -8,9 +8,9 @@ import streamlit as st
 from plotly import graph_objects as go, express as px
 from st_files_connection import FilesConnection
 
-from src.utils.fit_models import get_model
+from src.utils.models.models import get_model
 from src.utils.models.helper import pow_space
-from src.utils.pipeline_helper import print_, get_assay_info, get_cutoff, set_config, get_chemical
+from src.utils.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical
 from src.utils.query_db import query_db
 from src.utils.constants import OUTPUT_DIR_PATH
 
@@ -33,30 +33,29 @@ def load_data(aeid):  # aeid parameter used to handle correct caching
 
 def get_output_data():
     tbl = 'output'
-    path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{SUFFIX}")
-    print_(f"Fetch data with assay ID {CONFIG['aeid']}..")
+    path = os.path.join(OUTPUT_DIR_PATH, f"{CONFIG['aeid']}{CONFIG['file_format']}")
+    print(f"Fetch data with assay ID {CONFIG['aeid']}..")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
             df = query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = f"{CONFIG['bucket']}/{tbl}/{CONFIG['aeid']}{SUFFIX}"
+            data_source = f"{CONFIG['bucket']}/{tbl}/{CONFIG['aeid']}{CONFIG['file_format']}"
             df = conn.read(data_source, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
     length = df.shape[0]
     if length == 0:
         st.error(f"No data found for AEID {CONFIG['aeid']}", icon="🚨")
-    print_(f"{length} series loaded")
+    print(f"{length} series loaded")
     return df
 
 
 def set_config_app(config):
-    global CONFIG, SUFFIX
+    global CONFIG
     CONFIG = config
-    set_config(config)
-    SUFFIX = f".{config['data_file_format']}.gzip"
+    init_config(config)
 
 
 def get_series():

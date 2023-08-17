@@ -11,8 +11,7 @@ def exp4(field):
             result = ga * exponent
             return result
         except (ValueError, RuntimeWarning):
-            print("Error: Invalid input values")
-            return None
+            raise Exception("Error: Invalid input values")
 
     return {
         "fun": lambda x, tp, ga: tp * (1 - 2 ** (-x / ga)),

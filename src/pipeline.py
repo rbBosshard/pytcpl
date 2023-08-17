@@ -1,24 +1,26 @@
 import cProfile
 import os
 
-from utils.constants import ROOT_DIR, PROFILER_PATH, ERROR_PATH
-from utils.pipeline_helper import load_config, prolog, launch, load_raw_data, bye, write_output, epilog
+from utils.constants import ROOT_DIR, PROFILER_PATH, LOG_DIR_PATH
+from utils.pipeline_helper import load_config, prolog, launch, fetch_raw_data, bye, write_output, epilog
 from utils.process import process
 
 
 def pipeline(config, confg_path):
-    aeid_list = launch(config, confg_path)
+    instance_id, instances_total, aeid_list, logger = launch(config, confg_path)
     for aeid in aeid_list:
         try:
-            prolog(config, aeid)
-            df = load_raw_data()
-            df = process(df, config)
+            prolog(aeid)
+            df = fetch_raw_data()
+            df = process(df, config, logger)
             write_output(df)
             epilog()
+            raise Exception("klsdf")
         except Exception as e:
-            with open(ERROR_PATH, "a") as f:
+            error_file_path = os.path.join(LOG_DIR_PATH, f"errors_{instance_id}.log")
+            with open(error_file_path, "a") as f:
                 err_msg = f"Assay endpoint with aeid={aeid} failed: {e}"
-                print(err_msg)
+                logger.error(err_msg)
                 print(err_msg, file=f)
     bye()
 

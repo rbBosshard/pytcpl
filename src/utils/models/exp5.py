@@ -10,9 +10,9 @@ def exp5(field):
             result = ga * (-np.log2(1 - adjusted_y / tp + epsilon)) ** (1 / p)
             result = np.clip(result, 0, 1000)
             return result
-        except (ValueError, ZeroDivisionError, RuntimeWarning):
-            print("Error: Invalid input values")
-            return None
+        except (ValueError, ZeroDivisionError, RuntimeWarning) as e:
+            raise Exception(f"Error: Invalid input values: {e}")
+
     return {
         "fun": lambda x, tp, ga, p: tp * (1 - 2 ** (-(x / ga) ** p)),
         "inv": lambda y, tp, ga, p, conc=None: exp5_inverse(y, tp, ga, p),

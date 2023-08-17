@@ -1,7 +1,4 @@
 import os
-from datetime import datetime
-
-START_TIME = datetime.now()
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,7 +16,6 @@ CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
-ERROR_PATH = os.path.join(LOG_DIR_PATH, 'errors.out')
 
 OUTPUT_TABLE = "output"
 CUTOFF_TABLE = "cutoff"
@@ -38,7 +34,6 @@ COLORS_DICT = {
 
 # tqdm format
 custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
-
 custom_format_ = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"
 
 symbols_dict = {
@@ -142,4 +137,3 @@ symbols_dict = {
     "x-ray": "🦴",
     "yin_yang": "☯️",
 }
-BMAD_CONSTANT = 1.4826

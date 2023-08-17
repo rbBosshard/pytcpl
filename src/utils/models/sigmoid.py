@@ -1,7 +1,7 @@
 import numpy as np
 
-from .helper import get_inverse
 from .helper import get_er_est, get_mmed_conc, get_mmed, get_er_bounds
+from .helper import get_inverse
 
 
 def sigmoid(field):

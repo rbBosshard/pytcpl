@@ -1,7 +1,5 @@
 import numpy as np
 
-from ..constants import BMAD_CONSTANT
-
 
 def pow_space(start, stop, power, num):
     start = np.power(start, 1 / float(power))
@@ -52,4 +50,5 @@ def get_max_index(conc, resp):
 
 def get_mad(x):
     """Calculate the median absolute deviation (MAD) of an array"""
-    return BMAD_CONSTANT * np.median(np.abs(x - np.median(x)))
+    bmad_constant = 1.4826
+    return bmad_constant * np.median(np.abs(x - np.median(x)))

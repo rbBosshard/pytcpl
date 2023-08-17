@@ -34,13 +34,13 @@ pip install -r requirements.txt
 - Goto [DDL](config/DDL) to set Data Definition Language (DDL) statements, used to create new MySQL database schema objects
 #### Run pipeline
 ```bash 
-python src/pipeline.py
+python src/pipeline.py --instance_id 0 --instances_total 1
 ```
 
 <details><summary>(Optional) redirect terminal output to log file</summary>
 
 ```bash
-python src/pipeline.py --unicode | tee logs/log.out
+python src/pipeline.py --instance_id 0 --instances_total 1 # --unicode | tee logs/log.out
 ```
 
 - Goto [logs](logs) to see the redirected terminal logs and check in `error.out` what went wrong for which assay endpoint id

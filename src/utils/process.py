@@ -5,14 +5,14 @@ from scipy.optimize import minimize
 from scipy.stats import t, chi2
 from tqdm import tqdm
 
-from .bmd_bounds import bmd_bounds
 from .constants import custom_format
-from .fit_models import get_model
-from .pipeline_helper import track_fitted_params, get_msg_with_elapsed_time, status, print_, get_cutoff
-from .objective_function import get_negative_log_likelihood
+from src.utils.models.models import get_model
+from src.utils.models.objective_function import get_negative_log_likelihood
+from .pipeline_helper import get_msg_with_elapsed_time, get_cutoff
+from .track_fitted_params import track_fitted_params
 
 
-def process(df, config):
+def process(df, config, logger):
     cutoffs = get_cutoff()
     cutoff = cutoffs.iloc[0]['cutoff']
     onesd = cutoffs.iloc[0]['onesd']
@@ -106,9 +106,9 @@ def process(df, config):
     nj = config['n_jobs']
     p = nj != 1
     sample_groups = df.groupby(['aeid', 'spid'])
-    print_(f"{status('laptop')} Processing {len(sample_groups)} concentration-response series")
+    logger.info(f"💻 Processing (fit & hit) {len(sample_groups)} concentration-response series")
     df = group_datapoints_to_series(sample_groups)
-    desc = get_msg_with_elapsed_time(f"{status('hammer_and_wrench')}  -> Preprocessing:  ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"🛠️  -> Preprocessing:  ")
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
     mask = Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it]
     mask = pd.Series(mask)
@@ -116,7 +116,7 @@ def process(df, config):
     df_no_fit = df[~mask].reset_index(drop=True)
 
     # Curve-Fitting
-    desc = get_msg_with_elapsed_time(f"{status('comet')}  -> Curve-Fitting: ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"☄️  -> Curve-Fitting: ")
     it = tqdm(df_to_fit.iterrows(), total=df_to_fit.shape[0], desc=desc, bar_format=custom_format)
     fit_params = Parallel(n_jobs=nj)(delayed(fit)(i) for _, i in it) if p else [fit(i) for _, i in it]
     df_fitted = df_to_fit.assign(fit_params=fit_params)
@@ -127,7 +127,7 @@ def process(df, config):
     # Hit-Calling
     df_fitted['hitcall'] = 0
     df_no_fit['hitcall'] = 0
-    desc = get_msg_with_elapsed_time(f"{status('horizontal_traffic_light')}  -> Hit-Calling:   ", color_only_time=False)
+    desc = get_msg_with_elapsed_time(f"🚥  -> Hit-Calling:   ")
     it = tqdm(df_fitted.iterrows(), desc=desc, total=df_fitted.shape[0], bar_format=custom_format)
     res = pd.DataFrame(Parallel(n_jobs=nj)(delayed(hit)(i) for _, i in it)) if p \
         else df_fitted.apply(lambda i: hit(i), axis=1, result_type='expand')
