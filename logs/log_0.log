@@ -1,7 +1,117 @@
 [00:00:00:00] 🚀 Pytcpl launched!
 [00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\utils\../../config
-[00:00:00:00] 📜 Running pipeline for 368 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 📜 Running pipeline for 11 assay endpoints (See 'config/aeid_list.in')
 [00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
+[00:00:00:04] 🌱 Start processing new assay endpoint: TOX21_ERR_Agonist (aeid=2055)
+[00:00:00:04] ⏳ Fetching raw data..
+[00:00:00:10] ℹ️ Loaded 552960 single datapoints
+[00:00:00:10] 🌡️ Computing efficacy cutoff
+[00:00:00:80] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:00:30:39] 💽 Writing output data to DB (~9.07 MB)..
+[00:00:31:28] 🥕 Assay endpoint processing completed
+
+[00:00:31:28] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:31:30] 🌱 Start processing new assay endpoint: CCTE_Harrill_HTTr_Apoptosis_MCF7_DMEM_6hr (aeid=2452)
+[00:00:31:30] ⏳ Fetching raw data..
+[00:00:31:31] ℹ️ Loaded 54743 single datapoints
+[00:00:31:31] 🌡️ Computing efficacy cutoff
+[00:00:31:40] 💻 Processing (fit & hit) 2125 concentration-response series
+[00:00:35:76] 💽 Writing output data to DB (~1.47 MB)..
+[00:00:35:87] 🥕 Assay endpoint processing completed
+
+[00:00:35:87] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:35:89] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_viability (aeid=2072)
+[00:00:35:89] ⏳ Fetching raw data..
+[00:00:35:95] ℹ️ Loaded 548352 single datapoints
+[00:00:35:95] 🌡️ Computing efficacy cutoff
+[00:00:36:65] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:02:39:08] 💽 Writing output data to DB (~9.28 MB)..
+[00:02:40:06] 🥕 Assay endpoint processing completed
+
+[00:02:40:06] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:02:40:08] 🌱 Start processing new assay endpoint: TOX21_CASP3_HEPG2 (aeid=2366)
+[00:02:40:08] ⏳ Fetching raw data..
+[00:02:40:15] ℹ️ Loaded 547200 single datapoints
+[00:02:40:15] 🌡️ Computing efficacy cutoff
+[00:02:40:96] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:03:32:93] 💽 Writing output data to DB (~9.12 MB)..
+[00:03:34:00] 🥕 Assay endpoint processing completed
+
+[00:03:34:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:03:34:02] 🌱 Start processing new assay endpoint: TOX21_AhR_LUC_Agonist_viability (aeid=807)
+[00:03:34:02] ⏳ Fetching raw data..
+[00:03:34:09] ℹ️ Loaded 620544 single datapoints
+[00:03:34:09] 🌡️ Computing efficacy cutoff
+[00:03:35:07] 💻 Processing (fit & hit) 10500 concentration-response series
+[00:05:12:21] 💽 Writing output data to DB (~9.51 MB)..
+[00:05:13:30] 🥕 Assay endpoint processing completed
+
+[00:05:13:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:05:13:32] 🌱 Start processing new assay endpoint: TOX21_ERR_Antagonist (aeid=2057)
+[00:05:13:32] ⏳ Fetching raw data..
+[00:05:13:39] ℹ️ Loaded 552960 single datapoints
+[00:05:13:39] 🌡️ Computing efficacy cutoff
+[00:05:14:37] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:08:36:56] 💽 Writing output data to DB (~9.53 MB)..
+[00:08:37:72] 🥕 Assay endpoint processing completed
+
+[00:08:37:72] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:08:37:75] 🌱 Start processing new assay endpoint: UPITT_HCI_U2OS_AR_TIF2_Nucleoli_Cytoplasm_Ratio_Antagonist (aeid=2390)
+[00:08:37:75] ⏳ Fetching raw data..
+[00:08:37:76] ℹ️ Loaded 53911 single datapoints
+[00:08:37:76] 🌡️ Computing efficacy cutoff
+[00:08:37:95] 💻 Processing (fit & hit) 2242 concentration-response series
+[00:09:00:12] 💽 Writing output data to DB (~1.35 MB)..
+[00:09:00:29] 🥕 Assay endpoint processing completed
+
+[00:09:00:29] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:09:00:31] 🌱 Start processing new assay endpoint: TOX21_AhR_LUC_Agonist (aeid=806)
+[00:09:00:31] ⏳ Fetching raw data..
+[00:09:00:38] ℹ️ Loaded 622080 single datapoints
+[00:09:00:38] 🌡️ Computing efficacy cutoff
+[00:09:01:18] 💻 Processing (fit & hit) 10500 concentration-response series
+[00:10:29:88] 💽 Writing output data to DB (~9.54 MB)..
+[00:10:30:91] 🥕 Assay endpoint processing completed
+
+[00:10:30:91] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:10:30:93] 🌱 Start processing new assay endpoint: TOX21_CASP3_CHO (aeid=2368)
+[00:10:30:93] ⏳ Fetching raw data..
+[00:10:31:01] ℹ️ Loaded 547200 single datapoints
+[00:10:31:01] 🌡️ Computing efficacy cutoff
+[00:10:31:79] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:10:58:25] 💽 Writing output data to DB (~9.06 MB)..
+[00:10:59:23] 🥕 Assay endpoint processing completed
+
+[00:10:59:23] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:10:59:24] 🌱 Start processing new assay endpoint: ACEA_ER_80hr (aeid=2)
+[00:10:59:24] ⏳ Fetching raw data..
+[00:10:59:27] ℹ️ Loaded 82508 single datapoints
+[00:10:59:27] 🌡️ Computing efficacy cutoff
+[00:10:59:42] 💻 Processing (fit & hit) 3416 concentration-response series
+[00:11:53:43] 💽 Writing output data to DB (~2.23 MB)..
+[00:11:53:67] 🥕 Assay endpoint processing completed
+
+[00:11:53:67] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:11:53:69] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_Agonist (aeid=2068)
+[00:11:53:69] ⏳ Fetching raw data..
+[00:11:53:75] ℹ️ Loaded 552960 single datapoints
+[00:11:53:75] 🌡️ Computing efficacy cutoff
+[00:11:54:48] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:12:32:93] 💽 Writing output data to DB (~9.12 MB)..
+[00:12:33:90] 🥕 Assay endpoint processing completed
+
+[00:12:33:90] 🎊 Pipeline completed!
+[00:12:33:90] 👋 Goodbye

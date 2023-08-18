@@ -112,6 +112,7 @@ def process(df, config, logger):
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
     mask = Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it]
     mask = pd.Series(mask)
+    df = df.reset_index()
     df_to_fit = df[mask].reset_index(drop=True)
     df_no_fit = df[~mask].reset_index(drop=True)
 

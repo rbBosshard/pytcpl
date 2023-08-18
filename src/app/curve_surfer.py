@@ -25,9 +25,8 @@ def main():
     check_reset()
     with st.sidebar:
         st.header(title + "🏄")
-        with open(os.path.join(AEID_PATH, f'aeid_{0}.in'), 'r') as f:
-            aeid_value = int(f.readline().strip())
-            init_aeid(aeid_value)
+        aeid_value = 762
+        init_aeid(7)
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
         col1, col2 = st.columns(2)
         with col1:

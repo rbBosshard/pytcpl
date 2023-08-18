@@ -36,8 +36,12 @@ pip install -r requirements.txt
 ```bash 
 python pytcpl/src/pipeline.py --instance_id 0 --instances_total 1
 ```
-
 - Goto [logs](logs) to see the redirected terminal logs and check in the error logs what went wrong for which assay endpoint id
+- Note: Parameters `instance_id` and `instances_total` are used for distributing workload onto multiple compute engine instances (e.g. gcloud VMs).
+- Example: Distribute [workload](config/aeid_list.in) onto 2 VM instances. Run:
+  - `pytcpl/src/pipeline.py --instance_id 0 --instances_total 2` on one machine and
+  - `pytcpl/src/pipeline.py --instance_id 1 --instances_total 2` on another machine
+  - Note: instance_id < instances_total
 
 
 ### _Curve surfer_: Inspect fitted curves, hitcall labels and potency estimates
