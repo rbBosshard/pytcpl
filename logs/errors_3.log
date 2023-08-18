@@ -1,1 +1,2 @@
-Assay endpoint with aeid=8 failed: klsdf
+Assay endpoint with aeid=807 failed: Unalignable boolean Series provided as indexer (index of the boolean Series and of the indexed object do not match).
+Assay endpoint with aeid=2057 failed: Unalignable boolean Series provided as indexer (index of the boolean Series and of the indexed object do not match).
