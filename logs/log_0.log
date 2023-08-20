@@ -1,117 +1,835 @@
 [00:00:00:00] 🚀 Pytcpl launched!
-[00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\utils\../../config
-[00:00:00:00] 📜 Running pipeline for 11 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
+[00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
+[00:00:00:00] 📜 Running pipeline for 92 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=4
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:04] 🌱 Start processing new assay endpoint: TOX21_ERR_Agonist (aeid=2055)
-[00:00:00:04] ⏳ Fetching raw data..
-[00:00:00:10] ℹ️ Loaded 552960 single datapoints
-[00:00:00:10] 🌡️ Computing efficacy cutoff
-[00:00:00:80] 💻 Processing (fit & hit) 9672 concentration-response series
-[00:00:30:39] 💽 Writing output data to DB (~9.07 MB)..
-[00:00:31:28] 🥕 Assay endpoint processing completed
+[00:00:00:07] 🌱 Start processing new assay endpoint: TOX21_DT40_100 (aeid=2130)
+[00:00:00:07] ⏳ Fetching raw data..
+[00:00:00:14] ℹ️ Loaded 622080 single datapoints
+[00:00:00:14] 🌡️ Computing efficacy cutoff
+[00:00:01:55] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:06:38:43] 💽 Writing output data to DB (~10.45 MB)..
+[00:06:39:27] Assay endpoint with aeid=2130 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:06:39:28] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:31:28] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:06:39:30] 🌱 Start processing new assay endpoint: TOX21_TR_LUC_GH3_Antagonist_viability (aeid=805)
+[00:06:39:30] ⏳ Fetching raw data..
+[00:06:39:37] ℹ️ Loaded 615936 single datapoints
+[00:06:39:37] 🌡️ Computing efficacy cutoff
+[00:06:40:69] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:09:51:00] 💽 Writing output data to DB (~9.70 MB)..
+[00:09:51:72] Assay endpoint with aeid=805 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:09:51:72] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:31:30] 🌱 Start processing new assay endpoint: CCTE_Harrill_HTTr_Apoptosis_MCF7_DMEM_6hr (aeid=2452)
-[00:00:31:30] ⏳ Fetching raw data..
-[00:00:31:31] ℹ️ Loaded 54743 single datapoints
-[00:00:31:31] 🌡️ Computing efficacy cutoff
-[00:00:31:40] 💻 Processing (fit & hit) 2125 concentration-response series
-[00:00:35:76] 💽 Writing output data to DB (~1.47 MB)..
-[00:00:35:87] 🥕 Assay endpoint processing completed
+[00:09:51:75] 🌱 Start processing new assay endpoint: TOX21_SHH_3T3_GLI3_Agonist_viability (aeid=2107)
+[00:09:51:75] ⏳ Fetching raw data..
+[00:09:51:82] ℹ️ Loaded 552960 single datapoints
+[00:09:51:82] 🌡️ Computing efficacy cutoff
+[00:09:52:95] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:12:19:19] 💽 Writing output data to DB (~9.37 MB)..
+[00:12:19:88] Assay endpoint with aeid=2107 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:12:19:88] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:35:87] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:12:19:91] 🌱 Start processing new assay endpoint: TOX21_AP1_BLA_Agonist_ch1 (aeid=1844)
+[00:12:19:91] ⏳ Fetching raw data..
+[00:12:19:97] ℹ️ Loaded 552960 single datapoints
+[00:12:19:97] 🌡️ Computing efficacy cutoff
+[00:12:21:11] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:14:22:20] 💽 Writing output data to DB (~9.26 MB)..
+[00:14:22:85] Assay endpoint with aeid=1844 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:14:22:85] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:35:89] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_viability (aeid=2072)
-[00:00:35:89] ⏳ Fetching raw data..
-[00:00:35:95] ℹ️ Loaded 548352 single datapoints
-[00:00:35:95] 🌡️ Computing efficacy cutoff
-[00:00:36:65] 💻 Processing (fit & hit) 9672 concentration-response series
-[00:02:39:08] 💽 Writing output data to DB (~9.28 MB)..
-[00:02:40:06] 🥕 Assay endpoint processing completed
+[00:14:22:88] 🌱 Start processing new assay endpoint: TOX21_AR_LUC_MDAKB2_Antagonist_10nM_R1881_viability (aeid=766)
+[00:14:22:88] ⏳ Fetching raw data..
+[00:14:22:94] ℹ️ Loaded 617472 single datapoints
+[00:14:22:94] 🌡️ Computing efficacy cutoff
+[00:14:24:27] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:16:13:77] 💽 Writing output data to DB (~9.45 MB)..
+[00:16:14:44] Assay endpoint with aeid=766 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:16:14:44] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:02:40:06] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:16:14:47] 🌱 Start processing new assay endpoint: TOX21_ERa_LUC_VM7_Agonist_10nM_ICI182780_viability (aeid=2212)
+[00:16:14:47] ⏳ Fetching raw data..
+[00:16:14:54] ℹ️ Loaded 552960 single datapoints
+[00:16:14:54] 🌡️ Computing efficacy cutoff
+[00:16:15:69] 💻 Processing (fit & hit) 9673 concentration-response series
+[00:18:12:35] 💽 Writing output data to DB (~9.16 MB)..
+[00:18:13:04] Assay endpoint with aeid=2212 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:18:13:04] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:02:40:08] 🌱 Start processing new assay endpoint: TOX21_CASP3_HEPG2 (aeid=2366)
-[00:02:40:08] ⏳ Fetching raw data..
-[00:02:40:15] ℹ️ Loaded 547200 single datapoints
-[00:02:40:15] 🌡️ Computing efficacy cutoff
-[00:02:40:96] 💻 Processing (fit & hit) 9671 concentration-response series
-[00:03:32:93] 💽 Writing output data to DB (~9.12 MB)..
-[00:03:34:00] 🥕 Assay endpoint processing completed
+[00:18:13:07] 🌱 Start processing new assay endpoint: TOX21_NFkB_BLA_agonist_ch1 (aeid=1344)
+[00:18:13:07] ⏳ Fetching raw data..
+[00:18:13:15] ℹ️ Loaded 551424 single datapoints
+[00:18:13:15] 🌡️ Computing efficacy cutoff
+[00:18:14:43] 💻 Processing (fit & hit) 9319 concentration-response series
+[00:19:35:11] 💽 Writing output data to DB (~8.75 MB)..
+[00:19:35:73] Assay endpoint with aeid=1344 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:19:35:73] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:03:34:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:19:35:76] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p4_ch2 (aeid=1324)
+[00:19:35:76] ⏳ Fetching raw data..
+[00:19:35:80] ℹ️ Loaded 207360 single datapoints
+[00:19:35:80] 🌡️ Computing efficacy cutoff
+[00:19:36:39] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:20:50:81] 💽 Writing output data to DB (~5.20 MB)..
+[00:20:51:11] Assay endpoint with aeid=1324 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:20:51:11] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:03:34:02] 🌱 Start processing new assay endpoint: TOX21_AhR_LUC_Agonist_viability (aeid=807)
-[00:03:34:02] ⏳ Fetching raw data..
-[00:03:34:09] ℹ️ Loaded 620544 single datapoints
-[00:03:34:09] 🌡️ Computing efficacy cutoff
-[00:03:35:07] 💻 Processing (fit & hit) 10500 concentration-response series
-[00:05:12:21] 💽 Writing output data to DB (~9.51 MB)..
-[00:05:13:30] 🥕 Assay endpoint processing completed
+[00:20:51:13] 🌱 Start processing new assay endpoint: TOX21_ERa_BLA_Agonist_ch1 (aeid=783)
+[00:20:51:13] ⏳ Fetching raw data..
+[00:20:51:21] ℹ️ Loaded 622080 single datapoints
+[00:20:51:21] 🌡️ Computing efficacy cutoff
+[00:20:52:62] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:21:54:96] 💽 Writing output data to DB (~9.34 MB)..
+[00:21:55:61] Assay endpoint with aeid=783 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:21:55:61] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:05:13:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:21:55:64] 🌱 Start processing new assay endpoint: ATG_HIF1a_CIS_up (aeid=82)
+[00:21:55:64] ⏳ Fetching raw data..
+[00:21:55:65] ℹ️ Loaded 35988 single datapoints
+[00:21:55:65] 🌡️ Computing efficacy cutoff
+[00:21:55:85] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:22:48:76] 💽 Writing output data to DB (~2.03 MB)..
+[00:22:48:88] Assay endpoint with aeid=82 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:22:48:88] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:05:13:32] 🌱 Start processing new assay endpoint: TOX21_ERR_Antagonist (aeid=2057)
-[00:05:13:32] ⏳ Fetching raw data..
-[00:05:13:39] ℹ️ Loaded 552960 single datapoints
-[00:05:13:39] 🌡️ Computing efficacy cutoff
-[00:05:14:37] 💻 Processing (fit & hit) 9672 concentration-response series
-[00:08:36:56] 💽 Writing output data to DB (~9.53 MB)..
-[00:08:37:72] 🥕 Assay endpoint processing completed
+[00:22:48:90] 🌱 Start processing new assay endpoint: OT_AR_ARSRC1_0480 (aeid=740)
+[00:22:48:90] ⏳ Fetching raw data..
+[00:22:48:91] ℹ️ Loaded 43470 single datapoints
+[00:22:48:91] 🌡️ Computing efficacy cutoff
+[00:22:49:08] 💻 Processing (fit & hit) 2055 concentration-response series
+[00:23:30:22] 💽 Writing output data to DB (~1.27 MB)..
+[00:23:30:31] Assay endpoint with aeid=740 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:23:30:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:08:37:72] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:23:30:33] 🌱 Start processing new assay endpoint: TOX21_AR_LUC_MDAKB2_Agonist_3uM_Nilutamide (aeid=1822)
+[00:23:30:33] ⏳ Fetching raw data..
+[00:23:30:40] ℹ️ Loaded 552960 single datapoints
+[00:23:30:40] 🌡️ Computing efficacy cutoff
+[00:23:31:62] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:24:09:11] 💽 Writing output data to DB (~8.95 MB)..
+[00:24:09:73] Assay endpoint with aeid=1822 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:24:09:74] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:08:37:75] 🌱 Start processing new assay endpoint: UPITT_HCI_U2OS_AR_TIF2_Nucleoli_Cytoplasm_Ratio_Antagonist (aeid=2390)
-[00:08:37:75] ⏳ Fetching raw data..
-[00:08:37:76] ℹ️ Loaded 53911 single datapoints
-[00:08:37:76] 🌡️ Computing efficacy cutoff
-[00:08:37:95] 💻 Processing (fit & hit) 2242 concentration-response series
-[00:09:00:12] 💽 Writing output data to DB (~1.35 MB)..
-[00:09:00:29] 🥕 Assay endpoint processing completed
+[00:24:09:76] 🌱 Start processing new assay endpoint: ATG_Myc_CIS_up (aeid=93)
+[00:24:09:76] ⏳ Fetching raw data..
+[00:24:09:77] ℹ️ Loaded 35968 single datapoints
+[00:24:09:77] 🌡️ Computing efficacy cutoff
+[00:24:09:97] 💻 Processing (fit & hit) 4491 concentration-response series
+[00:24:36:85] 💽 Writing output data to DB (~1.94 MB)..
+[00:24:36:95] Assay endpoint with aeid=93 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:24:36:95] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:09:00:29] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:24:36:97] 🌱 Start processing new assay endpoint: ATG_THRa1_TRANS_up (aeid=143)
+[00:24:36:97] ⏳ Fetching raw data..
+[00:24:36:98] ℹ️ Loaded 36100 single datapoints
+[00:24:36:98] 🌡️ Computing efficacy cutoff
+[00:24:37:17] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:24:55:22] 💽 Writing output data to DB (~1.91 MB)..
+[00:24:55:31] Assay endpoint with aeid=143 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:24:55:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:09:00:31] 🌱 Start processing new assay endpoint: TOX21_AhR_LUC_Agonist (aeid=806)
-[00:09:00:31] ⏳ Fetching raw data..
-[00:09:00:38] ℹ️ Loaded 622080 single datapoints
-[00:09:00:38] 🌡️ Computing efficacy cutoff
-[00:09:01:18] 💻 Processing (fit & hit) 10500 concentration-response series
-[00:10:29:88] 💽 Writing output data to DB (~9.54 MB)..
-[00:10:30:91] 🥕 Assay endpoint processing completed
+[00:24:55:34] 🌱 Start processing new assay endpoint: BSK_CASM3C_LDLR_up (aeid=214)
+[00:24:55:34] ⏳ Fetching raw data..
+[00:24:55:34] ℹ️ Loaded 13020 single datapoints
+[00:24:55:34] 🌡️ Computing efficacy cutoff
+[00:24:55:41] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:25:07:05] 💽 Writing output data to DB (~0.81 MB)..
+[00:25:07:08] Assay endpoint with aeid=214 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:25:07:09] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:10:30:91] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:25:07:11] 🌱 Start processing new assay endpoint: TOX21_SHH_3T3_GLI3_Agonist (aeid=2106)
+[00:25:07:11] ⏳ Fetching raw data..
+[00:25:07:19] ℹ️ Loaded 552960 single datapoints
+[00:25:07:19] 🌡️ Computing efficacy cutoff
+[00:25:08:44] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:25:19:95] 💽 Writing output data to DB (~8.88 MB)..
+[00:25:20:57] Assay endpoint with aeid=2106 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:25:20:57] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:10:30:93] 🌱 Start processing new assay endpoint: TOX21_CASP3_CHO (aeid=2368)
-[00:10:30:93] ⏳ Fetching raw data..
-[00:10:31:01] ℹ️ Loaded 547200 single datapoints
-[00:10:31:01] 🌡️ Computing efficacy cutoff
-[00:10:31:79] 💻 Processing (fit & hit) 9671 concentration-response series
-[00:10:58:25] 💽 Writing output data to DB (~9.06 MB)..
-[00:10:59:23] 🥕 Assay endpoint processing completed
+[00:25:20:59] 🌱 Start processing new assay endpoint: ATG_M_32_TRANS_up (aeid=129)
+[00:25:20:59] ⏳ Fetching raw data..
+[00:25:20:60] ℹ️ Loaded 38963 single datapoints
+[00:25:20:60] 🌡️ Computing efficacy cutoff
+[00:25:20:82] 💻 Processing (fit & hit) 4786 concentration-response series
+[00:25:31:57] 💽 Writing output data to DB (~1.90 MB)..
+[00:25:31:65] Assay endpoint with aeid=129 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:25:31:65] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:10:59:23] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:25:31:68] 🌱 Start processing new assay endpoint: BSK_CASM3C_IL8_up (aeid=212)
+[00:25:31:68] ⏳ Fetching raw data..
+[00:25:31:69] ℹ️ Loaded 13020 single datapoints
+[00:25:31:69] 🌡️ Computing efficacy cutoff
+[00:25:31:75] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:25:36:51] 💽 Writing output data to DB (~0.78 MB)..
+[00:25:36:55] Assay endpoint with aeid=212 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:25:36:55] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:10:59:24] 🌱 Start processing new assay endpoint: ACEA_ER_80hr (aeid=2)
-[00:10:59:24] ⏳ Fetching raw data..
-[00:10:59:27] ℹ️ Loaded 82508 single datapoints
-[00:10:59:27] 🌡️ Computing efficacy cutoff
-[00:10:59:42] 💻 Processing (fit & hit) 3416 concentration-response series
-[00:11:53:43] 💽 Writing output data to DB (~2.23 MB)..
-[00:11:53:67] 🥕 Assay endpoint processing completed
+[00:25:36:57] 🌱 Start processing new assay endpoint: BSK_SAg_CD38_up (aeid=300)
+[00:25:36:57] ⏳ Fetching raw data..
+[00:25:36:59] ℹ️ Loaded 13020 single datapoints
+[00:25:36:59] 🌡️ Computing efficacy cutoff
+[00:25:36:66] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:25:40:32] 💽 Writing output data to DB (~0.78 MB)..
+[00:25:40:36] Assay endpoint with aeid=300 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:25:40:36] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:11:53:67] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:25:40:38] 🌱 Start processing new assay endpoint: TOX21_DT40 (aeid=1134)
+[00:25:40:38] ⏳ Fetching raw data..
+[00:25:40:46] ℹ️ Loaded 620544 single datapoints
+[00:25:40:46] 🌡️ Computing efficacy cutoff
+[00:25:41:88] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:31:41:49] 💽 Writing output data to DB (~10.34 MB)..
+[00:31:42:34] Assay endpoint with aeid=1134 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:31:42:34] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:11:53:69] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_Agonist (aeid=2068)
-[00:11:53:69] ⏳ Fetching raw data..
-[00:11:53:75] ℹ️ Loaded 552960 single datapoints
-[00:11:53:75] 🌡️ Computing efficacy cutoff
-[00:11:54:48] 💻 Processing (fit & hit) 9672 concentration-response series
-[00:12:32:93] 💽 Writing output data to DB (~9.12 MB)..
-[00:12:33:90] 🥕 Assay endpoint processing completed
+[00:31:42:37] 🌱 Start processing new assay endpoint: TOX21_ERb_BLA_Antagonist_ratio (aeid=2119)
+[00:31:42:37] ⏳ Fetching raw data..
+[00:31:42:43] ℹ️ Loaded 552960 single datapoints
+[00:31:42:43] 🌡️ Computing efficacy cutoff
+[00:31:43:61] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:34:48:78] 💽 Writing output data to DB (~9.48 MB)..
+[00:34:49:49] Assay endpoint with aeid=2119 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:34:49:49] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:12:33:90] 🎊 Pipeline completed!
-[00:12:33:90] 👋 Goodbye
+[00:34:49:52] 🌱 Start processing new assay endpoint: TOX21_ERb_BLA_Antagonist_viability (aeid=2120)
+[00:34:49:52] ⏳ Fetching raw data..
+[00:34:49:58] ℹ️ Loaded 552960 single datapoints
+[00:34:49:59] 🌡️ Computing efficacy cutoff
+[00:34:50:85] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:37:14:18] 💽 Writing output data to DB (~9.35 MB)..
+[00:37:14:88] Assay endpoint with aeid=2120 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:37:14:88] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:37:14:91] 🌱 Start processing new assay endpoint: ATG_PPARg_TRANS_up (aeid=134)
+[00:37:14:91] ⏳ Fetching raw data..
+[00:37:14:92] ℹ️ Loaded 36110 single datapoints
+[00:37:14:92] 🌡️ Computing efficacy cutoff
+[00:37:15:05] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:39:14:44] 💽 Writing output data to DB (~2.24 MB)..
+[00:39:14:58] Assay endpoint with aeid=134 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:39:14:59] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:39:14:61] 🌱 Start processing new assay endpoint: TOX21_RORg_LUC_CHO_Antagonist_viability (aeid=1662)
+[00:39:14:61] ⏳ Fetching raw data..
+[00:39:14:69] ℹ️ Loaded 552960 single datapoints
+[00:39:14:69] 🌡️ Computing efficacy cutoff
+[00:39:15:93] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:41:03:34] 💽 Writing output data to DB (~9.22 MB)..
+[00:41:04:01] Assay endpoint with aeid=1662 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:41:04:01] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:41:04:04] 🌱 Start processing new assay endpoint: TOX21_RT_HEPG2_GLO_40hr_viability (aeid=2105)
+[00:41:04:04] ⏳ Fetching raw data..
+[00:41:04:07] ℹ️ Loaded 184320 single datapoints
+[00:41:04:07] 🌡️ Computing efficacy cutoff
+[00:41:04:56] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:42:55:79] 💽 Writing output data to DB (~5.08 MB)..
+[00:42:56:09] Assay endpoint with aeid=2105 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:42:56:09] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:42:56:12] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p5_ch2 (aeid=1328)
+[00:42:56:12] ⏳ Fetching raw data..
+[00:42:56:15] ℹ️ Loaded 207360 single datapoints
+[00:42:56:15] 🌡️ Computing efficacy cutoff
+[00:42:56:75] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:44:20:05] 💽 Writing output data to DB (~5.22 MB)..
+[00:44:20:35] Assay endpoint with aeid=1328 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:44:20:35] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:44:20:38] 🌱 Start processing new assay endpoint: ATG_PPRE_CIS_up (aeid=102)
+[00:44:20:38] ⏳ Fetching raw data..
+[00:44:20:39] ℹ️ Loaded 35998 single datapoints
+[00:44:20:39] 🌡️ Computing efficacy cutoff
+[00:44:20:58] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:45:25:41] 💽 Writing output data to DB (~2.07 MB)..
+[00:45:25:53] Assay endpoint with aeid=102 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:45:25:53] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:45:25:55] 🌱 Start processing new assay endpoint: TOX21_ESRE_BLA_viability (aeid=1343)
+[00:45:25:55] ⏳ Fetching raw data..
+[00:45:25:62] ℹ️ Loaded 551424 single datapoints
+[00:45:25:62] 🌡️ Computing efficacy cutoff
+[00:45:26:78] 💻 Processing (fit & hit) 9319 concentration-response series
+[00:46:29:61] 💽 Writing output data to DB (~8.70 MB)..
+[00:46:30:22] Assay endpoint with aeid=1343 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:46:30:22] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:46:30:24] 🌱 Start processing new assay endpoint: TOX21_VDR_BLA_Antagonist_ch1 (aeid=1200)
+[00:46:30:24] ⏳ Fetching raw data..
+[00:46:30:31] ℹ️ Loaded 552960 single datapoints
+[00:46:30:31] 🌡️ Computing efficacy cutoff
+[00:46:31:59] 💻 Processing (fit & hit) 9320 concentration-response series
+[00:47:24:38] 💽 Writing output data to DB (~8.65 MB)..
+[00:47:24:97] Assay endpoint with aeid=1200 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:47:24:97] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:47:25:00] 🌱 Start processing new assay endpoint: TOX21_TSHR_HTRF_Antagonist_ch1 (aeid=2041)
+[00:47:25:00] ⏳ Fetching raw data..
+[00:47:25:06] ℹ️ Loaded 552960 single datapoints
+[00:47:25:06] 🌡️ Computing efficacy cutoff
+[00:47:26:33] 💻 Processing (fit & hit) 9670 concentration-response series
+[00:48:12:13] 💽 Writing output data to DB (~8.99 MB)..
+[00:48:12:77] Assay endpoint with aeid=2041 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:48:12:77] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:48:12:80] 🌱 Start processing new assay endpoint: OT_NURR1_NURR1RXRa_1440 (aeid=756)
+[00:48:12:80] ⏳ Fetching raw data..
+[00:48:12:81] ℹ️ Loaded 64296 single datapoints
+[00:48:12:81] 🌡️ Computing efficacy cutoff
+[00:48:13:03] 💻 Processing (fit & hit) 3067 concentration-response series
+[00:48:47:20] 💽 Writing output data to DB (~1.26 MB)..
+[00:48:47:28] Assay endpoint with aeid=756 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:48:47:28] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:48:47:31] 🌱 Start processing new assay endpoint: UPITT_HCI_U2OS_AR_TIF2_Nucleoli_Agonist (aeid=2387)
+[00:48:47:31] ⏳ Fetching raw data..
+[00:48:47:32] ℹ️ Loaded 53757 single datapoints
+[00:48:47:32] 🌡️ Computing efficacy cutoff
+[00:48:47:51] 💻 Processing (fit & hit) 2242 concentration-response series
+[00:49:19:17] 💽 Writing output data to DB (~1.39 MB)..
+[00:49:19:26] Assay endpoint with aeid=2387 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:49:19:26] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:49:19:28] 🌱 Start processing new assay endpoint: ATG_RXRa_TRANS_up (aeid=141)
+[00:49:19:29] ⏳ Fetching raw data..
+[00:49:19:30] ℹ️ Loaded 36104 single datapoints
+[00:49:19:30] 🌡️ Computing efficacy cutoff
+[00:49:19:47] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:49:37:09] 💽 Writing output data to DB (~1.91 MB)..
+[00:49:37:18] Assay endpoint with aeid=141 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:49:37:18] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:49:37:21] 🌱 Start processing new assay endpoint: ATG_AR_TRANS_up (aeid=115)
+[00:49:37:21] ⏳ Fetching raw data..
+[00:49:37:22] ℹ️ Loaded 36379 single datapoints
+[00:49:37:22] 🌡️ Computing efficacy cutoff
+[00:49:37:40] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:49:48:88] 💽 Writing output data to DB (~1.88 MB)..
+[00:49:48:96] Assay endpoint with aeid=115 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:49:48:96] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:49:48:99] 🌱 Start processing new assay endpoint: ATG_M_32_CIS_up (aeid=89)
+[00:49:48:99] ⏳ Fetching raw data..
+[00:49:49:00] ℹ️ Loaded 35999 single datapoints
+[00:49:49:00] 🌡️ Computing efficacy cutoff
+[00:49:49:18] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:49:59:33] 💽 Writing output data to DB (~1.88 MB)..
+[00:49:59:42] Assay endpoint with aeid=89 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:49:59:42] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:49:59:45] 🌱 Start processing new assay endpoint: ATG_RORg_TRANS_up (aeid=140)
+[00:49:59:45] ⏳ Fetching raw data..
+[00:49:59:46] ℹ️ Loaded 36103 single datapoints
+[00:49:59:46] 🌡️ Computing efficacy cutoff
+[00:49:59:57] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:50:06:74] 💽 Writing output data to DB (~1.88 MB)..
+[00:50:06:82] Assay endpoint with aeid=140 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:50:06:82] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:50:06:85] 🌱 Start processing new assay endpoint: BSK_4H_VEGFRII_up (aeid=184)
+[00:50:06:85] ⏳ Fetching raw data..
+[00:50:06:85] ℹ️ Loaded 13020 single datapoints
+[00:50:06:85] 🌡️ Computing efficacy cutoff
+[00:50:06:91] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:50:11:73] 💽 Writing output data to DB (~0.78 MB)..
+[00:50:11:76] Assay endpoint with aeid=184 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:50:11:76] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:50:11:78] 🌱 Start processing new assay endpoint: BSK_LPS_MCP1_up (aeid=286)
+[00:50:11:78] ⏳ Fetching raw data..
+[00:50:11:79] ℹ️ Loaded 13020 single datapoints
+[00:50:11:79] 🌡️ Computing efficacy cutoff
+[00:50:11:86] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:50:15:86] 💽 Writing output data to DB (~0.78 MB)..
+[00:50:15:89] Assay endpoint with aeid=286 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:50:15:90] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:50:15:92] 🌱 Start processing new assay endpoint: TOX21_DT40_657 (aeid=2131)
+[00:50:15:92] ⏳ Fetching raw data..
+[00:50:16:00] ℹ️ Loaded 620544 single datapoints
+[00:50:16:00] 🌡️ Computing efficacy cutoff
+[00:50:17:40] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:56:11:38] 💽 Writing output data to DB (~10.34 MB)..
+[00:56:12:20] Assay endpoint with aeid=2131 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:56:12:21] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:56:12:23] 🌱 Start processing new assay endpoint: TOX21_AR_LUC_MDAKB2_Antagonist_0.5nM_R1881 (aeid=1816)
+[00:56:12:23] ⏳ Fetching raw data..
+[00:56:12:30] ℹ️ Loaded 549888 single datapoints
+[00:56:12:30] 🌡️ Computing efficacy cutoff
+[00:56:13:48] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:59:18:83] 💽 Writing output data to DB (~9.46 MB)..
+[00:59:19:55] Assay endpoint with aeid=1816 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[00:59:19:56] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:59:19:58] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_Antagonist (aeid=2070)
+[00:59:19:58] ⏳ Fetching raw data..
+[00:59:19:65] ℹ️ Loaded 552960 single datapoints
+[00:59:19:65] 🌡️ Computing efficacy cutoff
+[00:59:20:85] 💻 Processing (fit & hit) 9672 concentration-response series
+[01:01:43:71] 💽 Writing output data to DB (~9.35 MB)..
+[01:01:44:41] Assay endpoint with aeid=2070 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:01:44:42] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:01:44:44] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Antagonist_ch2 (aeid=1194)
+[01:01:44:44] ⏳ Fetching raw data..
+[01:01:44:51] ℹ️ Loaded 620544 single datapoints
+[01:01:44:51] 🌡️ Computing efficacy cutoff
+[01:01:45:91] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:03:42:40] 💽 Writing output data to DB (~9.54 MB)..
+[01:03:43:08] Assay endpoint with aeid=1194 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:03:43:09] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:03:43:11] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Antagonist_ratio (aeid=794)
+[01:03:43:11] ⏳ Fetching raw data..
+[01:03:43:19] ℹ️ Loaded 620544 single datapoints
+[01:03:43:19] 🌡️ Computing efficacy cutoff
+[01:03:44:57] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:05:26:07] 💽 Writing output data to DB (~9.47 MB)..
+[01:05:26:75] Assay endpoint with aeid=794 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:05:26:75] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:05:26:77] 🌱 Start processing new assay endpoint: TOX21_AR_LUC_MDAKB2_Antagonist_0.5nM_R1881_viability (aeid=1817)
+[01:05:26:78] ⏳ Fetching raw data..
+[01:05:26:85] ℹ️ Loaded 549888 single datapoints
+[01:05:26:85] 🌡️ Computing efficacy cutoff
+[01:05:28:04] 💻 Processing (fit & hit) 9672 concentration-response series
+[01:07:06:25] 💽 Writing output data to DB (~9.12 MB)..
+[01:07:06:90] Assay endpoint with aeid=1817 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:07:06:90] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:07:06:93] 🌱 Start processing new assay endpoint: TOX21_HRE_BLA_Agonist_ch1 (aeid=2063)
+[01:07:06:93] ⏳ Fetching raw data..
+[01:07:07:00] ℹ️ Loaded 599040 single datapoints
+[01:07:07:00] 🌡️ Computing efficacy cutoff
+[01:07:08:33] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:08:37:12] 💽 Writing output data to DB (~9.73 MB)..
+[01:08:37:80] Assay endpoint with aeid=2063 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:08:37:81] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:08:37:83] 🌱 Start processing new assay endpoint: TOX21_ELG1_LUC_Agonist_viability (aeid=782)
+[01:08:37:83] ⏳ Fetching raw data..
+[01:08:37:91] ℹ️ Loaded 621990 single datapoints
+[01:08:37:91] 🌡️ Computing efficacy cutoff
+[01:08:39:28] 💻 Processing (fit & hit) 10498 concentration-response series
+[01:09:47:77] 💽 Writing output data to DB (~9.36 MB)..
+[01:09:48:44] Assay endpoint with aeid=782 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:09:48:44] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:09:48:46] 🌱 Start processing new assay endpoint: TOX21_FXR_BLA_agonist_viability (aeid=1188)
+[01:09:48:46] ⏳ Fetching raw data..
+[01:09:48:53] ℹ️ Loaded 552960 single datapoints
+[01:09:48:53] 🌡️ Computing efficacy cutoff
+[01:09:49:73] 💻 Processing (fit & hit) 9319 concentration-response series
+[01:10:49:98] 💽 Writing output data to DB (~8.70 MB)..
+[01:10:50:59] Assay endpoint with aeid=1188 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:10:50:59] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:10:50:61] 🌱 Start processing new assay endpoint: UPITT_HCI_U2OS_AR_TIF2_Nucleoli_Antagonist (aeid=2386)
+[01:10:50:61] ⏳ Fetching raw data..
+[01:10:50:63] ℹ️ Loaded 53911 single datapoints
+[01:10:50:63] 🌡️ Computing efficacy cutoff
+[01:10:50:83] 💻 Processing (fit & hit) 2242 concentration-response series
+[01:11:40:77] 💽 Writing output data to DB (~1.47 MB)..
+[01:11:40:88] Assay endpoint with aeid=2386 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:11:40:88] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:11:40:90] 🌱 Start processing new assay endpoint: ATG_DR5_CIS_up (aeid=71)
+[01:11:40:90] ⏳ Fetching raw data..
+[01:11:40:91] ℹ️ Loaded 35978 single datapoints
+[01:11:40:91] 🌡️ Computing efficacy cutoff
+[01:11:41:10] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:12:22:60] 💽 Writing output data to DB (~2.00 MB)..
+[01:12:22:71] Assay endpoint with aeid=71 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:12:22:71] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:12:22:73] 🌱 Start processing new assay endpoint: ATG_C_EBP_CIS_up (aeid=67)
+[01:12:22:73] ⏳ Fetching raw data..
+[01:12:22:75] ℹ️ Loaded 35992 single datapoints
+[01:12:22:75] 🌡️ Computing efficacy cutoff
+[01:12:22:93] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:12:55:98] 💽 Writing output data to DB (~1.97 MB)..
+[01:12:56:08] Assay endpoint with aeid=67 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:12:56:08] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:12:56:10] 🌱 Start processing new assay endpoint: TOX21_AR_BLA_Agonist_ch1 (aeid=759)
+[01:12:56:10] ⏳ Fetching raw data..
+[01:12:56:17] ℹ️ Loaded 619008 single datapoints
+[01:12:56:17] 🌡️ Computing efficacy cutoff
+[01:12:57:52] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:13:24:97] 💽 Writing output data to DB (~9.20 MB)..
+[01:13:25:60] Assay endpoint with aeid=759 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:13:25:60] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:13:25:62] 🌱 Start processing new assay endpoint: TOX21_PPARd_BLA_agonist_ch1 (aeid=1122)
+[01:13:25:62] ⏳ Fetching raw data..
+[01:13:25:69] ℹ️ Loaded 552960 single datapoints
+[01:13:25:69] 🌡️ Computing efficacy cutoff
+[01:13:26:98] 💻 Processing (fit & hit) 9319 concentration-response series
+[01:13:44:34] 💽 Writing output data to DB (~8.54 MB)..
+[01:13:44:92] Assay endpoint with aeid=1122 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:13:44:92] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:13:44:95] 🌱 Start processing new assay endpoint: ATG_RARa_TRANS_up (aeid=136)
+[01:13:44:95] ⏳ Fetching raw data..
+[01:13:44:96] ℹ️ Loaded 36109 single datapoints
+[01:13:44:96] 🌡️ Computing efficacy cutoff
+[01:13:45:08] 💻 Processing (fit & hit) 4489 concentration-response series
+[01:13:57:68] 💽 Writing output data to DB (~1.89 MB)..
+[01:13:57:77] Assay endpoint with aeid=136 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:13:57:77] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:13:57:79] 🌱 Start processing new assay endpoint: CCTE_Harrill_HTTr_Viability_MCF7_DMEM_6hr (aeid=2451)
+[01:13:57:79] ⏳ Fetching raw data..
+[01:13:57:81] ℹ️ Loaded 54743 single datapoints
+[01:13:57:81] 🌡️ Computing efficacy cutoff
+[01:13:58:00] 💻 Processing (fit & hit) 2125 concentration-response series
+[01:14:06:66] 💽 Writing output data to DB (~1.48 MB)..
+[01:14:06:74] Assay endpoint with aeid=2451 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:14:06:74] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:14:06:77] 🌱 Start processing new assay endpoint: OT_PPARg_PPARgSRC1_0480 (aeid=757)
+[01:14:06:77] ⏳ Fetching raw data..
+[01:14:06:78] ℹ️ Loaded 64296 single datapoints
+[01:14:06:78] 🌡️ Computing efficacy cutoff
+[01:14:07:05] 💻 Processing (fit & hit) 3066 concentration-response series
+[01:14:13:65] 💽 Writing output data to DB (~1.18 MB)..
+[01:14:13:72] Assay endpoint with aeid=757 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:14:13:72] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:14:13:75] 🌱 Start processing new assay endpoint: BSK_4H_uPAR_up (aeid=180)
+[01:14:13:75] ⏳ Fetching raw data..
+[01:14:13:75] ℹ️ Loaded 13020 single datapoints
+[01:14:13:75] 🌡️ Computing efficacy cutoff
+[01:14:13:82] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:14:18:84] 💽 Writing output data to DB (~0.78 MB)..
+[01:14:18:88] Assay endpoint with aeid=180 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:14:18:88] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:14:18:90] 🌱 Start processing new assay endpoint: BSK_BE3C_uPA_up (aeid=204)
+[01:14:18:90] ⏳ Fetching raw data..
+[01:14:18:91] ℹ️ Loaded 13020 single datapoints
+[01:14:18:91] 🌡️ Computing efficacy cutoff
+[01:14:18:97] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:14:22:64] 💽 Writing output data to DB (~0.77 MB)..
+[01:14:22:67] Assay endpoint with aeid=204 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:14:22:67] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:14:22:70] 🌱 Start processing new assay endpoint: TOX21_PXR_Agonist (aeid=2363)
+[01:14:22:70] ⏳ Fetching raw data..
+[01:14:22:77] ℹ️ Loaded 547200 single datapoints
+[01:14:22:77] 🌡️ Computing efficacy cutoff
+[01:14:23:98] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:19:24:87] 💽 Writing output data to DB (~9.92 MB)..
+[01:19:25:66] Assay endpoint with aeid=2363 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:19:25:66] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:19:25:69] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_FLO_32hr_viability (aeid=2080)
+[01:19:25:69] ⏳ Fetching raw data..
+[01:19:25:72] ℹ️ Loaded 184320 single datapoints
+[01:19:25:72] 🌡️ Computing efficacy cutoff
+[01:19:26:22] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:22:58:20] 💽 Writing output data to DB (~5.53 MB)..
+[01:22:58:57] Assay endpoint with aeid=2080 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:22:58:57] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:22:58:60] 🌱 Start processing new assay endpoint: TOX21_SBE_BLA_Antagonist_ratio (aeid=2372)
+[01:22:58:60] ⏳ Fetching raw data..
+[01:22:58:67] ℹ️ Loaded 547200 single datapoints
+[01:22:58:67] 🌡️ Computing efficacy cutoff
+[01:22:59:84] 💻 Processing (fit & hit) 9670 concentration-response series
+[01:25:26:97] 💽 Writing output data to DB (~9.33 MB)..
+[01:25:27:64] Assay endpoint with aeid=2372 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:25:27:65] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:25:27:67] 🌱 Start processing new assay endpoint: TOX21_ERa_LUC_VM7_Antagonist_0.5nM_E2 (aeid=789)
+[01:25:27:67] ⏳ Fetching raw data..
+[01:25:27:74] ℹ️ Loaded 620544 single datapoints
+[01:25:27:74] 🌡️ Computing efficacy cutoff
+[01:25:29:11] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:27:30:80] 💽 Writing output data to DB (~9.57 MB)..
+[01:27:31:49] Assay endpoint with aeid=789 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:27:31:49] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:27:31:52] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p3_ratio (aeid=1321)
+[01:27:31:52] ⏳ Fetching raw data..
+[01:27:31:55] ℹ️ Loaded 207360 single datapoints
+[01:27:31:55] 🌡️ Computing efficacy cutoff
+[01:27:32:18] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:29:39:18] 💽 Writing output data to DB (~5.30 MB)..
+[01:29:39:49] Assay endpoint with aeid=1321 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:29:39:49] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:29:39:52] 🌱 Start processing new assay endpoint: ATG_MRE_CIS_up (aeid=91)
+[01:29:39:52] ⏳ Fetching raw data..
+[01:29:39:53] ℹ️ Loaded 35990 single datapoints
+[01:29:39:53] 🌡️ Computing efficacy cutoff
+[01:29:39:73] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:31:15:05] 💽 Writing output data to DB (~2.14 MB)..
+[01:31:15:19] Assay endpoint with aeid=91 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:31:15:19] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:31:15:21] 🌱 Start processing new assay endpoint: TOX21_AR_BLA_Agonist_ratio (aeid=761)
+[01:31:15:21] ⏳ Fetching raw data..
+[01:31:15:28] ℹ️ Loaded 619008 single datapoints
+[01:31:15:28] 🌡️ Computing efficacy cutoff
+[01:31:16:62] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:32:36:89] 💽 Writing output data to DB (~9.37 MB)..
+[01:32:37:54] Assay endpoint with aeid=761 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:32:37:54] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:32:37:56] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Agonist_ratio (aeid=793)
+[01:32:37:56] ⏳ Fetching raw data..
+[01:32:37:65] ℹ️ Loaded 620544 single datapoints
+[01:32:37:65] 🌡️ Computing efficacy cutoff
+[01:32:39:03] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:33:52:39] 💽 Writing output data to DB (~9.34 MB)..
+[01:33:53:03] Assay endpoint with aeid=793 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:33:53:04] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:33:53:06] 🌱 Start processing new assay endpoint: ATG_Pax6_CIS_up (aeid=100)
+[01:33:53:06] ⏳ Fetching raw data..
+[01:33:53:07] ℹ️ Loaded 35990 single datapoints
+[01:33:53:07] 🌡️ Computing efficacy cutoff
+[01:33:53:20] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:34:52:32] 💽 Writing output data to DB (~2.03 MB)..
+[01:34:52:44] Assay endpoint with aeid=100 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:34:52:44] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:34:52:47] 🌱 Start processing new assay endpoint: TOX21_AR_BLA_Antagonist_ch1 (aeid=1202)
+[01:34:52:47] ⏳ Fetching raw data..
+[01:34:52:55] ℹ️ Loaded 620544 single datapoints
+[01:34:52:55] 🌡️ Computing efficacy cutoff
+[01:34:53:90] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:35:45:71] 💽 Writing output data to DB (~9.30 MB)..
+[01:35:46:35] Assay endpoint with aeid=1202 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:35:46:36] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:35:46:38] 🌱 Start processing new assay endpoint: TOX21_SBE_BLA_Antagonist_viability (aeid=2373)
+[01:35:46:38] ⏳ Fetching raw data..
+[01:35:46:44] ℹ️ Loaded 529920 single datapoints
+[01:35:46:44] 🌡️ Computing efficacy cutoff
+[01:35:47:60] 💻 Processing (fit & hit) 9670 concentration-response series
+[01:36:30:01] 💽 Writing output data to DB (~9.00 MB)..
+[01:36:30:63] Assay endpoint with aeid=2373 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:36:30:63] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:36:30:66] 🌱 Start processing new assay endpoint: TOX21_PPARd_BLA_Antagonist_ch1 (aeid=1196)
+[01:36:30:66] ⏳ Fetching raw data..
+[01:36:30:72] ℹ️ Loaded 552960 single datapoints
+[01:36:30:72] 🌡️ Computing efficacy cutoff
+[01:36:31:93] 💻 Processing (fit & hit) 9320 concentration-response series
+[01:37:08:37] 💽 Writing output data to DB (~8.61 MB)..
+[01:37:08:95] Assay endpoint with aeid=1196 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:37:08:95] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:37:08:98] 🌱 Start processing new assay endpoint: TOX21_ERa_LUC_VM7_Agonist_10nM_ICI182780 (aeid=2211)
+[01:37:08:98] ⏳ Fetching raw data..
+[01:37:09:04] ℹ️ Loaded 552960 single datapoints
+[01:37:09:04] 🌡️ Computing efficacy cutoff
+[01:37:10:33] 💻 Processing (fit & hit) 9673 concentration-response series
+[01:37:38:55] 💽 Writing output data to DB (~8.93 MB)..
+[01:37:39:16] Assay endpoint with aeid=2211 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:37:39:16] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:37:39:18] 🌱 Start processing new assay endpoint: ATG_LXRa_TRANS_up (aeid=125)
+[01:37:39:18] ⏳ Fetching raw data..
+[01:37:39:19] ℹ️ Loaded 36104 single datapoints
+[01:37:39:19] 🌡️ Computing efficacy cutoff
+[01:37:39:39] 💻 Processing (fit & hit) 4489 concentration-response series
+[01:37:54:43] 💽 Writing output data to DB (~1.91 MB)..
+[01:37:54:52] Assay endpoint with aeid=125 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:37:54:53] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:37:54:55] 🌱 Start processing new assay endpoint: ATG_HNF6_CIS_up (aeid=83)
+[01:37:54:55] ⏳ Fetching raw data..
+[01:37:54:56] ℹ️ Loaded 35994 single datapoints
+[01:37:54:56] 🌡️ Computing efficacy cutoff
+[01:37:54:75] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:38:07:51] 💽 Writing output data to DB (~1.89 MB)..
+[01:38:07:60] Assay endpoint with aeid=83 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:38:07:60] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:38:07:62] 🌱 Start processing new assay endpoint: ATG_Myb_CIS_up (aeid=92)
+[01:38:07:62] ⏳ Fetching raw data..
+[01:38:07:63] ℹ️ Loaded 35993 single datapoints
+[01:38:07:63] 🌡️ Computing efficacy cutoff
+[01:38:07:81] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:38:17:21] 💽 Writing output data to DB (~1.88 MB)..
+[01:38:17:30] Assay endpoint with aeid=92 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:38:17:30] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:38:17:32] 🌱 Start processing new assay endpoint: ATG_Ets_CIS_up (aeid=76)
+[01:38:17:32] ⏳ Fetching raw data..
+[01:38:17:34] ℹ️ Loaded 35983 single datapoints
+[01:38:17:34] 🌡️ Computing efficacy cutoff
+[01:38:17:52] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:38:24:74] 💽 Writing output data to DB (~1.87 MB)..
+[01:38:24:82] Assay endpoint with aeid=76 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:38:24:83] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:38:24:85] 🌱 Start processing new assay endpoint: BSK_LPS_Eselectin_up (aeid=280)
+[01:38:24:85] ⏳ Fetching raw data..
+[01:38:24:86] ℹ️ Loaded 13020 single datapoints
+[01:38:24:86] 🌡️ Computing efficacy cutoff
+[01:38:24:92] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:38:29:36] 💽 Writing output data to DB (~0.78 MB)..
+[01:38:29:39] Assay endpoint with aeid=280 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:38:29:39] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:38:29:42] 🌱 Start processing new assay endpoint: BSK_hDFCGF_MIG_up (aeid=246)
+[01:38:29:42] ⏳ Fetching raw data..
+[01:38:29:42] ℹ️ Loaded 13020 single datapoints
+[01:38:29:42] 🌡️ Computing efficacy cutoff
+[01:38:29:48] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:38:32:80] 💽 Writing output data to DB (~0.77 MB)..
+[01:38:32:83] Assay endpoint with aeid=246 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:38:32:83] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:38:32:85] 🌱 Start processing new assay endpoint: TOX21_TR_LUC_GH3_Antagonist (aeid=804)
+[01:38:32:85] ⏳ Fetching raw data..
+[01:38:32:92] ℹ️ Loaded 617472 single datapoints
+[01:38:32:92] 🌡️ Computing efficacy cutoff
+[01:38:34:28] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:43:14:65] 💽 Writing output data to DB (~10.03 MB)..
+[01:43:15:43] Assay endpoint with aeid=804 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:43:15:43] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:43:15:46] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_FLO_24hr_viability (aeid=2078)
+[01:43:15:46] ⏳ Fetching raw data..
+[01:43:15:49] ℹ️ Loaded 184320 single datapoints
+[01:43:15:49] 🌡️ Computing efficacy cutoff
+[01:43:16:00] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:46:45:18] 💽 Writing output data to DB (~5.55 MB)..
+[01:46:45:56] Assay endpoint with aeid=2078 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:46:45:56] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:46:45:58] 🌱 Start processing new assay endpoint: TOX21_ERR_viability (aeid=2059)
+[01:46:45:58] ⏳ Fetching raw data..
+[01:46:45:65] ℹ️ Loaded 552960 single datapoints
+[01:46:45:65] 🌡️ Computing efficacy cutoff
+[01:46:46:84] 💻 Processing (fit & hit) 9672 concentration-response series
+[01:49:08:21] 💽 Writing output data to DB (~9.34 MB)..
+[01:49:08:90] Assay endpoint with aeid=2059 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:49:08:90] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:49:08:93] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p2_ratio (aeid=1317)
+[01:49:08:93] ⏳ Fetching raw data..
+[01:49:08:96] ℹ️ Loaded 204288 single datapoints
+[01:49:08:96] 🌡️ Computing efficacy cutoff
+[01:49:09:59] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:51:30:49] 💽 Writing output data to DB (~5.29 MB)..
+[01:51:30:81] Assay endpoint with aeid=1317 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:51:30:81] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:51:30:83] 🌱 Start processing new assay endpoint: TOX21_RT_HEPG2_GLO_32hr_ctrl_viability (aeid=2103)
+[01:51:30:83] ⏳ Fetching raw data..
+[01:51:30:86] ℹ️ Loaded 184320 single datapoints
+[01:51:30:86] 🌡️ Computing efficacy cutoff
+[01:51:31:43] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:53:33:22] 💽 Writing output data to DB (~5.12 MB)..
+[01:53:33:52] Assay endpoint with aeid=2103 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:53:33:52] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:53:33:55] 🌱 Start processing new assay endpoint: TOX21_ARE_BLA_agonist_viability (aeid=1185)
+[01:53:33:55] ⏳ Fetching raw data..
+[01:53:33:62] ℹ️ Loaded 552960 single datapoints
+[01:53:33:62] 🌡️ Computing efficacy cutoff
+[01:53:34:78] 💻 Processing (fit & hit) 9319 concentration-response series
+[01:55:08:48] 💽 Writing output data to DB (~8.85 MB)..
+[01:55:09:12] Assay endpoint with aeid=1185 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:55:09:12] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:55:09:15] 🌱 Start processing new assay endpoint: TOX21_H2AX_HTRF_CHO_Agonist_ratio (aeid=1843)
+[01:55:09:15] ⏳ Fetching raw data..
+[01:55:09:22] ℹ️ Loaded 552960 single datapoints
+[01:55:09:22] 🌡️ Computing efficacy cutoff
+[01:55:10:41] 💻 Processing (fit & hit) 9672 concentration-response series
+[01:56:34:13] 💽 Writing output data to DB (~9.10 MB)..
+[01:56:34:76] Assay endpoint with aeid=1843 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:56:34:76] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:56:34:79] 🌱 Start processing new assay endpoint: TOX21_VDR_BLA_antagonist_ratio (aeid=1132)
+[01:56:34:79] ⏳ Fetching raw data..
+[01:56:34:87] ℹ️ Loaded 552960 single datapoints
+[01:56:34:87] 🌡️ Computing efficacy cutoff
+[01:56:36:20] 💻 Processing (fit & hit) 9320 concentration-response series
+[01:57:42:95] 💽 Writing output data to DB (~8.72 MB)..
+[01:57:43:55] Assay endpoint with aeid=1132 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:57:43:55] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:57:43:58] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p5_viability (aeid=1330)
+[01:57:43:58] ⏳ Fetching raw data..
+[01:57:43:61] ℹ️ Loaded 207360 single datapoints
+[01:57:43:61] 🌡️ Computing efficacy cutoff
+[01:57:44:22] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:58:46:13] 💽 Writing output data to DB (~5.15 MB)..
+[01:58:46:41] Assay endpoint with aeid=1330 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:58:46:41] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:58:46:44] 🌱 Start processing new assay endpoint: OT_FXR_FXRSRC1_0480 (aeid=753)
+[01:58:46:44] ⏳ Fetching raw data..
+[01:58:46:45] ℹ️ Loaded 43470 single datapoints
+[01:58:46:45] 🌡️ Computing efficacy cutoff
+[01:58:46:55] 💻 Processing (fit & hit) 2055 concentration-response series
+[01:59:33:28] 💽 Writing output data to DB (~1.31 MB)..
+[01:59:33:37] Assay endpoint with aeid=753 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[01:59:33:37] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:59:33:40] 🌱 Start processing new assay endpoint: TOX21_TSHR_HTRF_Antagonist_ratio (aeid=2043)
+[01:59:33:40] ⏳ Fetching raw data..
+[01:59:33:46] ℹ️ Loaded 552960 single datapoints
+[01:59:33:46] 🌡️ Computing efficacy cutoff
+[01:59:34:72] 💻 Processing (fit & hit) 9670 concentration-response series
+[02:00:19:67] 💽 Writing output data to DB (~8.99 MB)..
+[02:00:20:30] Assay endpoint with aeid=2043 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:00:20:30] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[02:00:20:33] 🌱 Start processing new assay endpoint: OT_ERa_EREGFP_0120 (aeid=750)
+[02:00:20:33] ⏳ Fetching raw data..
+[02:00:20:33] ℹ️ Loaded 43470 single datapoints
+[02:00:20:33] 🌡️ Computing efficacy cutoff
+[02:00:20:45] 💻 Processing (fit & hit) 2055 concentration-response series
+[02:00:54:24] 💽 Writing output data to DB (~1.24 MB)..
+[02:00:54:31] Assay endpoint with aeid=750 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:00:54:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[02:00:54:34] 🌱 Start processing new assay endpoint: BSK_BE3C_MMP1_up (aeid=194)
+[02:00:54:34] ⏳ Fetching raw data..
+[02:00:54:34] ℹ️ Loaded 13020 single datapoints
+[02:00:54:34] 🌡️ Computing efficacy cutoff
+[02:00:54:41] 💻 Processing (fit & hit) 2035 concentration-response series
+[02:01:21:08] 💽 Writing output data to DB (~0.85 MB)..
+[02:01:21:13] Assay endpoint with aeid=194 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:01:21:13] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[02:01:21:15] 🌱 Start processing new assay endpoint: TOX21_VDR_BLA_agonist_ch2 (aeid=1130)
+[02:01:21:15] ⏳ Fetching raw data..
+[02:01:21:24] ℹ️ Loaded 597504 single datapoints
+[02:01:21:24] 🌡️ Computing efficacy cutoff
+[02:01:22:53] 💻 Processing (fit & hit) 9319 concentration-response series
+[02:01:40:94] 💽 Writing output data to DB (~8.74 MB)..
+[02:01:41:53] Assay endpoint with aeid=1130 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:01:41:53] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[02:01:41:55] 🌱 Start processing new assay endpoint: ATG_RARg_TRANS_up (aeid=138)
+[02:01:41:55] ⏳ Fetching raw data..
+[02:01:41:56] ℹ️ Loaded 36109 single datapoints
+[02:01:41:56] 🌡️ Computing efficacy cutoff
+[02:01:41:76] 💻 Processing (fit & hit) 4489 concentration-response series
+[02:01:54:23] 💽 Writing output data to DB (~1.89 MB)..
+[02:01:54:31] Assay endpoint with aeid=138 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:01:54:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[02:01:54:34] 🌱 Start processing new assay endpoint: BSK_SAg_Eselectin_up (aeid=306)
+[02:01:54:34] ⏳ Fetching raw data..
+[02:01:54:35] ℹ️ Loaded 13020 single datapoints
+[02:01:54:35] 🌡️ Computing efficacy cutoff
+[02:01:54:42] 💻 Processing (fit & hit) 2035 concentration-response series
+[02:02:03:14] 💽 Writing output data to DB (~0.80 MB)..
+[02:02:03:18] Assay endpoint with aeid=306 failed: Cannot save file into a non-existent directory: '/home/bossh/pytcpl/src/utils/../../data/output'
+[02:02:03:18] 🎊 Pipeline completed!
+[02:02:03:18] 👋 Goodbye
