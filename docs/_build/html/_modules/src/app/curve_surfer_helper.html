@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.app.curve_surfer_helper &mdash; pytcpl 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pytcpl
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pytcpl</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.app.curve_surfer_helper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.app.curve_surfer_helper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">streamlit</span> <span class="k">as</span> <span class="nn">st</span>
+<span class="kn">from</span> <span class="nn">plotly</span> <span class="kn">import</span> <span class="n">graph_objects</span> <span class="k">as</span> <span class="n">go</span><span class="p">,</span> <span class="n">express</span> <span class="k">as</span> <span class="n">px</span>
+<span class="kn">from</span> <span class="nn">st_files_connection</span> <span class="kn">import</span> <span class="n">FilesConnection</span>
+
+<span class="kn">from</span> <span class="nn">src.utils.constants</span> <span class="kn">import</span> <span class="n">OUTPUT_DIR_PATH</span>
+<span class="kn">from</span> <span class="nn">src.utils.models.helper</span> <span class="kn">import</span> <span class="n">pow_space</span>
+<span class="kn">from</span> <span class="nn">src.utils.models.models</span> <span class="kn">import</span> <span class="n">get_model</span>
+<span class="kn">from</span> <span class="nn">src.pipeline.pipeline_helper</span> <span class="kn">import</span> <span class="n">get_assay_info</span><span class="p">,</span> <span class="n">get_cutoff</span><span class="p">,</span> <span class="n">init_config</span><span class="p">,</span> <span class="n">get_chemical</span>
+<span class="kn">from</span> <span class="nn">src.utils.query_db</span> <span class="kn">import</span> <span class="n">query_db</span>
+
+<span class="c1"># Add the parent folder to sys.path</span>
+<span class="n">parent_folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;..&quot;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent_folder_path</span><span class="p">)</span>
+
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">SUFFIX</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="n">ERR_MSG</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No data found for this query&quot;</span>
+
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.load_data">[docs]</a><span class="nd">@st</span><span class="o">.</span><span class="n">cache_data</span>
+<span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">aeid</span><span class="p">):</span>  <span class="c1"># aeid parameter used to handle correct caching</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load data for a specific AEID.</span>
+
+<span class="sd">    This function loads data for a given assay endpoint ID (AEID). It retrieves the data from an output table and a cutoff</span>
+<span class="sd">    table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data</span>
+<span class="sd">    is returned as two dataframes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        aeid (int): Assay endpoint ID for which to load data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_output_data</span><span class="p">()</span>
+    <span class="n">cutoff_df</span> <span class="o">=</span> <span class="n">get_cutoff</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">cutoff_df</span></div>
+
+
+<div class="viewcode-block" id="get_output_data"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.get_output_data">[docs]</a><span class="k">def</span> <span class="nf">get_output_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve output data for a specific AEID.</span>
+
+<span class="sd">    This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,</span>
+<span class="sd">    a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame containing the output data for the specified AEID.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tbl</span> <span class="o">=</span> <span class="s1">&#39;output&#39;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">OUTPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetch data with assay ID </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="si">}</span><span class="s2">..&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT * FROM </span><span class="si">{</span><span class="n">tbl</span><span class="si">}</span><span class="s2"> WHERE aeid = </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="si">}</span><span class="s2">;&quot;</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">data_source</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tbl</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No data found for AEID </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;🚨&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2"> series loaded&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="set_config_app"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.set_config_app">[docs]</a><span class="k">def</span> <span class="nf">set_config_app</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the configuration for the Streamlit app.</span>
+
+<span class="sd">    This function sets the global configuration variable CONFIG using the provided configuration dictionary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): Configuration settings for the app.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">CONFIG</span>
+    <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">config</span>
+    <span class="n">init_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_series"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.get_series">[docs]</a><span class="k">def</span> <span class="nf">get_series</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the series data for the currently selected index.</span>
+
+<span class="sd">    This function retrieves the data for the currently selected index (id) from the session_state dataframe. The data is</span>
+<span class="sd">    processed and returned as a dictionary.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing the series data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">series</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+    <span class="n">series</span><span class="p">[</span><span class="s1">&#39;conc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;conc&#39;</span><span class="p">])</span>
+    <span class="n">series</span><span class="p">[</span><span class="s1">&#39;resp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;resp&#39;</span><span class="p">])</span>
+    <span class="n">series</span><span class="p">[</span><span class="s1">&#39;fit_params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;fit_params&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">series</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_chem_info"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.get_chem_info">[docs]</a><span class="k">def</span> <span class="nf">get_chem_info</span><span class="p">(</span><span class="n">spid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get chemical information for a given SPID.</span>
+
+<span class="sd">    This function retrieves chemical information such as CAS number, chemical name, and DSSTox substance ID for a</span>
+<span class="sd">    specified Sample ID (SPID).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spid (str): Sample ID for which to retrieve chemical information.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing CAS number, chemical name, and DSSTox substance ID.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chem</span> <span class="o">=</span> <span class="n">get_chemical</span><span class="p">([</span><span class="n">spid</span><span class="p">])</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">casn</span> <span class="o">=</span> <span class="n">chem</span><span class="p">[</span><span class="s1">&#39;casn&#39;</span><span class="p">]</span>
+    <span class="n">chnm</span> <span class="o">=</span> <span class="n">chem</span><span class="p">[</span><span class="s1">&#39;chnm&#39;</span><span class="p">]</span>
+    <span class="n">dsstox_substance_id</span> <span class="o">=</span> <span class="n">chem</span><span class="p">[</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">casn</span><span class="p">,</span> <span class="n">chnm</span><span class="p">,</span> <span class="n">dsstox_substance_id</span></div>
+
+
+<div class="viewcode-block" id="init_figure"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.init_figure">[docs]</a><span class="k">def</span> <span class="nf">init_figure</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">cutoff_df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the plot figure for visualizing data.</span>
+
+<span class="sd">    This function initializes a Plotly figure object for visualizing the data. It sets up various plot attributes such as</span>
+<span class="sd">    title, labels, and annotations. It also adds the efficacy cutoff line to the plot.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        series (dict): Dictionary containing series data.</span>
+<span class="sd">        cutoff_df (pd.DataFrame): DataFrame containing cutoff data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        go.Figure: Initialized Plotly figure object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff_df</span><span class="p">[</span><span class="s1">&#39;cutoff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">bmad</span> <span class="o">=</span> <span class="n">cutoff_df</span><span class="p">[</span><span class="s1">&#39;bmad&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">onesd</span> <span class="o">=</span> <span class="n">cutoff_df</span><span class="p">[</span><span class="s1">&#39;onesd&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff</span><span class="p">,</span> <span class="s2">&quot;bmad&quot;</span><span class="p">:</span> <span class="n">bmad</span><span class="p">,</span> <span class="s2">&quot;onesd&quot;</span><span class="p">:</span> <span class="n">onesd</span><span class="p">})</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+    <span class="n">casn</span><span class="p">,</span> <span class="n">chnm</span><span class="p">,</span> <span class="n">dsstox_substance_id</span> <span class="o">=</span> <span class="n">get_chem_info</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">])</span>
+    <span class="c1"># fig.update_layout(hovermode=&quot;x unified&quot;)  # uncomment to enable unified hover</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">showspikes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">showspikes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">assay_infos</span> <span class="o">=</span> <span class="n">get_assay_info</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="p">)</span>
+    <span class="n">normalized_data_type</span> <span class="o">=</span> <span class="n">assay_infos</span><span class="p">[</span><span class="s2">&quot;normalized_data_type&quot;</span><span class="p">]</span>
+    <span class="n">assay_component_endpoint_name</span> <span class="o">=</span> <span class="n">assay_infos</span><span class="p">[</span><span class="s2">&quot;assay_component_endpoint_name&quot;</span><span class="p">]</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;AEID: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="n">assay_component_endpoint_name</span>
+    <span class="n">hitcall</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;hitcall&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># f&quot;{series[&#39;hitcall&#39;]:.0%}&quot;</span>
+    <span class="n">subtitle</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;&lt;sup&gt;Hitcall: </span><span class="si">{</span><span class="n">hitcall</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">chnm</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">dsstox_substance_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">casn</span><span class="p">)</span><span class="si">}</span><span class="s2">&lt;/sup&gt;&quot;</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span> <span class="o">+</span> <span class="n">subtitle</span><span class="p">,</span> <span class="n">title_font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">26</span><span class="p">))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">150</span><span class="p">),</span> <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;log10(Concentration) μM&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_data_type</span><span class="p">))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_hrect</span><span class="p">(</span><span class="n">y0</span><span class="o">=-</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">y1</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s1">&#39;below&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                  <span class="n">annotation_text</span><span class="o">=</span><span class="s2">&quot;efficacy cutoff&quot;</span><span class="p">,</span> <span class="n">annotation_position</span><span class="o">=</span><span class="s2">&quot;top left&quot;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">groupclick</span><span class="o">=</span><span class="s2">&quot;toggleitem&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="add_curves"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.add_curves">[docs]</a><span class="k">def</span> <span class="nf">add_curves</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add curves to the plot based on series data.</span>
+
+<span class="sd">    This function adds response and fitted curves to the plot based on the provided series data. It also adds potency and</span>
+<span class="sd">    efficacy markers to the plot.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        series (dict): Dictionary containing series data.</span>
+<span class="sd">        fig (go.Figure): Plotly figure object to which curves are added.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing fitted curve parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conc</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="n">fit_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;conc&#39;</span><span class="p">]),</span> <span class="n">series</span><span class="p">[</span><span class="s1">&#39;resp&#39;</span><span class="p">],</span> <span class="n">series</span><span class="p">[</span><span class="s1">&#39;fit_params&#39;</span><span class="p">]</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">conc</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">resp</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">,</span> <span class="n">legendgroup</span><span class="o">=</span><span class="s2">&quot;Response&quot;</span><span class="p">,</span> <span class="n">legendgrouptitle_text</span><span class="o">=</span><span class="s2">&quot;Repsonse&quot;</span><span class="p">,</span>
+                   <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s2">&quot;x-thin-open&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Repsonse&quot;</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+    <span class="n">potencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">potency</span> <span class="k">for</span> <span class="n">potency</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;acc&quot;</span><span class="p">,</span> <span class="s2">&quot;ac50&quot;</span><span class="p">,</span> <span class="s2">&quot;actop&quot;</span><span class="p">,</span> <span class="s2">&quot;ac1sd&quot;</span><span class="p">,</span> <span class="s2">&quot;bmd&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">potency</span> <span class="ow">in</span> <span class="n">series</span><span class="p">]</span>
+    <span class="n">efficacies</span> <span class="o">=</span> <span class="p">[</span><span class="n">efficacy</span> <span class="k">for</span> <span class="n">efficacy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;cutoff&quot;</span><span class="p">,</span> <span class="s2">&quot;bmad&quot;</span><span class="p">,</span> <span class="s2">&quot;onesd&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">efficacy</span> <span class="ow">in</span> <span class="n">series</span><span class="p">]</span>
+
+    <span class="n">potency_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">series</span><span class="p">[</span><span class="n">potency</span><span class="p">]</span> <span class="k">for</span> <span class="n">potency</span> <span class="ow">in</span> <span class="n">potencies</span><span class="p">]</span>
+    <span class="n">efficacy_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">series</span><span class="p">[</span><span class="n">efficacy</span><span class="p">]</span> <span class="k">for</span> <span class="n">efficacy</span> <span class="ow">in</span> <span class="n">efficacies</span><span class="p">]</span>
+
+    <span class="n">sorted_pairs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">potency_values</span><span class="p">,</span> <span class="n">potencies</span><span class="p">))</span>
+    <span class="n">potency_values</span><span class="p">,</span> <span class="n">potencies</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sorted_pairs</span><span class="p">)</span>
+
+    <span class="n">sorted_pairs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">efficacy_values</span><span class="p">,</span> <span class="n">efficacies</span><span class="p">))</span>
+    <span class="n">efficacy_values</span><span class="p">,</span> <span class="n">efficacies</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sorted_pairs</span><span class="p">)</span>
+
+    <span class="n">pars_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">conc</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">conc</span><span class="p">)</span>
+    <span class="n">min_potencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">potency_values</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">potency_values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">10000000</span>
+
+    <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">min_potencies</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pow_space</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+    <span class="n">best_model</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="s1">&#39;best_aic_model&#39;</span><span class="p">]</span>
+    <span class="n">color_best</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span>
+    <span class="k">if</span> <span class="n">fit_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">series</span><span class="p">[</span><span class="s1">&#39;hitcall&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">iterator</span> <span class="o">=</span> <span class="n">fit_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">fit_model</span><span class="p">,</span> <span class="n">fit_parameters</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iterator</span><span class="p">):</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">fit_parameters</span><span class="p">[</span><span class="s2">&quot;pars&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">pars_dict</span><span class="p">[</span><span class="n">fit_model</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+            <span class="n">er</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;er&#39;</span><span class="p">)</span>
+            <span class="n">aic</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">fit_parameters</span><span class="p">[</span><span class="s2">&quot;aic&quot;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">get_model</span><span class="p">(</span><span class="n">fit_model</span><span class="p">)(</span><span class="s1">&#39;fun&#39;</span><span class="p">)(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">qualitative</span><span class="o">.</span><span class="n">Bold</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">is_best</span> <span class="o">=</span> <span class="n">fit_model</span> <span class="o">==</span> <span class="n">best_model</span>
+            <span class="n">color_best</span> <span class="o">=</span> <span class="n">color</span> <span class="k">if</span> <span class="n">is_best</span> <span class="k">else</span> <span class="n">color_best</span>
+            <span class="n">is_best_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(BEST)&quot;</span> <span class="k">if</span> <span class="n">is_best</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">dash</span> <span class="o">=</span> <span class="s1">&#39;solid&#39;</span> <span class="k">if</span> <span class="n">is_best</span> <span class="k">else</span> <span class="s2">&quot;dash&quot;</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fit_model</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">is_best_tag</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">is_best</span> <span class="k">else</span> <span class="mi">2</span>
+            <span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.9</span>
+
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+                <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="n">legendgroup</span><span class="o">=</span><span class="s2">&quot;Fit models&quot;</span><span class="p">,</span>
+                           <span class="n">legendgrouptitle_text</span><span class="o">=</span><span class="s2">&quot;Fit models&quot;</span><span class="p">,</span>
+                           <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">),</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+                           <span class="n">visible</span><span class="o">=</span><span class="s2">&quot;legendonly&quot;</span> <span class="k">if</span> <span class="n">fit_model</span> <span class="o">==</span> <span class="s1">&#39;cnst&#39;</span> <span class="k">else</span> <span class="kc">True</span><span class="p">,</span>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="n">dash</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">efficacy</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">efficacies</span><span class="p">):</span>
+        <span class="n">eff</span> <span class="o">=</span> <span class="n">efficacy_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">eff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">eff</span><span class="p">):</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">efficacy</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">eff</span><span class="si">:</span><span class="s2">.1e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">))],</span>
+                <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">eff</span><span class="p">,</span> <span class="n">eff</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dashdot&#39;</span><span class="p">),</span>
+                <span class="n">legendgroup</span><span class="o">=</span><span class="s2">&quot;Efficacy&quot;</span><span class="p">,</span>
+                <span class="n">legendgrouptitle_text</span><span class="o">=</span><span class="s2">&quot;Efficacy&quot;</span><span class="p">,</span>
+                <span class="n">visible</span><span class="o">=</span><span class="s2">&quot;legendonly&quot;</span>
+            <span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">potency</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">potencies</span><span class="p">):</span>
+        <span class="n">pot</span> <span class="o">=</span> <span class="n">potency_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">pot</span><span class="p">):</span>
+            <span class="n">pot_log</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">potency</span><span class="p">])</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="n">best_model</span><span class="p">][</span><span class="s1">&#39;pars&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;er&#39;</span><span class="p">)</span>
+            <span class="n">pot_y</span> <span class="o">=</span> <span class="n">get_model</span><span class="p">(</span><span class="n">best_model</span><span class="p">)(</span><span class="s1">&#39;fun&#39;</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pot</span><span class="p">]),</span> <span class="o">**</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">potency</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">pot</span><span class="si">:</span><span class="s2">.1e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">pot_log</span><span class="p">,</span> <span class="n">pot_log</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pot_y</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">color_best</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">),</span>
+                <span class="n">legendgroup</span><span class="o">=</span><span class="s2">&quot;Potency estimates&quot;</span><span class="p">,</span>
+                <span class="n">legendgrouptitle_text</span><span class="o">=</span><span class="s2">&quot;Potency estimates&quot;</span><span class="p">,</span>
+            <span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">pars_dict</span></div>
+
+
+<div class="viewcode-block" id="check_reset"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.check_reset">[docs]</a><span class="k">def</span> <span class="nf">check_reset</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check and set session state variables.</span>
+
+<span class="sd">    This function checks and sets various session state variables used by the app. It ensures that necessary variables are</span>
+<span class="sd">    initialized or reset as needed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">reset_id</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s2">&quot;aeid&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="s2">&quot;last_aeid&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">last_aeid</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="s2">&quot;spid&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;sort_by&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">sort_by</span> <span class="o">=</span> <span class="s2">&quot;hitcall&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;asc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">asc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s2">&quot;length&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="s2">&quot;trigger&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;df&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s2">&quot;series&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="reset_id"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.reset_id">[docs]</a><span class="k">def</span> <span class="nf">reset_id</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reset the index (id) of the current series.</span>
+
+<span class="sd">    This function resets the index (id) of the currently selected series to the initial value.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="trigger"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.trigger">[docs]</a><span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="n">trigger</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the trigger in session state.</span>
+
+<span class="sd">    This function sets the trigger value in the session state, which is used to control app behavior based on user</span>
+<span class="sd">    interactions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trigger (str): The trigger value to set.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="n">trigger</span></div>
+
+
+<div class="viewcode-block" id="filter_spid"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.filter_spid">[docs]</a><span class="k">def</span> <span class="nf">filter_spid</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter data based on the selected SPID.</span>
+
+<span class="sd">    This function filters the data based on the selected Sample ID (SPID) and updates the hitcall slider accordingly.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="s2">&quot;spid&quot;</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">hitcall_slider</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sort"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.sort">[docs]</a><span class="k">def</span> <span class="nf">sort</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort the data based on user-selected criteria.</span>
+
+<span class="sd">    This function sorts the data in the session state dataframe based on user-selected sorting criteria and ascending/descending</span>
+<span class="sd">    order.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
+        <span class="n">by</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">sort_by</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">asc</span><span class="p">,</span> <span class="n">na_position</span><span class="o">=</span><span class="s1">&#39;last&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">reset_id</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="update"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.update">[docs]</a><span class="k">def</span> <span class="nf">update</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the app state and visualization.</span>
+
+<span class="sd">    This function updates the app&#39;s state and visualization based on user interactions and triggers. It handles loading data,</span>
+<span class="sd">    filtering, sorting, and updating the Plotly figure.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing the updated Plotly figure and a dictionary of fitted curve parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">trigger</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">trigger</span>
+    <span class="n">fresh_load</span> <span class="o">=</span> <span class="s2">&quot;df&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span> <span class="ow">or</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">last_aeid</span> <span class="o">!=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span>
+    <span class="n">refresh_load</span> <span class="o">=</span> <span class="n">fresh_load</span> <span class="ow">or</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;spid&quot;</span><span class="p">,</span> <span class="s2">&quot;hitcall_slider&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">refresh_load</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="p">)</span>  <span class="c1"># requires id parameter for unique caching</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">last_aeid</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span>
+        <span class="k">if</span> <span class="n">fresh_load</span><span class="p">:</span>
+            <span class="n">sort</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s2">&quot;hitcall_slider&quot;</span><span class="p">:</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">hitcall_slider</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> &lt;= hitcall &lt;= </span><span class="si">{</span><span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;hitcall.isna()&quot;</span><span class="p">)])</span> <span class="k">if</span> <span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="n">df</span>
+        <span class="n">reset_id</span><span class="p">()</span>
+
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+
+    <span class="k">if</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;sort_by&quot;</span><span class="p">,</span> <span class="s2">&quot;asc&quot;</span><span class="p">,</span> <span class="s2">&quot;hitcall_slider&quot;</span><span class="p">]:</span>
+        <span class="n">sort</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s2">&quot;next&quot;</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s2">&quot;prev&quot;</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">ERR_MSG</span><span class="p">)</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">%</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s2">&quot;spid&quot;</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input string </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;🚨&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s1">&#39;spid&#39;</span><span class="p">]</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span> <span class="o">=</span> <span class="n">get_series</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">ERR_MSG</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">init_figure</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">cutoff</span><span class="p">)</span>
+    <span class="n">pars_dict</span> <span class="o">=</span> <span class="n">add_curves</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span><span class="p">,</span> <span class="n">fig</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">pars_dict</span></div>
+
+
+<div class="viewcode-block" id="get_assay_and_sample_info"><a class="viewcode-back" href="../../../src.app.html#src.app.curve_surfer_helper.get_assay_and_sample_info">[docs]</a><span class="k">def</span> <span class="nf">get_assay_and_sample_info</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get assay and sample information for display.</span>
+
+<span class="sd">    This function retrieves assay and sample information for the currently selected AEID and SPID. It formats the information</span>
+<span class="sd">    and prepares it for display in an expander.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Formatted assay and sample information.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assay_infos</span> <span class="o">=</span> <span class="n">get_assay_info</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">aeid</span><span class="p">)</span>
+    <span class="n">assay_component_endpoint_name</span> <span class="o">=</span> <span class="n">assay_infos</span><span class="p">[</span><span class="s2">&quot;assay_component_endpoint_name&quot;</span><span class="p">]</span>
+    <span class="n">assay_component_endpoint_desc</span> <span class="o">=</span> <span class="n">assay_infos</span><span class="p">[</span><span class="s2">&quot;assay_component_endpoint_desc&quot;</span><span class="p">]</span>
+    <span class="c1"># st.subheader(f&quot;AEID: {st.session_state.aeid} | {assay_component_endpoint_name}&quot;)</span>
+    <span class="n">casn</span><span class="p">,</span> <span class="n">chnm</span><span class="p">,</span> <span class="n">dsstox_substance_id</span> <span class="o">=</span> <span class="n">get_chem_info</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span><span class="p">)</span>
+    <span class="n">dsstox_substance_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://comptox.epa.gov/dashboard/chemical/details/</span><span class="si">{</span><span class="n">dsstox_substance_id</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">dsstox_substance_id</span> <span class="k">else</span> <span class="s2">&quot;N/A&quot;</span>
+    <span class="n">casn</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://commonchemistry.cas.org/detail?cas_rn=</span><span class="si">{</span><span class="n">casn</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">casn</span> <span class="k">else</span> <span class="s2">&quot;N/A&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;Hitcall&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="s1">&#39;hitcall&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;SPID&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">spid</span><span class="p">],</span>
+            <span class="s2">&quot;Chemical&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">chnm</span><span class="p">],</span>
+            <span class="s2">&quot;DSSTOXSID&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">dsstox_substance_id</span><span class="p">],</span>
+            <span class="s2">&quot;CASRN&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">casn</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Sample info :petri_dish:&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column_config</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;Hitcall&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">column_config</span><span class="o">.</span><span class="n">ProgressColumn</span><span class="p">(</span>
+                <span class="s2">&quot;Hitcall&quot;</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Bioactivity score :biohazard_sign: &quot;</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">max_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;Chemical&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">column_config</span><span class="o">.</span><span class="n">TextColumn</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Chemical&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Chemical Name :test_tube:&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;SPID&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">column_config</span><span class="o">.</span><span class="n">TextColumn</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;SPID&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Sample :id:&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;DSSTOXSID&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">column_config</span><span class="o">.</span><span class="n">LinkColumn</span><span class="p">(</span><span class="s2">&quot;DSSTOXSID&quot;</span><span class="p">,</span>
+                                                     <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Distributed Structure-Searchable Toxicity Substance ID. Link to dashboard :bar_chart:&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;CASRN&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">column_config</span><span class="o">.</span><span class="n">LinkColumn</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CASRN&quot;</span><span class="p">,</span>
+                                                 <span class="n">help</span><span class="o">=</span><span class="s2">&quot;CAS Registry Number :information_source:&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+                     <span class="n">hide_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="p">)</span>
+    <span class="k">return</span> <span class="n">assay_component_endpoint_desc</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, R. Bosshard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

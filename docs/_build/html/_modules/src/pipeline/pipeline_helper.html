@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.pipeline.pipeline_helper &mdash; pytcpl 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pytcpl
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pytcpl</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.pipeline.pipeline_helper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.pipeline.pipeline_helper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">streamlit</span> <span class="k">as</span> <span class="nn">st</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">st_files_connection</span> <span class="kn">import</span> <span class="n">FilesConnection</span>
+
+<span class="kn">from</span> <span class="nn">src.utils.constants</span> <span class="kn">import</span> <span class="n">CONFIG_DIR_PATH</span><span class="p">,</span> <span class="n">CONFIG_PATH</span><span class="p">,</span> <span class="n">AEIDS_LIST_PATH</span><span class="p">,</span> <span class="n">DDL_PATH</span><span class="p">,</span> \
+    <span class="n">DATA_DIR_PATH</span><span class="p">,</span> <span class="n">LOG_DIR_PATH</span><span class="p">,</span> <span class="n">RAW_DIR_PATH</span><span class="p">,</span> <span class="n">CUSTOM_OUTPUT_DIR_PATH</span><span class="p">,</span> <span class="n">INPUT_DIR_PATH</span><span class="p">,</span> \
+    <span class="n">CUTOFF_DIR_PATH</span><span class="p">,</span> <span class="n">CUTOFF_TABLE</span><span class="p">,</span> <span class="n">AEID_PATH</span>
+<span class="kn">from</span> <span class="nn">src.utils.models.helper</span> <span class="kn">import</span> <span class="n">get_mad</span>
+<span class="kn">from</span> <span class="nn">src.utils.query_db</span> <span class="kn">import</span> <span class="n">get_sqlalchemy_engine</span>
+<span class="kn">from</span> <span class="nn">src.utils.query_db</span> <span class="kn">import</span> <span class="n">query_db</span>
+
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">START_TIME</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">AEID</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="launch"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.launch">[docs]</a><span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the processing instance, set up logging, and retrieve a list of assay endpoints to process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): Configuration settings.</span>
+<span class="sd">        config_path (str): Path to the configuration file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing instance ID, total instances, assay endpoint ID list, and logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">init_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;--instance_id&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Instance ID for workload distribution&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="s2">&quot;--instances_total&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Total number of instances&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">instance_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">instances_total</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Please provide both --instance_id or -i and --instances_total or -n arguments&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">instance_id</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">instance_id</span>
+    <span class="n">instances_total</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">instances_total</span>
+
+    <span class="k">global</span> <span class="n">START_TIME</span>
+    <span class="n">START_TIME</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">create_empty_log_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="n">log_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LOG_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;log_</span><span class="si">{</span><span class="n">instance_id</span><span class="si">}</span><span class="s2">.log&quot;</span><span class="p">)</span>
+    <span class="n">error_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LOG_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;errors_</span><span class="si">{</span><span class="n">instance_id</span><span class="si">}</span><span class="s2">.log&quot;</span><span class="p">)</span>
+    <span class="n">create_empty_log_file</span><span class="p">(</span><span class="n">log_filename</span><span class="p">)</span>
+    <span class="n">create_empty_log_file</span><span class="p">(</span><span class="n">error_filename</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">ElapsedTimeFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;%&#39;</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">START_TIME</span>
+
+        <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span>
+            <span class="n">hours</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="mi">3600</span><span class="p">)</span>
+            <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">remainder</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="n">hundredths</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">delta</span><span class="o">.</span><span class="n">microseconds</span> <span class="o">/</span> <span class="mi">10000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span>
+            <span class="n">elapsed_time_formatted</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">minutes</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">hundredths</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time_formatted</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">file_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">console_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">ElapsedTimeFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">console_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
+
+    <span class="n">aeid_list</span> <span class="o">=</span> <span class="n">get_partition</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span> <span class="n">instances_total</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🚀 Pytcpl launched!&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚙️ Configuration located in </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📜 Running pipeline for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">aeid_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> assay endpoints (See &#39;config/aeid_list.in&#39;)&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🧩 Engine: instance_id=</span><span class="si">{</span><span class="n">instance_id</span><span class="si">}</span><span class="s2">, instances_total=</span><span class="si">{</span><span class="n">instances_total</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_writing_db&#39;</span><span class="p">]:</span>
+        <span class="n">check_db</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">instance_id</span><span class="p">,</span> <span class="n">instances_total</span><span class="p">,</span> <span class="n">aeid_list</span><span class="p">,</span> <span class="n">logger</span></div>
+
+
+<div class="viewcode-block" id="prolog"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.prolog">[docs]</a><span class="k">def</span> <span class="nf">prolog</span><span class="p">(</span><span class="n">new_aeid</span><span class="p">,</span> <span class="n">instance_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize processing for a specific assay endpoint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_aeid (int): New assay endpoint ID.</span>
+<span class="sd">        instance_id (int): Instance ID for workload distribution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">init_aeid</span><span class="p">(</span><span class="n">new_aeid</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">AEID_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;aeid_</span><span class="si">{</span><span class="n">instance_id</span><span class="si">}</span><span class="s1">.in&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">AEID</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;#-&quot;</span> <span class="o">*</span> <span class="mi">50</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">assay_component_endpoint_name</span> <span class="o">=</span> <span class="n">get_assay_info</span><span class="p">(</span><span class="n">AEID</span><span class="p">)[</span><span class="s1">&#39;assay_component_endpoint_name&#39;</span><span class="p">]</span>
+    <span class="n">assay_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">assay_component_endpoint_name</span><span class="si">}</span><span class="s2"> (aeid=</span><span class="si">{</span><span class="n">AEID</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🌱 Start processing new assay endpoint: </span><span class="si">{</span><span class="n">assay_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="init_aeid"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.init_aeid">[docs]</a><span class="k">def</span> <span class="nf">init_aeid</span><span class="p">(</span><span class="n">new_aeid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the global assay endpoint identifier (AEID).</span>
+
+<span class="sd">    This function sets the global AEID (assay endpoint identifier) to the provided value. The AEID is used to identify</span>
+<span class="sd">    the specific assay endpoint being processed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_aeid (int): The new AEID value to set.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">AEID</span>
+    <span class="n">AEID</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_aeid</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="epilog"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.epilog">[docs]</a><span class="k">def</span> <span class="nf">epilog</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Log the completion of processing for an assay endpoint.</span>
+
+<span class="sd">    This function is called to log the completion of processing for a specific assay endpoint. It can be used to</span>
+<span class="sd">    indicate that the processing for a particular assay endpoint has finished.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🥕 Assay endpoint processing completed</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bye"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.bye">[docs]</a><span class="k">def</span> <span class="nf">bye</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform cleanup and logging as the pipeline completes.</span>
+
+<span class="sd">    This function is called at the end of the pipeline to perform any necessary cleanup tasks and log</span>
+<span class="sd">    completion messages.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🎊 Pipeline completed!&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;👋 Goodbye&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_db"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.check_db">[docs]</a><span class="k">def</span> <span class="nf">check_db</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the database schema for required tables and optionally drop new tables if enabled.</span>
+
+<span class="sd">    This function checks whether the required database tables exist in the schema. It also provides the option</span>
+<span class="sd">    to drop newly created tables if the configuration specifies enabling dropping new tables.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_dropping_all_new_tables&#39;</span><span class="p">]:</span>
+        <span class="n">query_db</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DROP TABLE IF EXISTS </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;new_db_tables&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🧹 Dropped all relevant tables&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ddl_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="n">DDL_PATH</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ddl_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">query_db</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;👍 Verified the existence of required DB tables&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_assay_info"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_assay_info">[docs]</a><span class="k">def</span> <span class="nf">get_assay_info</span><span class="p">(</span><span class="n">aeid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve information about a specific assay endpoint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        aeid (int): Assay endpoint ID.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing assay endpoint information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tbl_endpoint</span> <span class="o">=</span> <span class="s1">&#39;assay_component_endpoint&#39;</span>
+    <span class="n">tbl_component</span> <span class="o">=</span> <span class="s1">&#39;assay_component&#39;</span>
+    <span class="n">path_endpoint</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_endpoint</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">path_component</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_component</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_endpoint</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_component</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">endpoint_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT * FROM </span><span class="si">{</span><span class="n">tbl_endpoint</span><span class="si">}</span><span class="s2"> WHERE aeid = </span><span class="si">{</span><span class="n">aeid</span><span class="si">}</span><span class="s2">;&quot;</span>
+            <span class="n">acid</span> <span class="o">=</span> <span class="n">query_db</span><span class="p">(</span><span class="n">endpoint_query</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;acid&#39;</span><span class="p">]</span>
+            <span class="n">component_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT * FROM </span><span class="si">{</span><span class="n">tbl_component</span><span class="si">}</span><span class="s2"> WHERE acid = </span><span class="si">{</span><span class="n">acid</span><span class="si">}</span><span class="s2">;&quot;</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">query_db</span><span class="p">(</span><span class="n">endpoint_query</span><span class="p">),</span> <span class="n">query_db</span><span class="p">(</span><span class="n">component_query</span><span class="p">),</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;acid&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">path_endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">tbl_endpoint</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">path_component</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">tbl_component</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">endpoint_df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_endpoint</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+            <span class="n">component_df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_component</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">endpoint_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_endpoint</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="n">component_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_component</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+
+    <span class="n">endpoint_df</span> <span class="o">=</span> <span class="n">endpoint_df</span><span class="p">[</span><span class="n">endpoint_df</span><span class="p">[</span><span class="s1">&#39;aeid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">aeid</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">endpoint_df</span><span class="p">,</span> <span class="n">component_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;acid&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path_endpoint</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">path_endpoint</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="fetch_raw_data"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.fetch_raw_data">[docs]</a><span class="k">def</span> <span class="nf">fetch_raw_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetch raw data for a given assay endpoint and compute efficacy cutoffs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: Processed DataFrame containing raw data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⏳ Fetching raw data..&quot;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">RAW_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">select_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">,</span> <span class="s1">&#39;aeid&#39;</span><span class="p">,</span> <span class="s1">&#39;logc&#39;</span><span class="p">,</span> <span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="s1">&#39;cndx&#39;</span><span class="p">,</span> <span class="s1">&#39;wllt&#39;</span><span class="p">]</span>
+        <span class="n">table_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mc0.m0id&#39;</span><span class="p">:</span> <span class="s1">&#39;mc1.m0id&#39;</span><span class="p">,</span> <span class="s1">&#39;mc1.m0id&#39;</span><span class="p">:</span> <span class="s1">&#39;mc3.m0id&#39;</span><span class="p">}</span>
+        <span class="n">join_string</span> <span class="o">=</span> <span class="s1">&#39; AND &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">table_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+        <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">select_cols</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span> \
+                  <span class="sa">f</span><span class="s2">&quot;FROM mc0, mc1, mc3 &quot;</span> \
+                  <span class="sa">f</span><span class="s2">&quot;WHERE </span><span class="si">{</span><span class="n">join_string</span><span class="si">}</span><span class="s2"> AND aeid = </span><span class="si">{</span><span class="n">AEID</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ℹ️ Loaded </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> single datapoints&quot;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🌡️ Computing efficacy cutoff&quot;</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">other_mthds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bmed.aeid.lowconc.twells&#39;</span><span class="p">,</span> <span class="s1">&#39;onesd.aeid.lowconc.twells&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">mthd</span> <span class="ow">in</span> <span class="n">load_method</span><span class="p">(</span><span class="n">lvl</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">aeid</span><span class="o">=</span><span class="n">AEID</span><span class="p">)</span> <span class="o">+</span> <span class="n">other_mthds</span><span class="p">:</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">mthd</span><span class="p">:</span> <span class="n">mc4_mthds</span><span class="p">(</span><span class="n">mthd</span><span class="p">,</span> <span class="n">df</span><span class="p">)})</span>
+
+    <span class="n">bmad</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;bmad.aeid.lowconc.twells&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;bmad.aeid.lowconc.twells&#39;</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">else</span> <span class="n">values</span><span class="p">[</span>
+        <span class="s1">&#39;bmad.aeid.lowconc.nwells&#39;</span><span class="p">]</span>
+    <span class="n">bmed</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;bmed.aeid.lowconc.twells&#39;</span><span class="p">]</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s1">&#39;onesd.aeid.lowconc.twells&#39;</span><span class="p">]</span>
+
+    <span class="n">cutoffs</span> <span class="o">=</span> <span class="p">[</span><span class="n">mc5_mthds</span><span class="p">(</span><span class="n">mthd</span><span class="p">,</span> <span class="n">bmad</span><span class="p">)</span> <span class="k">for</span> <span class="n">mthd</span> <span class="ow">in</span> <span class="n">load_method</span><span class="p">(</span><span class="n">lvl</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">aeid</span><span class="o">=</span><span class="n">AEID</span><span class="p">)]</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cutoffs</span><span class="p">)),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;aeid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">AEID</span><span class="p">],</span> <span class="s1">&#39;bmad&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">bmad</span><span class="p">],</span> <span class="s1">&#39;bmed&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">bmed</span><span class="p">],</span> <span class="s1">&#39;onesd&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">sd</span><span class="p">],</span> <span class="s1">&#39;cutoff&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">cutoff</span><span class="p">]})</span>
+
+    <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_writing_db&#39;</span><span class="p">]:</span>
+        <span class="n">db_delete</span><span class="p">(</span><span class="s1">&#39;cutoff&#39;</span><span class="p">)</span>
+        <span class="n">db_append</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s1">&#39;cutoff&#39;</span><span class="p">)</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUTOFF_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="db_append"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.db_append">[docs]</a><span class="k">def</span> <span class="nf">db_append</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">tbl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Append data to a database table.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dat (pandas.DataFrame): Data to append.</span>
+<span class="sd">        tbl (str): Table name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_writing_db&#39;</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="n">get_sqlalchemy_engine</span><span class="p">()</span>
+            <span class="n">dat</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">engine</span><span class="p">,</span> <span class="n">if_exists</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR_PATH</span><span class="p">,</span> <span class="n">tbl</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">dat</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="db_delete"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.db_delete">[docs]</a><span class="k">def</span> <span class="nf">db_delete</span><span class="p">(</span><span class="n">tbl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete data from a database table.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tbl (str): Table name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_writing_db&#39;</span><span class="p">]:</span>
+        <span class="n">query_db</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DELETE FROM </span><span class="si">{</span><span class="n">tbl</span><span class="si">}</span><span class="s2"> WHERE aeid = </span><span class="si">{</span><span class="n">AEID</span><span class="si">}</span><span class="s2">;&quot;</span><span class="p">)</span>
+
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_DIR_PATH</span><span class="p">,</span> <span class="n">tbl</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_output"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.write_output">[docs]</a><span class="k">def</span> <span class="nf">write_output</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write output data to the database and custom output files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): DataFrame containing output data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_metadata</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">subset_chemicals</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;output_cols_filter&#39;</span><span class="p">]]</span>
+    <span class="n">mb_value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;💽 Writing output data to DB (~</span><span class="si">{</span><span class="n">mb_value</span><span class="si">}</span><span class="s2">)..&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;conc&#39;</span><span class="p">,</span> <span class="s1">&#39;resp&#39;</span><span class="p">,</span> <span class="s1">&#39;fit_params&#39;</span><span class="p">]:</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">)</span>
+    <span class="n">db_delete</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">)</span>
+    <span class="n">db_append</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Custom data</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUSTOM_OUTPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">,</span> <span class="s1">&#39;hitcall&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="subset_chemicals"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.subset_chemicals">[docs]</a><span class="k">def</span> <span class="nf">subset_chemicals</span><span class="p">(</span><span class="n">dat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subset chemicals based on consensus hit logic and keep the first occurrence.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dat (pandas.DataFrame): DataFrame containing data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: Subsetted DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># A chemical id (chid) can have more than one sample id (spid). Use consensus hit (chit) logic: max</span>
+    <span class="n">dat</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">,</span> <span class="s1">&#39;hitcall&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+    <span class="c1"># Drop duplicates based on &#39;chid&#39; and keep the first occurrence (max &#39;hitcall&#39; value)</span>
+    <span class="k">return</span> <span class="n">dat</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_metadata"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_metadata">[docs]</a><span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enhance the input DataFrame with additional metadata and replace missing chemical IDs.</span>
+
+<span class="sd">    This function takes a DataFrame containing experimental data and enhances it by adding chemical</span>
+<span class="sd">    information and replacing missing `dsstox_substance_id` values based on predefined replacement rules.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Input DataFrame containing experimental data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: Enhanced DataFrame with added chemical information and replaced `dsstox_substance_id` values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">])</span>
+    <span class="n">chemical_df</span> <span class="o">=</span> <span class="n">get_chemical</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;spid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">chemical_df</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;spid&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;chid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;chid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;chid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">replacement_values</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;DMSO&#39;</span><span class="p">:</span> <span class="s1">&#39;DTXSID2021735&#39;</span><span class="p">,</span> <span class="s1">&#39;Beta-Estradiol&#39;</span><span class="p">:</span> <span class="s1">&#39;DTXSID0020573&#39;</span><span class="p">,</span> <span class="p">}</span>
+    <span class="n">index_mask</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+    <span class="c1"># Iterate through the DataFrame and replace masked values</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">index_mask</span><span class="p">]</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">spid_value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">]</span>
+        <span class="n">replacement_value</span> <span class="o">=</span> <span class="n">replacement_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">spid_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">replacement_value</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">replacement_value</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="get_chemical"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_chemical">[docs]</a><span class="k">def</span> <span class="nf">get_chemical</span><span class="p">(</span><span class="n">spids</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve chemical information for a list of sample IDs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spids (list): List of sample IDs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: DataFrame containing chemical information for the specified sample IDs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="s1">&#39;sample&#39;</span>
+    <span class="n">chemical</span> <span class="o">=</span> <span class="s1">&#39;chemical&#39;</span>
+    <span class="n">path_sample</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sample</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">path_chemical</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">chemical</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_sample</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_chemical</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">              SELECT spid, chid, dsstox_substance_id, chnm, casn</span>
+<span class="s2">              FROM </span><span class="si">{</span><span class="n">sample</span><span class="si">}</span>
+<span class="s2">              LEFT JOIN </span><span class="si">{</span><span class="n">chemical</span><span class="si">}</span><span class="s2"> ON </span><span class="si">{</span><span class="n">chemical</span><span class="si">}</span><span class="s2">.chid = </span><span class="si">{</span><span class="n">sample</span><span class="si">}</span><span class="s2">.chid</span>
+<span class="s2">              WHERE spid IN </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">spids</span><span class="p">))</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">              &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">path_sample</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">sample</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">path_chemical</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">chemical</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">sample_df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_sample</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+            <span class="n">chemical_df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_chemical</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sample_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path_sample</span><span class="p">)</span>
+        <span class="n">chemical_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path_chemical</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">sample_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">chemical_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;chid&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;spid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">spids</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;spid&#39;</span><span class="p">,</span> <span class="s1">&#39;chid&#39;</span><span class="p">,</span> <span class="s1">&#39;dsstox_substance_id&#39;</span><span class="p">,</span> <span class="s1">&#39;chnm&#39;</span><span class="p">,</span> <span class="s1">&#39;casn&#39;</span><span class="p">]]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path_sample</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">path_chemical</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="get_assay_component_endpoint"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_assay_component_endpoint">[docs]</a><span class="k">def</span> <span class="nf">get_assay_component_endpoint</span><span class="p">(</span><span class="n">aeid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve assay component endpoint information for a specific assay endpoint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        aeid (int): Assay endpoint ID.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: DataFrame containing assay component endpoint information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tbl</span> <span class="o">=</span> <span class="s1">&#39;assay_component_endpoint&#39;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT aeid, assay_component_endpoint_name, normalized_data_type</span>
+<span class="s2">                FROM </span><span class="si">{</span><span class="n">tbl</span><span class="si">}</span><span class="s2"> </span>
+<span class="s2">                WHERE aeid = </span><span class="si">{</span><span class="n">aeid</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">tbl</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;aeid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">aeid</span><span class="p">][[</span><span class="s1">&#39;aeid&#39;</span><span class="p">,</span> <span class="s1">&#39;assay_component_endpoint_name&#39;</span><span class="p">,</span> <span class="s1">&#39;normalized_data_type&#39;</span><span class="p">]]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="get_cutoff"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_cutoff">[docs]</a><span class="k">def</span> <span class="nf">get_cutoff</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve efficacy cutoff values for a specific assay endpoint.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: DataFrame containing cutoff values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CUTOFF_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT bmad, bmed, onesd, cutoff</span>
+<span class="s2">                FROM </span><span class="si">{</span><span class="n">CUTOFF_TABLE</span><span class="si">}</span><span class="s2"> </span>
+<span class="s2">                WHERE aeid = </span><span class="si">{</span><span class="n">AEID</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+            <span class="k">return</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">CUTOFF_TABLE</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">AEID</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;bmad&#39;</span><span class="p">,</span> <span class="s1">&#39;bmed&#39;</span><span class="p">,</span> <span class="s1">&#39;onesd&#39;</span><span class="p">,</span> <span class="s1">&#39;cutoff&#39;</span><span class="p">]]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="mc4_mthds"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.mc4_mthds">[docs]</a><span class="k">def</span> <span class="nf">mc4_mthds</span><span class="p">(</span><span class="n">mthd</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute specific metrics based on input data for level 4 methods.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mthd (str): Method name.</span>
+<span class="sd">        df (pandas.DataFrame): Input data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Computed metric value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cndx</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;cndx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">wllt_t</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;wllt&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cndx</span> <span class="o">&amp;</span> <span class="n">wllt_t</span><span class="p">,</span> <span class="s1">&#39;resp&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">mthd</span> <span class="o">==</span> <span class="s1">&#39;bmad.aeid.lowconc.twells&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_mad</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mthd</span> <span class="o">==</span> <span class="s1">&#39;bmad.aeid.lowconc.nwells&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_mad</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;wllt&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;resp&#39;</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">mthd</span> <span class="o">==</span> <span class="s1">&#39;onesd.aeid.lowconc.twells&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">mthd</span> <span class="o">==</span> <span class="s1">&#39;bmed.aeid.lowconc.twells&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">median</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="mc5_mthds"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.mc5_mthds">[docs]</a><span class="k">def</span> <span class="nf">mc5_mthds</span><span class="p">(</span><span class="n">mthd</span><span class="p">,</span> <span class="n">bmad</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get predefined values for level 5 methods or perform computations using bmad.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mthd (str): Method name.</span>
+<span class="sd">        bmad (float): Calculated bmad value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Method-specific value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;pc20&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s1">&#39;pc50&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s1">&#39;pc70&#39;</span><span class="p">:</span> <span class="mi">70</span><span class="p">,</span>
+        <span class="s1">&#39;log2_1.2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">1.2</span><span class="p">),</span>
+        <span class="s1">&#39;log10_1.2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.2</span><span class="p">),</span>
+        <span class="s1">&#39;log2_2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+        <span class="s1">&#39;log10_2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+        <span class="s1">&#39;neglog2_0.88&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mf">0.88</span><span class="p">),</span>
+        <span class="s1">&#39;coff_2.32&#39;</span><span class="p">:</span> <span class="mf">2.32</span><span class="p">,</span>
+        <span class="s1">&#39;fc0.2&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="s1">&#39;fc0.3&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="s1">&#39;fc0.5&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s1">&#39;pc05&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;pc10&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;pc25&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="s1">&#39;pc30&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="s1">&#39;pc95&#39;</span><span class="p">:</span> <span class="mi">95</span><span class="p">,</span>
+        <span class="s1">&#39;bmad1&#39;</span><span class="p">:</span> <span class="n">bmad</span><span class="p">,</span>
+        <span class="s1">&#39;bmad2&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;bmad3&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s1">&#39;bmad4&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;bmad5&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;bmad6&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;bmad10&#39;</span><span class="p">:</span> <span class="n">bmad</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="c1"># &#39;maxmed20pct&#39;: lambda df: df[&#39;max_med&#39;].aggregate(lambda x: np.max(x) * 0.20),  # is never used</span>
+    <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mthd</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_method"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.load_method">[docs]</a><span class="k">def</span> <span class="nf">load_method</span><span class="p">(</span><span class="n">lvl</span><span class="p">,</span> <span class="n">aeid</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load and retrieve the list of methods for a specific level and assay endpoint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lvl (int): Method level.</span>
+<span class="sd">        aeid (int): Assay endpoint ID.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of method names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tbl_aeid</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_aeid&quot;</span>
+    <span class="n">tbl_methods</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_methods&quot;</span>
+    <span class="n">path_aeid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_aeid</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">path_methods</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">INPUT_DIR_PATH</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_methods</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_aeid</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path_methods</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span> <span class="ow">or</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_allowing_reading_remote&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;enable_reading_db&#39;</span><span class="p">]:</span>
+            <span class="n">flds</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;b.mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd AS mthd&quot;</span><span class="p">]</span>
+            <span class="n">tbls</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_aeid</span><span class="si">}</span><span class="s2"> AS a&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tbl_methods</span><span class="si">}</span><span class="s2"> AS b&quot;</span><span class="p">]</span>
+            <span class="n">qstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">flds</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span> \
+                      <span class="sa">f</span><span class="s2">&quot;FROM </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tbls</span><span class="p">)</span><span class="si">}</span><span class="s2"> &quot;</span> \
+                      <span class="sa">f</span><span class="s2">&quot;WHERE a.mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd_id = b.mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd_id &quot;</span> \
+                      <span class="sa">f</span><span class="s2">&quot;AND aeid = </span><span class="si">{</span><span class="n">aeid</span><span class="si">}</span><span class="s2">;&quot;</span>
+            <span class="k">return</span> <span class="n">query_db</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">qstring</span><span class="p">)[</span><span class="s2">&quot;mthd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">experimental_connection</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">FilesConnection</span><span class="p">)</span>
+            <span class="n">path_aeid</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">tbl_aeid</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">path_methods</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/input/</span><span class="si">{</span><span class="n">tbl_methods</span><span class="si">}{</span><span class="n">CONFIG</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">df_aeid</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_aeid</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+            <span class="n">df_methods</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path_methods</span><span class="p">,</span> <span class="n">input_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_aeid</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path_aeid</span><span class="p">)</span>
+        <span class="n">df_methods</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path_methods</span><span class="p">)</span>
+
+    <span class="n">df_aeid</span> <span class="o">=</span> <span class="n">df_aeid</span><span class="p">[</span><span class="n">df_aeid</span><span class="p">[</span><span class="s1">&#39;aeid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">aeid</span><span class="p">]</span>
+    <span class="n">level_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df_aeid</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_methods</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd_id&quot;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;mc</span><span class="si">{</span><span class="n">lvl</span><span class="si">}</span><span class="s2">_mthd_id&quot;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">level_col</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read from </span><span class="si">{</span><span class="n">path_aeid</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">path_methods</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="load_config"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.load_config">[docs]</a><span class="k">def</span> <span class="nf">load_config</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load and retrieve the configuration settings.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing configuration settings and configuration directory path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">CONFIG_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">config</span><span class="p">,</span> <span class="n">CONFIG_DIR_PATH</span></div>
+
+
+<div class="viewcode-block" id="init_config"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.init_config">[docs]</a><span class="k">def</span> <span class="nf">init_config</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the global configuration variable.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): Configuration settings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">CONFIG</span>
+    <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="get_partition"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_partition">[docs]</a><span class="k">def</span> <span class="nf">get_partition</span><span class="p">(</span><span class="n">instance_id</span><span class="p">,</span> <span class="n">instances_total</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divide a list of assay endpoints into partitions for distributed processing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        instance_id (int): Instance ID for workload distribution.</span>
+<span class="sd">        instances_total (int): Total number of instances.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of assay endpoint IDs for the given instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">read_aeids</span><span class="p">():</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">AEIDS_LIST_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">ids_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">ids_list</span>
+
+    <span class="n">all_ids</span> <span class="o">=</span> <span class="n">read_aeids</span><span class="p">()</span>
+    <span class="n">partition_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span> <span class="o">//</span> <span class="n">instances_total</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="n">instance_id</span> <span class="o">*</span> <span class="n">partition_size</span>
+    <span class="n">end_idx</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="n">partition_size</span>
+    <span class="k">return</span> <span class="n">all_ids</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_formatted_time_elapsed"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_formatted_time_elapsed">[docs]</a><span class="k">def</span> <span class="nf">get_formatted_time_elapsed</span><span class="p">(</span><span class="n">start_time</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get formatted time elapsed since a specific time.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        start_time (datetime): Start time for elapsed time calculation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Formatted elapsed time string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="n">hours</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="mi">3600</span><span class="p">)</span>
+    <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">remainder</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">hundredths</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">delta</span><span class="o">.</span><span class="n">microseconds</span> <span class="o">/</span> <span class="mi">10000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">elapsed_time_formatted</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">hours</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">minutes</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">hundredths</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">]&quot;</span>
+    <span class="k">return</span> <span class="n">elapsed_time_formatted</span></div>
+
+
+<div class="viewcode-block" id="get_msg_with_elapsed_time"><a class="viewcode-back" href="../../../src.pipeline.html#src.pipeline.pipeline_helper.get_msg_with_elapsed_time">[docs]</a><span class="k">def</span> <span class="nf">get_msg_with_elapsed_time</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add elapsed time to a message.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        msg (str): Message.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Message with elapsed time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_formatted_time_elapsed</span><span class="p">(</span><span class="n">START_TIME</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, R. Bosshard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.pipeline package &mdash; pytcpl 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src.utils package" href="src.utils.html" />
+    <link rel="prev" title="src.app package" href="src.app.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pytcpl
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="src.html">src package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="src.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.app.html">src.app package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">src.pipeline package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.utils.html">src.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.html#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pytcpl</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="src.html">src package</a></li>
+      <li class="breadcrumb-item active">src.pipeline package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/src.pipeline.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="src-pipeline-package">
+<h1>src.pipeline package<a class="headerlink" href="#src-pipeline-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-src.pipeline.pipeline">
+<span id="src-pipeline-pipeline-module"></span><h2>src.pipeline.pipeline module<a class="headerlink" href="#module-src.pipeline.pipeline" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline.pipeline">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline.</span></span><span class="sig-name descname"><span class="pre">pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confg_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline.html#pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline.pipeline" title="Permalink to this definition"></a></dt>
+<dd><p>Execute the data processing pipeline for a list of assay endpoints.</p>
+<p>This function executes the complete data processing pipeline for a list of assay endpoints. The pipeline includes
+data retrieval, preprocessing, modeling, and output writing for each assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – A dictionary containing configuration parameters for the pipeline.</p></li>
+<li><p><strong>confg_path</strong> (<em>str</em>) – The path to the configuration file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p>Note:
+This function iterates over a list of assay endpoint IDs and performs the following steps for each endpoint:
+1. Launches the processing instance and prepares the logging.
+2. Retrieves raw data for the given assay endpoint.
+3. Processes the raw data according to the provided configuration.
+4. Writes the processed output data.
+5. Finalizes the processing for the endpoint.
+If an exception occurs during processing, an error message is logged and written to an error file.</p>
+</dd></dl>
+
+</section>
+<section id="module-src.pipeline.pipeline_helper">
+<span id="src-pipeline-pipeline-helper-module"></span><h2>src.pipeline.pipeline_helper module<a class="headerlink" href="#module-src.pipeline.pipeline_helper" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.bye">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">bye</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#bye"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.bye" title="Permalink to this definition"></a></dt>
+<dd><p>Perform cleanup and logging as the pipeline completes.</p>
+<p>This function is called at the end of the pipeline to perform any necessary cleanup tasks and log
+completion messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.check_db">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">check_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#check_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.check_db" title="Permalink to this definition"></a></dt>
+<dd><p>Check the database schema for required tables and optionally drop new tables if enabled.</p>
+<p>This function checks whether the required database tables exist in the schema. It also provides the option
+to drop newly created tables if the configuration specifies enabling dropping new tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.db_append">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">db_append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tbl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#db_append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.db_append" title="Permalink to this definition"></a></dt>
+<dd><p>Append data to a database table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dat</strong> (<em>pandas.DataFrame</em>) – Data to append.</p></li>
+<li><p><strong>tbl</strong> (<em>str</em>) – Table name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.db_delete">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">db_delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tbl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#db_delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.db_delete" title="Permalink to this definition"></a></dt>
+<dd><p>Delete data from a database table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tbl</strong> (<em>str</em>) – Table name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.epilog">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">epilog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#epilog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.epilog" title="Permalink to this definition"></a></dt>
+<dd><p>Log the completion of processing for an assay endpoint.</p>
+<p>This function is called to log the completion of processing for a specific assay endpoint. It can be used to
+indicate that the processing for a particular assay endpoint has finished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.fetch_raw_data">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">fetch_raw_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#fetch_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.fetch_raw_data" title="Permalink to this definition"></a></dt>
+<dd><p>Fetch raw data for a given assay endpoint and compute efficacy cutoffs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed DataFrame containing raw data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_assay_component_endpoint">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_assay_component_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_assay_component_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_assay_component_endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve assay component endpoint information for a specific assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>aeid</strong> (<em>int</em>) – Assay endpoint ID.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame containing assay component endpoint information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_assay_info">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_assay_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_assay_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_assay_info" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve information about a specific assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>aeid</strong> (<em>int</em>) – Assay endpoint ID.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing assay endpoint information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_chemical">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_chemical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_chemical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_chemical" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve chemical information for a list of sample IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>spids</strong> (<em>list</em>) – List of sample IDs.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame containing chemical information for the specified sample IDs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_cutoff">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_cutoff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_cutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_cutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve efficacy cutoff values for a specific assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataFrame containing cutoff values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_formatted_time_elapsed">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_formatted_time_elapsed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_formatted_time_elapsed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_formatted_time_elapsed" title="Permalink to this definition"></a></dt>
+<dd><p>Get formatted time elapsed since a specific time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>start_time</strong> (<em>datetime</em>) – Start time for elapsed time calculation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted elapsed time string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_metadata">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Enhance the input DataFrame with additional metadata and replace missing chemical IDs.</p>
+<p>This function takes a DataFrame containing experimental data and enhances it by adding chemical
+information and replacing missing <cite>dsstox_substance_id</cite> values based on predefined replacement rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Input DataFrame containing experimental data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Enhanced DataFrame with added chemical information and replaced <cite>dsstox_substance_id</cite> values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_msg_with_elapsed_time">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_msg_with_elapsed_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_msg_with_elapsed_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_msg_with_elapsed_time" title="Permalink to this definition"></a></dt>
+<dd><p>Add elapsed time to a message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – Message.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Message with elapsed time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.get_partition">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">get_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instances_total</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#get_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.get_partition" title="Permalink to this definition"></a></dt>
+<dd><p>Divide a list of assay endpoints into partitions for distributed processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instance_id</strong> (<em>int</em>) – Instance ID for workload distribution.</p></li>
+<li><p><strong>instances_total</strong> (<em>int</em>) – Total number of instances.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of assay endpoint IDs for the given instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.init_aeid">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">init_aeid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#init_aeid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.init_aeid" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the global assay endpoint identifier (AEID).</p>
+<p>This function sets the global AEID (assay endpoint identifier) to the provided value. The AEID is used to identify
+the specific assay endpoint being processed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_aeid</strong> (<em>int</em>) – The new AEID value to set.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.init_config">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">init_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#init_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.init_config" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the global configuration variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>dict</em>) – Configuration settings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.launch">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">launch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.launch" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the processing instance, set up logging, and retrieve a list of assay endpoints to process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration settings.</p></li>
+<li><p><strong>config_path</strong> (<em>str</em>) – Path to the configuration file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing instance ID, total instances, assay endpoint ID list, and logger.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.load_config">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.load_config" title="Permalink to this definition"></a></dt>
+<dd><p>Load and retrieve the configuration settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing configuration settings and configuration directory path.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.load_method">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">load_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lvl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#load_method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.load_method" title="Permalink to this definition"></a></dt>
+<dd><p>Load and retrieve the list of methods for a specific level and assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lvl</strong> (<em>int</em>) – Method level.</p></li>
+<li><p><strong>aeid</strong> (<em>int</em>) – Assay endpoint ID.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of method names.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.mc4_mthds">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">mc4_mthds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mthd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#mc4_mthds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.mc4_mthds" title="Permalink to this definition"></a></dt>
+<dd><p>Compute specific metrics based on input data for level 4 methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mthd</strong> (<em>str</em>) – Method name.</p></li>
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Input data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed metric value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.mc5_mthds">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">mc5_mthds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mthd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bmad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#mc5_mthds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.mc5_mthds" title="Permalink to this definition"></a></dt>
+<dd><p>Get predefined values for level 5 methods or perform computations using bmad.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mthd</strong> (<em>str</em>) – Method name.</p></li>
+<li><p><strong>bmad</strong> (<em>float</em>) – Calculated bmad value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Method-specific value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.prolog">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">prolog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_aeid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#prolog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.prolog" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize processing for a specific assay endpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_aeid</strong> (<em>int</em>) – New assay endpoint ID.</p></li>
+<li><p><strong>instance_id</strong> (<em>int</em>) – Instance ID for workload distribution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.subset_chemicals">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">subset_chemicals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#subset_chemicals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.subset_chemicals" title="Permalink to this definition"></a></dt>
+<dd><p>Subset chemicals based on consensus hit logic and keep the first occurrence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dat</strong> (<em>pandas.DataFrame</em>) – DataFrame containing data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Subsetted DataFrame.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.pipeline_helper.write_output">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.pipeline_helper.</span></span><span class="sig-name descname"><span class="pre">write_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/pipeline_helper.html#write_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.pipeline_helper.write_output" title="Permalink to this definition"></a></dt>
+<dd><p>Write output data to the database and custom output files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – DataFrame containing output data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.pipeline.process">
+<span id="src-pipeline-process-module"></span><h2>src.pipeline.process module<a class="headerlink" href="#module-src.pipeline.process" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.pipeline.process.process">
+<span class="sig-prename descclassname"><span class="pre">src.pipeline.process.</span></span><span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/pipeline/process.html#process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.pipeline.process.process" title="Permalink to this definition"></a></dt>
+<dd><p>Process concentration-response data.</p>
+<p>This function processes concentration-response data stored in a DataFrame. It performs various steps such as
+grouping datapoints, curve fitting, and hit calling for each concentration-response series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The DataFrame containing concentration-response data.</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration settings for data processing.</p></li>
+<li><p><strong>logger</strong> – Logger object for logging messages.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame with processed concentration-response data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.pipeline">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src.pipeline" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="src.app.html" class="btn btn-neutral float-left" title="src.app package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="src.utils.html" class="btn btn-neutral float-right" title="src.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, R. Bosshard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
