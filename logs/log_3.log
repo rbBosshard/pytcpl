@@ -1,0 +1,650 @@
+[00:00:00:00] 🚀 Pytcpl launched!
+[00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/utils/../../config
+[00:00:00:00] 📜 Running pipeline for 92 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=3, instances_total=4
+
+[00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:00:21] 🌱 Start processing new assay endpoint: BSK_CASM3C_Proliferation_up (aeid=222)
+[00:00:00:22] ⏳ Fetching raw data..
+[00:00:00:22] ℹ️ Loaded 13020 single datapoints
+[00:00:00:22] 🌡️ Computing efficacy cutoff
+[00:00:00:36] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:00:08:75] 💽 Writing output data to DB (~0.79 MB)..
+[00:00:08:83] 🥕 Assay endpoint processing completed
+
+[00:00:08:83] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:08:85] 🌱 Start processing new assay endpoint: BSK_KF3CT_ICAM1_up (aeid=260)
+[00:00:08:85] ⏳ Fetching raw data..
+[00:00:08:86] ℹ️ Loaded 13020 single datapoints
+[00:00:08:86] 🌡️ Computing efficacy cutoff
+[00:00:09:02] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:00:12:89] 💽 Writing output data to DB (~0.77 MB)..
+[00:00:12:95] 🥕 Assay endpoint processing completed
+
+[00:00:12:95] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:00:12:98] 🌱 Start processing new assay endpoint: TOX21_RT_HEPG2_FLO_24hr_viability (aeid=2097)
+[00:00:12:98] ⏳ Fetching raw data..
+[00:00:13:01] ℹ️ Loaded 184320 single datapoints
+[00:00:13:01] 🌡️ Computing efficacy cutoff
+[00:00:13:58] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:04:10:26] 💽 Writing output data to DB (~5.59 MB)..
+[00:04:11:16] 🥕 Assay endpoint processing completed
+
+[00:04:11:16] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:04:11:18] 🌱 Start processing new assay endpoint: TOX21_ERb_BLA_Agonist_viability (aeid=2116)
+[00:04:11:18] ⏳ Fetching raw data..
+[00:04:11:28] ℹ️ Loaded 551424 single datapoints
+[00:04:11:28] 🌡️ Computing efficacy cutoff
+[00:04:12:54] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:06:43:40] 💽 Writing output data to DB (~9.35 MB)..
+[00:06:45:06] 🥕 Assay endpoint processing completed
+
+[00:06:45:06] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:06:45:09] 🌱 Start processing new assay endpoint: TOX21_HRE_BLA_Agonist_viability (aeid=2066)
+[00:06:45:09] ⏳ Fetching raw data..
+[00:06:45:22] ℹ️ Loaded 552960 single datapoints
+[00:06:45:23] 🌡️ Computing efficacy cutoff
+[00:06:47:15] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:09:03:41] 💽 Writing output data to DB (~9.30 MB)..
+[00:09:04:99] 🥕 Assay endpoint processing completed
+
+[00:09:04:99] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:09:05:02] 🌱 Start processing new assay endpoint: TOX21_RT_HEPG2_FLO_08hr_viability (aeid=2095)
+[00:09:05:02] ⏳ Fetching raw data..
+[00:09:05:05] ℹ️ Loaded 184320 single datapoints
+[00:09:05:05] 🌡️ Computing efficacy cutoff
+[00:09:05:62] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:11:18:12] 💽 Writing output data to DB (~5.23 MB)..
+[00:11:18:86] 🥕 Assay endpoint processing completed
+
+[00:11:18:86] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:11:18:88] 🌱 Start processing new assay endpoint: TOX21_AhR_LUC_Agonist (aeid=806)
+[00:11:18:88] ⏳ Fetching raw data..
+[00:11:18:98] ℹ️ Loaded 622080 single datapoints
+[00:11:18:98] 🌡️ Computing efficacy cutoff
+[00:11:20:41] 💻 Processing (fit & hit) 10500 concentration-response series
+[00:13:03:52] 💽 Writing output data to DB (~9.48 MB)..
+[00:13:05:12] 🥕 Assay endpoint processing completed
+
+[00:13:05:12] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:13:05:15] 🌱 Start processing new assay endpoint: TOX21_ERa_LUC_VM7_Antagonist_0.1nM_E2_viability (aeid=2054)
+[00:13:05:15] ⏳ Fetching raw data..
+[00:13:05:23] ℹ️ Loaded 552960 single datapoints
+[00:13:05:23] 🌡️ Computing efficacy cutoff
+[00:13:06:53] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:14:28:72] 💽 Writing output data to DB (~9.12 MB)..
+[00:14:30:27] 🥕 Assay endpoint processing completed
+
+[00:14:30:27] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:14:30:29] 🌱 Start processing new assay endpoint: TOX21_AP1_BLA_Agonist_viability (aeid=1847)
+[00:14:30:29] ⏳ Fetching raw data..
+[00:14:30:37] ℹ️ Loaded 552960 single datapoints
+[00:14:30:38] 🌡️ Computing efficacy cutoff
+[00:14:31:61] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:15:50:35] 💽 Writing output data to DB (~9.11 MB)..
+[00:15:51:87] 🥕 Assay endpoint processing completed
+
+[00:15:51:87] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:15:51:90] 🌱 Start processing new assay endpoint: TOX21_RAR_LUC_Agonist_viability (aeid=1660)
+[00:15:51:90] ⏳ Fetching raw data..
+[00:15:51:97] ℹ️ Loaded 551424 single datapoints
+[00:15:51:97] 🌡️ Computing efficacy cutoff
+[00:15:53:18] 💻 Processing (fit & hit) 9321 concentration-response series
+[00:17:06:08] 💽 Writing output data to DB (~8.71 MB)..
+[00:17:07:51] 🥕 Assay endpoint processing completed
+
+[00:17:07:51] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:17:07:54] 🌱 Start processing new assay endpoint: TOX21_PR_BLA_Antagonist_ch1 (aeid=2125)
+[00:17:07:54] ⏳ Fetching raw data..
+[00:17:07:62] ℹ️ Loaded 549888 single datapoints
+[00:17:07:62] 🌡️ Computing efficacy cutoff
+[00:17:08:82] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:18:06:38] 💽 Writing output data to DB (~9.02 MB)..
+[00:18:07:87] 🥕 Assay endpoint processing completed
+
+[00:18:07:87] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:18:07:90] 🌱 Start processing new assay endpoint: TOX21_SBE_BLA_Agonist_viability (aeid=2377)
+[00:18:07:90] ⏳ Fetching raw data..
+[00:18:07:97] ℹ️ Loaded 544160 single datapoints
+[00:18:07:97] 🌡️ Computing efficacy cutoff
+[00:18:09:28] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:18:56:64] 💽 Writing output data to DB (~8.98 MB)..
+[00:18:58:13] 🥕 Assay endpoint processing completed
+
+[00:18:58:13] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:18:58:16] 🌱 Start processing new assay endpoint: OT_ER_ERbERb_0480 (aeid=746)
+[00:18:58:16] ⏳ Fetching raw data..
+[00:18:58:17] ℹ️ Loaded 43470 single datapoints
+[00:18:58:17] 🌡️ Computing efficacy cutoff
+[00:18:58:37] 💻 Processing (fit & hit) 2055 concentration-response series
+[00:19:34:13] 💽 Writing output data to DB (~1.25 MB)..
+[00:19:34:33] 🥕 Assay endpoint processing completed
+
+[00:19:34:33] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:19:34:35] 🌱 Start processing new assay endpoint: TOX21_CASP3_CHO (aeid=2368)
+[00:19:34:35] ⏳ Fetching raw data..
+[00:19:34:43] ℹ️ Loaded 547200 single datapoints
+[00:19:34:43] 🌡️ Computing efficacy cutoff
+[00:19:35:76] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:20:08:26] 💽 Writing output data to DB (~8.96 MB)..
+[00:20:09:75] 🥕 Assay endpoint processing completed
+
+[00:20:09:75] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:20:09:78] 🌱 Start processing new assay endpoint: TOX21_NFkB_BLA_agonist_ratio (aeid=1346)
+[00:20:09:78] ⏳ Fetching raw data..
+[00:20:09:86] ℹ️ Loaded 551424 single datapoints
+[00:20:09:86] 🌡️ Computing efficacy cutoff
+[00:20:11:04] 💻 Processing (fit & hit) 9319 concentration-response series
+[00:20:39:33] 💽 Writing output data to DB (~8.56 MB)..
+[00:20:40:59] 🥕 Assay endpoint processing completed
+
+[00:20:40:59] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:20:40:61] 🌱 Start processing new assay endpoint: ATG_GR_TRANS_up (aeid=122)
+[00:20:40:61] ⏳ Fetching raw data..
+[00:20:40:62] ℹ️ Loaded 36107 single datapoints
+[00:20:40:62] 🌡️ Computing efficacy cutoff
+[00:20:40:82] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:20:53:43] 💽 Writing output data to DB (~1.89 MB)..
+[00:20:53:63] 🥕 Assay endpoint processing completed
+
+[00:20:53:63] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:20:53:66] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Antagonist_ch1 (aeid=1193)
+[00:20:53:66] ⏳ Fetching raw data..
+[00:20:53:73] ℹ️ Loaded 620544 single datapoints
+[00:20:53:73] 🌡️ Computing efficacy cutoff
+[00:20:55:22] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:21:07:18] 💽 Writing output data to DB (~9.16 MB)..
+[00:21:08:64] 🥕 Assay endpoint processing completed
+
+[00:21:08:64] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:21:08:67] 🌱 Start processing new assay endpoint: BSK_CASM3C_IL6_up (aeid=210)
+[00:21:08:67] ⏳ Fetching raw data..
+[00:21:08:67] ℹ️ Loaded 13020 single datapoints
+[00:21:08:67] 🌡️ Computing efficacy cutoff
+[00:21:08:76] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:21:17:27] 💽 Writing output data to DB (~0.79 MB)..
+[00:21:17:35] 🥕 Assay endpoint processing completed
+
+[00:21:17:35] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:21:17:37] 🌱 Start processing new assay endpoint: BSK_CASM3C_TissueFactor_up (aeid=230)
+[00:21:17:37] ⏳ Fetching raw data..
+[00:21:17:38] ℹ️ Loaded 13020 single datapoints
+[00:21:17:38] 🌡️ Computing efficacy cutoff
+[00:21:17:45] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:21:23:64] 💽 Writing output data to DB (~0.78 MB)..
+[00:21:23:71] 🥕 Assay endpoint processing completed
+
+[00:21:23:71] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:21:23:73] 🌱 Start processing new assay endpoint: BSK_BE3C_tPA_up (aeid=202)
+[00:21:23:73] ⏳ Fetching raw data..
+[00:21:23:74] ℹ️ Loaded 13020 single datapoints
+[00:21:23:74] 🌡️ Computing efficacy cutoff
+[00:21:23:81] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:21:27:99] 💽 Writing output data to DB (~0.77 MB)..
+[00:21:28:05] 🥕 Assay endpoint processing completed
+
+[00:21:28:05] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:21:28:08] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_FLO_40hr_viability (aeid=2082)
+[00:21:28:08] ⏳ Fetching raw data..
+[00:21:28:11] ℹ️ Loaded 184320 single datapoints
+[00:21:28:11] 🌡️ Computing efficacy cutoff
+[00:21:28:65] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:25:23:27] 💽 Writing output data to DB (~5.57 MB)..
+[00:25:24:17] 🥕 Assay endpoint processing completed
+
+[00:25:24:17] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:25:24:20] 🌱 Start processing new assay endpoint: TOX21_PR_BLA_Antagonist_ch2 (aeid=2126)
+[00:25:24:20] ⏳ Fetching raw data..
+[00:25:24:26] ℹ️ Loaded 549888 single datapoints
+[00:25:24:26] 🌡️ Computing efficacy cutoff
+[00:25:25:48] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:27:54:84] 💽 Writing output data to DB (~9.38 MB)..
+[00:27:56:47] 🥕 Assay endpoint processing completed
+
+[00:27:56:47] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:27:56:50] 🌱 Start processing new assay endpoint: TOX21_RXR_BLA_Agonist_viability (aeid=1821)
+[00:27:56:50] ⏳ Fetching raw data..
+[00:27:56:58] ℹ️ Loaded 552960 single datapoints
+[00:27:56:58] 🌡️ Computing efficacy cutoff
+[00:27:57:80] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:30:03:63] 💽 Writing output data to DB (~9.31 MB)..
+[00:30:05:23] 🥕 Assay endpoint processing completed
+
+[00:30:05:23] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:30:05:25] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p5_ratio (aeid=1329)
+[00:30:05:25] ⏳ Fetching raw data..
+[00:30:05:28] ℹ️ Loaded 207360 single datapoints
+[00:30:05:28] 🌡️ Computing efficacy cutoff
+[00:30:05:90] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:32:16:97] 💽 Writing output data to DB (~5.30 MB)..
+[00:32:17:66] 🥕 Assay endpoint processing completed
+
+[00:32:17:66] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:32:17:68] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p1_ch1 (aeid=1114)
+[00:32:17:68] ⏳ Fetching raw data..
+[00:32:17:78] ℹ️ Loaded 691170 single datapoints
+[00:32:17:78] 🌡️ Computing efficacy cutoff
+[00:32:19:29] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:34:01:34] 💽 Writing output data to DB (~10.27 MB)..
+[00:34:03:13] 🥕 Assay endpoint processing completed
+
+[00:34:03:13] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:34:03:16] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Antagonist_viability (aeid=795)
+[00:34:03:16] ⏳ Fetching raw data..
+[00:34:03:23] ℹ️ Loaded 622080 single datapoints
+[00:34:03:23] 🌡️ Computing efficacy cutoff
+[00:34:04:55] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:35:27:29] 💽 Writing output data to DB (~9.42 MB)..
+[00:35:28:91] 🥕 Assay endpoint processing completed
+
+[00:35:28:91] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:35:28:93] 🌱 Start processing new assay endpoint: TOX21_MMP_fitc (aeid=796)
+[00:35:28:93] ⏳ Fetching raw data..
+[00:35:29:01] ℹ️ Loaded 614310 single datapoints
+[00:35:29:01] 🌡️ Computing efficacy cutoff
+[00:35:30:41] 💻 Processing (fit & hit) 10498 concentration-response series
+[00:36:42:97] 💽 Writing output data to DB (~9.29 MB)..
+[00:36:44:51] 🥕 Assay endpoint processing completed
+
+[00:36:44:51] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:36:44:54] 🌱 Start processing new assay endpoint: TOX21_PPARg_BLA_antagonist_viability (aeid=1128)
+[00:36:44:54] ⏳ Fetching raw data..
+[00:36:44:61] ℹ️ Loaded 552960 single datapoints
+[00:36:44:61] 🌡️ Computing efficacy cutoff
+[00:36:45:83] 💻 Processing (fit & hit) 9320 concentration-response series
+[00:37:48:78] 💽 Writing output data to DB (~8.69 MB)..
+[00:37:50:29] 🥕 Assay endpoint processing completed
+
+[00:37:50:30] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:37:50:32] 🌱 Start processing new assay endpoint: TOX21_HRE_BLA_Agonist_ratio (aeid=2065)
+[00:37:50:32] ⏳ Fetching raw data..
+[00:37:50:40] ℹ️ Loaded 599040 single datapoints
+[00:37:50:40] 🌡️ Computing efficacy cutoff
+[00:37:51:78] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:39:07:68] 💽 Writing output data to DB (~9.66 MB)..
+[00:39:09:16] 🥕 Assay endpoint processing completed
+
+[00:39:09:16] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:39:09:19] 🌱 Start processing new assay endpoint: TOX21_PGC_ERR_Agonist (aeid=2068)
+[00:39:09:19] ⏳ Fetching raw data..
+[00:39:09:25] ℹ️ Loaded 552960 single datapoints
+[00:39:09:25] 🌡️ Computing efficacy cutoff
+[00:39:10:57] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:39:56:22] 💽 Writing output data to DB (~9.03 MB)..
+[00:39:57:69] 🥕 Assay endpoint processing completed
+
+[00:39:57:69] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:39:57:72] 🌱 Start processing new assay endpoint: ATG_NFI_CIS_up (aeid=95)
+[00:39:57:72] ⏳ Fetching raw data..
+[00:39:57:73] ℹ️ Loaded 35993 single datapoints
+[00:39:57:73] 🌡️ Computing efficacy cutoff
+[00:39:57:93] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:40:35:88] 💽 Writing output data to DB (~1.97 MB)..
+[00:40:36:12] 🥕 Assay endpoint processing completed
+
+[00:40:36:12] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:40:36:14] 🌱 Start processing new assay endpoint: TOX21_HDAC_Inhibition_viability (aeid=2062)
+[00:40:36:14] ⏳ Fetching raw data..
+[00:40:36:21] ℹ️ Loaded 552960 single datapoints
+[00:40:36:21] 🌡️ Computing efficacy cutoff
+[00:40:37:41] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:41:07:20] 💽 Writing output data to DB (~8.95 MB)..
+[00:41:08:63] 🥕 Assay endpoint processing completed
+
+[00:41:08:63] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:41:08:66] 🌱 Start processing new assay endpoint: TOX21_PPARg_BLA_Agonist_ch1 (aeid=800)
+[00:41:08:66] ⏳ Fetching raw data..
+[00:41:08:73] ℹ️ Loaded 622080 single datapoints
+[00:41:08:73] 🌡️ Computing efficacy cutoff
+[00:41:10:13] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:41:33:29] 💽 Writing output data to DB (~9.21 MB)..
+[00:41:34:80] 🥕 Assay endpoint processing completed
+
+[00:41:34:80] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:41:34:82] 🌱 Start processing new assay endpoint: ATG_LXRb_TRANS_up (aeid=126)
+[00:41:34:82] ⏳ Fetching raw data..
+[00:41:34:83] ℹ️ Loaded 36099 single datapoints
+[00:41:34:83] 🌡️ Computing efficacy cutoff
+[00:41:34:97] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:41:48:09] 💽 Writing output data to DB (~1.90 MB)..
+[00:41:48:29] 🥕 Assay endpoint processing completed
+
+[00:41:48:29] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:41:48:32] 🌱 Start processing new assay endpoint: ATG_FoxO_CIS_up (aeid=78)
+[00:41:48:32] ⏳ Fetching raw data..
+[00:41:48:33] ℹ️ Loaded 35954 single datapoints
+[00:41:48:33] 🌡️ Computing efficacy cutoff
+[00:41:48:52] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:41:59:47] 💽 Writing output data to DB (~1.89 MB)..
+[00:41:59:67] 🥕 Assay endpoint processing completed
+
+[00:41:59:67] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:41:59:70] 🌱 Start processing new assay endpoint: BSK_3C_IL8_up (aeid=152)
+[00:41:59:70] ⏳ Fetching raw data..
+[00:41:59:70] ℹ️ Loaded 13020 single datapoints
+[00:41:59:70] 🌡️ Computing efficacy cutoff
+[00:41:59:77] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:42:06:73] 💽 Writing output data to DB (~0.79 MB)..
+[00:42:06:80] 🥕 Assay endpoint processing completed
+
+[00:42:06:80] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:42:06:83] 🌱 Start processing new assay endpoint: ATG_ERRg_TRANS_up (aeid=119)
+[00:42:06:83] ⏳ Fetching raw data..
+[00:42:06:84] ℹ️ Loaded 36108 single datapoints
+[00:42:06:84] 🌡️ Computing efficacy cutoff
+[00:42:07:02] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:42:13:16] 💽 Writing output data to DB (~1.87 MB)..
+[00:42:13:35] 🥕 Assay endpoint processing completed
+
+[00:42:13:35] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:42:13:38] 🌱 Start processing new assay endpoint: BSK_BE3C_PAI1_up (aeid=196)
+[00:42:13:38] ⏳ Fetching raw data..
+[00:42:13:38] ℹ️ Loaded 13020 single datapoints
+[00:42:13:38] 🌡️ Computing efficacy cutoff
+[00:42:13:52] 💻 Processing (fit & hit) 2035 concentration-response series
+[00:42:17:31] 💽 Writing output data to DB (~0.78 MB)..
+[00:42:17:37] 🥕 Assay endpoint processing completed
+
+[00:42:17:37] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:42:17:40] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_GLO_16hr_viability (aeid=2088)
+[00:42:17:40] ⏳ Fetching raw data..
+[00:42:17:42] ℹ️ Loaded 184320 single datapoints
+[00:42:17:42] 🌡️ Computing efficacy cutoff
+[00:42:17:97] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:45:42:89] 💽 Writing output data to DB (~5.46 MB)..
+[00:45:43:73] 🥕 Assay endpoint processing completed
+
+[00:45:43:73] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:45:43:75] 🌱 Start processing new assay endpoint: TOX21_ERa_BLA_Antagonist_ratio (aeid=786)
+[00:45:43:75] ⏳ Fetching raw data..
+[00:45:43:82] ℹ️ Loaded 620544 single datapoints
+[00:45:43:82] 🌡️ Computing efficacy cutoff
+[00:45:45:14] 💻 Processing (fit & hit) 10501 concentration-response series
+[00:48:19:52] 💽 Writing output data to DB (~9.61 MB)..
+[00:48:21:20] 🥕 Assay endpoint processing completed
+
+[00:48:21:20] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:48:21:23] 🌱 Start processing new assay endpoint: TOX21_CAR_Agonist_viabillity (aeid=2048)
+[00:48:21:23] ⏳ Fetching raw data..
+[00:48:21:29] ℹ️ Loaded 552960 single datapoints
+[00:48:21:29] 🌡️ Computing efficacy cutoff
+[00:48:22:51] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:50:37:16] 💽 Writing output data to DB (~9.33 MB)..
+[00:50:38:77] 🥕 Assay endpoint processing completed
+
+[00:50:38:77] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:50:38:80] 🌱 Start processing new assay endpoint: ATG_ERa_TRANS_up (aeid=117)
+[00:50:38:80] ⏳ Fetching raw data..
+[00:50:38:81] ℹ️ Loaded 36107 single datapoints
+[00:50:38:81] 🌡️ Computing efficacy cutoff
+[00:50:39:03] 💻 Processing (fit & hit) 4489 concentration-response series
+[00:52:30:72] 💽 Writing output data to DB (~2.18 MB)..
+[00:52:31:06] 🥕 Assay endpoint processing completed
+
+[00:52:31:06] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:52:31:09] 🌱 Start processing new assay endpoint: TOX21_CAR_Antagonist (aeid=2049)
+[00:52:31:09] ⏳ Fetching raw data..
+[00:52:31:15] ℹ️ Loaded 549888 single datapoints
+[00:52:31:15] 🌡️ Computing efficacy cutoff
+[00:52:32:37] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:54:10:94] 💽 Writing output data to DB (~9.18 MB)..
+[00:54:12:52] 🥕 Assay endpoint processing completed
+
+[00:54:12:52] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:54:12:55] 🌱 Start processing new assay endpoint: ATG_AP_1_CIS_up (aeid=64)
+[00:54:12:55] ⏳ Fetching raw data..
+[00:54:12:56] ℹ️ Loaded 35982 single datapoints
+[00:54:12:56] 🌡️ Computing efficacy cutoff
+[00:54:12:69] 💻 Processing (fit & hit) 4492 concentration-response series
+[00:55:33:20] 💽 Writing output data to DB (~2.11 MB)..
+[00:55:33:50] 🥕 Assay endpoint processing completed
+
+[00:55:33:50] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:55:33:53] 🌱 Start processing new assay endpoint: TOX21_HDAC_Inhibition (aeid=2061)
+[00:55:33:53] ⏳ Fetching raw data..
+[00:55:33:61] ℹ️ Loaded 552960 single datapoints
+[00:55:33:61] 🌡️ Computing efficacy cutoff
+[00:55:34:91] 💻 Processing (fit & hit) 9671 concentration-response series
+[00:56:44:47] 💽 Writing output data to DB (~9.08 MB)..
+[00:56:45:97] 🥕 Assay endpoint processing completed
+
+[00:56:45:97] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:56:45:99] 🌱 Start processing new assay endpoint: TOX21_PPARg_BLA_Agonist_ch2 (aeid=801)
+[00:56:45:99] ⏳ Fetching raw data..
+[00:56:46:06] ℹ️ Loaded 622080 single datapoints
+[00:56:46:06] 🌡️ Computing efficacy cutoff
+[00:56:47:50] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:57:50:24] 💽 Writing output data to DB (~9.37 MB)..
+[00:57:51:83] 🥕 Assay endpoint processing completed
+
+[00:57:51:83] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:57:51:86] 🌱 Start processing new assay endpoint: TOX21_PR_BLA_Agonist_ch1 (aeid=2121)
+[00:57:51:86] ⏳ Fetching raw data..
+[00:57:51:94] ℹ️ Loaded 551424 single datapoints
+[00:57:51:94] 🌡️ Computing efficacy cutoff
+[00:57:53:24] 💻 Processing (fit & hit) 9672 concentration-response series
+[00:58:54:80] 💽 Writing output data to DB (~9.04 MB)..
+[00:58:56:31] 🥕 Assay endpoint processing completed
+
+[00:58:56:31] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:58:56:34] 🌱 Start processing new assay endpoint: TOX21_HSE_BLA_agonist_ch2 (aeid=1112)
+[00:58:56:34] ⏳ Fetching raw data..
+[00:58:56:40] ℹ️ Loaded 552960 single datapoints
+[00:58:56:40] 🌡️ Computing efficacy cutoff
+[00:58:57:63] 💻 Processing (fit & hit) 9319 concentration-response series
+[00:59:49:99] 💽 Writing output data to DB (~8.63 MB)..
+[00:59:51:41] 🥕 Assay endpoint processing completed
+
+[00:59:51:41] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:59:51:44] 🌱 Start processing new assay endpoint: TOX21_GR_BLA_Agonist_ch2 (aeid=792)
+[00:59:51:44] ⏳ Fetching raw data..
+[00:59:51:52] ℹ️ Loaded 620544 single datapoints
+[00:59:51:52] 🌡️ Computing efficacy cutoff
+[00:59:52:96] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:00:31:86] 💽 Writing output data to DB (~9.24 MB)..
+[01:00:33:35] 🥕 Assay endpoint processing completed
+
+[01:00:33:35] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:00:33:37] 🌱 Start processing new assay endpoint: OT_ER_ERaERa_0480 (aeid=742)
+[01:00:33:37] ⏳ Fetching raw data..
+[01:00:33:38] ℹ️ Loaded 43470 single datapoints
+[01:00:33:38] 🌡️ Computing efficacy cutoff
+[01:00:33:58] 💻 Processing (fit & hit) 2055 concentration-response series
+[01:01:01:52] 💽 Writing output data to DB (~1.22 MB)..
+[01:01:01:70] 🥕 Assay endpoint processing completed
+
+[01:01:01:70] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:01:01:73] 🌱 Start processing new assay endpoint: ATG_NF_kB_CIS_up (aeid=94)
+[01:01:01:73] ⏳ Fetching raw data..
+[01:01:01:74] ℹ️ Loaded 35984 single datapoints
+[01:01:01:74] 🌡️ Computing efficacy cutoff
+[01:01:01:92] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:01:22:37] 💽 Writing output data to DB (~1.91 MB)..
+[01:01:22:59] 🥕 Assay endpoint processing completed
+
+[01:01:22:59] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:01:22:61] 🌱 Start processing new assay endpoint: BSK_LPS_TNFa_up (aeid=296)
+[01:01:22:61] ⏳ Fetching raw data..
+[01:01:22:62] ℹ️ Loaded 13020 single datapoints
+[01:01:22:62] 🌡️ Computing efficacy cutoff
+[01:01:22:69] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:01:38:01] 💽 Writing output data to DB (~0.82 MB)..
+[01:01:38:10] 🥕 Assay endpoint processing completed
+
+[01:01:38:10] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:01:38:13] 🌱 Start processing new assay endpoint: TOX21_HRE_BLA_Agonist_ch2 (aeid=2064)
+[01:01:38:13] ⏳ Fetching raw data..
+[01:01:38:20] ℹ️ Loaded 599040 single datapoints
+[01:01:38:20] 🌡️ Computing efficacy cutoff
+[01:01:39:57] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:01:51:90] 💽 Writing output data to DB (~9.50 MB)..
+[01:01:53:34] 🥕 Assay endpoint processing completed
+
+[01:01:53:34] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:01:53:36] 🌱 Start processing new assay endpoint: OT_PPARg_PPARgSRC1_1440 (aeid=758)
+[01:01:53:36] ⏳ Fetching raw data..
+[01:01:53:37] ℹ️ Loaded 64296 single datapoints
+[01:01:53:38] 🌡️ Computing efficacy cutoff
+[01:01:53:60] 💻 Processing (fit & hit) 3066 concentration-response series
+[01:02:01:35] 💽 Writing output data to DB (~1.18 MB)..
+[01:02:01:51] 🥕 Assay endpoint processing completed
+
+[01:02:01:51] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:02:01:54] 🌱 Start processing new assay endpoint: ATG_M_06_TRANS_up (aeid=127)
+[01:02:01:54] ⏳ Fetching raw data..
+[01:02:01:55] ℹ️ Loaded 38965 single datapoints
+[01:02:01:55] 🌡️ Computing efficacy cutoff
+[01:02:01:74] 💻 Processing (fit & hit) 4786 concentration-response series
+[01:02:07:19] 💽 Writing output data to DB (~1.88 MB)..
+[01:02:07:38] 🥕 Assay endpoint processing completed
+
+[01:02:07:38] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:02:07:41] 🌱 Start processing new assay endpoint: BSK_SAg_MCP1_up (aeid=310)
+[01:02:07:41] ⏳ Fetching raw data..
+[01:02:07:41] ℹ️ Loaded 13020 single datapoints
+[01:02:07:41] 🌡️ Computing efficacy cutoff
+[01:02:07:48] 💻 Processing (fit & hit) 2035 concentration-response series
+[01:02:11:22] 💽 Writing output data to DB (~0.78 MB)..
+[01:02:11:29] 🥕 Assay endpoint processing completed
+
+[01:02:11:29] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:02:11:31] 🌱 Start processing new assay endpoint: TOX21_CASP3_CHO_viability (aeid=2369)
+[01:02:11:31] ⏳ Fetching raw data..
+[01:02:11:38] ℹ️ Loaded 539600 single datapoints
+[01:02:11:38] 🌡️ Computing efficacy cutoff
+[01:02:12:56] 💻 Processing (fit & hit) 9671 concentration-response series
+[01:05:52:36] 💽 Writing output data to DB (~9.41 MB)..
+[01:05:54:04] 🥕 Assay endpoint processing completed
+
+[01:05:54:04] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:05:54:07] 🌱 Start processing new assay endpoint: TOX21_Aromatase_Inhibition (aeid=767)
+[01:05:54:07] ⏳ Fetching raw data..
+[01:05:54:14] ℹ️ Loaded 601152 single datapoints
+[01:05:54:14] 🌡️ Computing efficacy cutoff
+[01:05:55:42] 💻 Processing (fit & hit) 10499 concentration-response series
+[01:08:29:04] 💽 Writing output data to DB (~9.63 MB)..
+[01:08:30:73] 🥕 Assay endpoint processing completed
+
+[01:08:30:73] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:08:30:76] 🌱 Start processing new assay endpoint: TOX21_VDR_BLA_Agonist_viability (aeid=1331)
+[01:08:30:76] ⏳ Fetching raw data..
+[01:08:30:84] ℹ️ Loaded 552960 single datapoints
+[01:08:30:84] 🌡️ Computing efficacy cutoff
+[01:08:32:17] 💻 Processing (fit & hit) 9319 concentration-response series
+[01:10:37:48] 💽 Writing output data to DB (~8.92 MB)..
+[01:10:39:03] 🥕 Assay endpoint processing completed
+
+[01:10:39:03] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:10:39:06] 🌱 Start processing new assay endpoint: TOX21_PR_BLA_Antagonist_viability (aeid=2128)
+[01:10:39:06] ⏳ Fetching raw data..
+[01:10:39:13] ℹ️ Loaded 546816 single datapoints
+[01:10:39:13] 🌡️ Computing efficacy cutoff
+[01:10:40:33] 💻 Processing (fit & hit) 9672 concentration-response series
+[01:12:30:28] 💽 Writing output data to DB (~9.15 MB)..
+[01:12:31:85] 🥕 Assay endpoint processing completed
+
+[01:12:31:85] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:12:31:88] 🌱 Start processing new assay endpoint: TOX21_p53_BLA_p4_ch1 (aeid=1323)
+[01:12:31:88] ⏳ Fetching raw data..
+[01:12:31:92] ℹ️ Loaded 207360 single datapoints
+[01:12:31:92] 🌡️ Computing efficacy cutoff
+[01:12:32:55] 💻 Processing (fit & hit) 10501 concentration-response series
+[01:14:22:94] 💽 Writing output data to DB (~5.27 MB)..
+[01:14:23:63] 🥕 Assay endpoint processing completed
+
+[01:14:23:63] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:14:23:66] 🌱 Start processing new assay endpoint: TOX21_PPARd_BLA_antagonist_ratio (aeid=1125)
+[01:14:23:66] ⏳ Fetching raw data..
+[01:14:23:74] ℹ️ Loaded 552960 single datapoints
+[01:14:23:74] 🌡️ Computing efficacy cutoff
+[01:14:24:95] 💻 Processing (fit & hit) 9320 concentration-response series
+[01:15:49:17] 💽 Writing output data to DB (~8.77 MB)..
+[01:15:50:67] 🥕 Assay endpoint processing completed
+
+[01:15:50:67] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:15:50:70] 🌱 Start processing new assay endpoint: ATG_CMV_CIS_up (aeid=68)
+[01:15:50:70] ⏳ Fetching raw data..
+[01:15:50:71] ℹ️ Loaded 35971 single datapoints
+[01:15:50:71] 🌡️ Computing efficacy cutoff
+[01:15:50:91] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:17:00:75] 💽 Writing output data to DB (~2.07 MB)..
+[01:17:01:04] 🥕 Assay endpoint processing completed
+
+[01:17:01:04] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:17:01:06] 🌱 Start processing new assay endpoint: ATG_Xbp1_CIS_up (aeid=114)
+[01:17:01:06] ⏳ Fetching raw data..
+[01:17:01:07] ℹ️ Loaded 35996 single datapoints
+[01:17:01:07] 🌡️ Computing efficacy cutoff
+[01:17:01:27] 💻 Processing (fit & hit) 4492 concentration-response series
+[01:18:00:99] Assay endpoint with aeid=114 failed: Length of values (608) does not match length of index (629)
+[01:18:01:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[01:18:01:03] 🌱 Start processing new assay endpoint: ATG_RORE_CIS_up (aeid=104)
+[01:18:01:03] ⏳ Fetching raw data..
+[01:18:01:04] ℹ️ Loaded 35974 single datapoints
+[01:18:01:04] 🌡️ Computing efficacy cutoff
+[01:18:01:22] 💻 Processing (fit & hit) 4492 concentration-response series
