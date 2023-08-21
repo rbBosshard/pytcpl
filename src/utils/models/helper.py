@@ -31,11 +31,11 @@ def get_er_est(resp):
 def get_mmed_conc(conc, resp):
     max_idx, unique_conc, _ = get_max_index(conc, resp)
     mmed_conc = unique_conc[max_idx]
-    return mmed_conc # mmed = rmds[max_idx]
+    return mmed_conc  # mmed = rmds[max_idx]
 
 
 def get_mmed(conc, resp):
-    max_idx, _, rmds= get_max_index(conc, resp)
+    max_idx, _, rmds = get_max_index(conc, resp)
     mmed = rmds[max_idx]
     return mmed
 

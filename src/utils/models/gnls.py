@@ -1,10 +1,30 @@
 import numpy as np
 
-from .helper import get_inverse
 from .helper import get_er_est, get_mmed_conc, get_mmed, get_er_bounds
+from .helper import get_inverse
 
 
 def gnls(field):
+    """
+    Create and return GainLoss model functions and parameters.
+
+    This function generates and returns different components of the GainLoss model, including the forward function,
+    inverse function, parameter names, parameter bounds, initial parameter guesses, and scaling function.
+
+    Args:
+        field (str): The field corresponding to the desired component of the GainLoss model.
+
+    Returns:
+        dict or lambda: Depending on the provided field, either a dictionary containing model information (such as
+                        functions, parameter names, bounds, etc.) or a lambda function representing the selected
+                        component.
+
+    Note:
+    The GainLoss model represents a nonlinear relationship between variables, often used to describe biological
+    phenomena. It includes a forward function to calculate responses based on concentrations and model parameters,
+    as well as an inverse function to estimate concentrations from responses.
+
+    """
     def gnls_inverse(y, tp, ga, p, la, q, conc=None, x_min_limit=1e-10):
         param = [tp, ga, p, la, q]
         x_min = np.min(conc)

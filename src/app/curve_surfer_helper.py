@@ -8,16 +8,11 @@ import streamlit as st
 from plotly import graph_objects as go, express as px
 from st_files_connection import FilesConnection
 
-from src.utils.models.models import get_model
-from src.utils.models.helper import pow_space
-from src.utils.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical
-from src.utils.query_db import query_db
 from src.utils.constants import OUTPUT_DIR_PATH
-
-# Add the parent folder to sys.path
-parent_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(parent_folder_path)
-
+from src.utils.models.helper import pow_space
+from src.utils.models.models import get_model
+from src.pipeline.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical
+from src.utils.query_db import query_db
 
 CONFIG = {}
 SUFFIX = ''
@@ -26,12 +21,36 @@ ERR_MSG = f"No data found for this query"
 
 @st.cache_data
 def load_data(aeid):  # aeid parameter used to handle correct caching
+    """
+    Load data for a specific AEID.
+
+    This function loads data for a given assay endpoint ID (AEID). It retrieves the data from an output table and a cutoff
+    table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
+    is returned as two dataframes.
+
+    Args:
+        aeid (int): Assay endpoint ID for which to load data.
+
+    Returns:
+        tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
+
+    """
     df = get_output_data()
     cutoff_df = get_cutoff()
     return df, cutoff_df
 
 
 def get_output_data():
+    """
+    Retrieve output data for a specific AEID.
+
+    This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
+    a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the output data for the specified AEID.
+
+    """
     tbl = 'output'
     path = os.path.join(OUTPUT_DIR_PATH, f"{st.session_state.aeid}{CONFIG['file_format']}")
     print(f"Fetch data with assay ID {st.session_state.aeid}..")
@@ -53,12 +72,31 @@ def get_output_data():
 
 
 def set_config_app(config):
+    """
+    Set the configuration for the Streamlit app.
+
+    This function sets the global configuration variable CONFIG using the provided configuration dictionary.
+
+    Args:
+        config (dict): Configuration settings for the app.
+
+    """
     global CONFIG
     CONFIG = config
     init_config(config)
 
 
 def get_series():
+    """
+    Get the series data for the currently selected index.
+
+    This function retrieves the data for the currently selected index (id) from the session_state dataframe. The data is
+    processed and returned as a dictionary.
+
+    Returns:
+        dict: Dictionary containing the series data.
+
+    """
     series = st.session_state.df.iloc[st.session_state.id]
     series['conc'] = json.loads(series['conc'])
     series['resp'] = json.loads(series['resp'])
@@ -67,6 +105,19 @@ def get_series():
 
 
 def get_chem_info(spid):
+    """
+    Get chemical information for a given SPID.
+
+    This function retrieves chemical information such as CAS number, chemical name, and DSSTox substance ID for a
+    specified Sample ID (SPID).
+
+    Args:
+        spid (str): Sample ID for which to retrieve chemical information.
+
+    Returns:
+        tuple: A tuple containing CAS number, chemical name, and DSSTox substance ID.
+
+    """
     chem = get_chemical([spid]).iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
@@ -75,6 +126,20 @@ def get_chem_info(spid):
 
 
 def init_figure(series, cutoff_df):
+    """
+    Initialize the plot figure for visualizing data.
+
+    This function initializes a Plotly figure object for visualizing the data. It sets up various plot attributes such as
+    title, labels, and annotations. It also adds the efficacy cutoff line to the plot.
+
+    Args:
+        series (dict): Dictionary containing series data.
+        cutoff_df (pd.DataFrame): DataFrame containing cutoff data.
+
+    Returns:
+        go.Figure: Initialized Plotly figure object.
+
+    """
     cutoff = cutoff_df['cutoff'].iloc[0]
     bmad = cutoff_df['bmad'].iloc[0]
     onesd = cutoff_df['onesd'].iloc[0]
@@ -99,6 +164,20 @@ def init_figure(series, cutoff_df):
 
 
 def add_curves(series, fig):
+    """
+    Add curves to the plot based on series data.
+
+    This function adds response and fitted curves to the plot based on the provided series data. It also adds potency and
+    efficacy markers to the plot.
+
+    Args:
+        series (dict): Dictionary containing series data.
+        fig (go.Figure): Plotly figure object to which curves are added.
+
+    Returns:
+        dict: Dictionary containing fitted curve parameters.
+
+    """
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
     fig.add_trace(
@@ -143,8 +222,10 @@ def add_curves(series, fig):
             opacity = 0.9
 
             fig.add_trace(
-                go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup="Fit models", legendgrouptitle_text="Fit models",
-                           marker=dict(color=color), mode='lines', visible="legendonly" if fit_model == 'cnst' else True,
+                go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup="Fit models",
+                           legendgrouptitle_text="Fit models",
+                           marker=dict(color=color), mode='lines',
+                           visible="legendonly" if fit_model == 'cnst' else True,
                            name=name, line=dict(width=width, dash=dash)))
 
     for i, efficacy in enumerate(efficacies):
@@ -163,28 +244,34 @@ def add_curves(series, fig):
             ))
 
     for i, potency in enumerate(potencies):
-            pot = potency_values[i]
-            if pot is not None and not np.isnan(pot):
-                pot_log = np.log10(series[potency])
-                params = fit_params[best_model]['pars'].copy()
-                params.pop('er')
-                pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
-                fig.add_trace(go.Scatter(
-                    name=f"{potency} = {pot:.1e}",
-                    x=[pot_log, pot_log],
-                    y=[0, pot_y],
-                    mode='lines',
-                    opacity=0.8,
-                    line=dict(color=color_best, width=3, dash='dot'),
-                    legendgroup="Potency estimates",
-                    legendgrouptitle_text="Potency estimates",
-                ))
-
+        pot = potency_values[i]
+        if pot is not None and not np.isnan(pot):
+            pot_log = np.log10(series[potency])
+            params = fit_params[best_model]['pars'].copy()
+            params.pop('er')
+            pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
+            fig.add_trace(go.Scatter(
+                name=f"{potency} = {pot:.1e}",
+                x=[pot_log, pot_log],
+                y=[0, pot_y],
+                mode='lines',
+                opacity=0.8,
+                line=dict(color=color_best, width=3, dash='dot'),
+                legendgroup="Potency estimates",
+                legendgrouptitle_text="Potency estimates",
+            ))
 
     return pars_dict
 
 
 def check_reset():
+    """
+    Check and set session state variables.
+
+    This function checks and sets various session state variables used by the app. It ensures that necessary variables are
+    initialized or reset as needed.
+
+    """
     if "id" not in st.session_state:
         reset_id()
     if "aeid" not in st.session_state:
@@ -208,25 +295,64 @@ def check_reset():
 
 
 def reset_id():
+    """
+    Reset the index (id) of the current series.
+
+    This function resets the index (id) of the currently selected series to the initial value.
+
+    """
     st.session_state.id = 0
 
 
 def trigger(trigger):
+    """
+    Set the trigger in session state.
+
+    This function sets the trigger value in the session state, which is used to control app behavior based on user
+    interactions.
+
+    Args:
+        trigger (str): The trigger value to set.
+
+    """
     st.session_state.trigger = trigger
 
 
 def filter_spid():
+    """
+    Filter data based on the selected SPID.
+
+    This function filters the data based on the selected Sample ID (SPID) and updates the hitcall slider accordingly.
+
+    """
     st.session_state.trigger = "spid"
     st.session_state.hitcall_slider = (0.0, 1.0)
 
 
 def sort():
+    """
+    Sort the data based on user-selected criteria.
+
+    This function sorts the data in the session state dataframe based on user-selected sorting criteria and ascending/descending
+    order.
+
+    """
     st.session_state.df = st.session_state.df.sort_values(
         by=st.session_state.sort_by, ascending=st.session_state.asc, na_position='last').reset_index(drop=True)
     reset_id()
 
 
 def update():
+    """
+    Update the app state and visualization.
+
+    This function updates the app's state and visualization based on user interactions and triggers. It handles loading data,
+    filtering, sorting, and updating the Plotly figure.
+
+    Returns:
+        tuple: A tuple containing the updated Plotly figure and a dictionary of fitted curve parameters.
+
+    """
     trigger = st.session_state.trigger
     fresh_load = "df" not in st.session_state or st.session_state.last_aeid != st.session_state.aeid
     refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
@@ -279,12 +405,23 @@ def update():
 
 
 def get_assay_and_sample_info():
+    """
+    Get assay and sample information for display.
+
+    This function retrieves assay and sample information for the currently selected AEID and SPID. It formats the information
+    and prepares it for display in an expander.
+
+    Returns:
+        str: Formatted assay and sample information.
+
+    """
     assay_infos = get_assay_info(st.session_state.aeid)
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
     # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
     casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
     dsstox_substance_id = f"https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id}" if dsstox_substance_id else "N/A"
+    casn = f"https://commonchemistry.cas.org/detail?cas_rn={casn}" if casn else "N/A"
     df = pd.DataFrame(
         {
             "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
@@ -307,7 +444,7 @@ def get_assay_and_sample_info():
             "SPID": st.column_config.TextColumn(label="SPID", help="Sample :id:"),
             "DSSTOXSID": st.column_config.LinkColumn("DSSTOXSID",
                                                      help="Distributed Structure-Searchable Toxicity Substance ID. Link to dashboard :bar_chart:"),
-            "CASRN": st.column_config.TextColumn(label="CASRN",
+            "CASRN": st.column_config.LinkColumn(label="CASRN",
                                                  help="CAS Registry Number :information_source:"),
         },
                      hide_index=True,

@@ -1,8 +1,30 @@
 import numpy as np
+
 from .helper import get_er_est, get_mmed_conc, get_mmed, get_er_bounds
 
 
 def exp4(field):
+    """
+    Create and return exponential decay model (Exp4) functions and parameters.
+
+    This function generates and returns different components of the exponential decay model (Exp4), including the
+    forward function, inverse function, parameter names, parameter bounds, initial parameter guesses, and scaling
+    function.
+
+    Args:
+        field (str): The field corresponding to the desired component of the exponential decay model (Exp4).
+
+    Returns:
+        dict or lambda: Depending on the provided field, either a dictionary containing model information (such as
+                        functions, parameter names, bounds, etc.) or a lambda function representing the selected
+                        component.
+
+    Note:
+    The exponential decay model (Exp4) describes a decaying relationship between variables. It includes a forward
+    function to calculate responses based on concentrations and model parameters, as well as an inverse function to
+    estimate concentrations from responses.
+
+    """
     def exp4_inverse(y, tp, ga):
         epsilon = 1e-4
         try:

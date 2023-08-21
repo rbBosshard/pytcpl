@@ -5,6 +5,26 @@ from .helper import get_inverse
 
 
 def sigmoid(field):
+    """
+    Create and return sigmoid equation model functions and parameters.
+
+    This function generates and returns different components of the sigmoid equation model, including the forward
+    function, inverse function, parameter names, parameter bounds, initial parameter guesses, and scaling function.
+
+    Args:
+        field (str): The field corresponding to the desired component of the sigmoid equation model.
+
+    Returns:
+        dict or lambda: Depending on the provided field, either a dictionary containing model information (such as
+                        functions, parameter names, bounds, etc.) or a lambda function representing the selected
+                        component.
+
+    Note:
+    The sigmoid equation model is commonly used to describe dose-response relationships. It includes a forward function
+    to calculate responses based on concentrations and model parameters, as well as an inverse function to estimate
+    concentrations from responses.
+
+    """
     def sigmoid_inverse(y, tp, ga, p, q, conc=None, x_min_limit=1e-10):
         param = [tp, ga, p, q]
         x_min = np.min(conc)

@@ -8,20 +8,20 @@ AEIDS_LIST_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid_list.in')
 AEID_PATH = os.path.join(CONFIG_DIR_PATH, 'aeid')
 DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 
-EXPORT_DIR_PATH = os.path.join(ROOT_DIR, '../../data')
-RAW_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'raw')
-INPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'input')
-OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'output')
-CUSTOM_OUTPUT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'custom_output')
-CHEMICAL_RESULT_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'chemical_results')
-CUTOFF_DIR_PATH = os.path.join(ROOT_DIR, '../../data', 'cutoff')
+DATA_DIR_PATH = os.path.join(ROOT_DIR, '../../data')
+RAW_DIR_PATH = os.path.join(DATA_DIR_PATH, 'raw')
+INPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'input')
+OUTPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'output')
+CUSTOM_OUTPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'custom_output')
+CHEMICAL_RESULT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'chemical_results')
+METADATA_DIR_PATH = os.path.join(DATA_DIR_PATH, 'metadata')
+CUTOFF_DIR_PATH = os.path.join(DATA_DIR_PATH, 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
 
 OUTPUT_TABLE = "output"
 CUTOFF_TABLE = "cutoff"
-
 
 COLORS_DICT = {
     "WHITE": "\033[37m",
@@ -32,7 +32,6 @@ COLORS_DICT = {
     "VIOLET": "\033[35m",
     "RESET": "\033[0m",
 }
-
 
 # tqdm format
 custom_format = f"{COLORS_DICT['WHITE']}{{desc}} {{percentage:3.0f}}%{{bar}} {{n_fmt}}/{{total_fmt}} {{elapsed}}<{{remaining}}{COLORS_DICT['RESET']}"

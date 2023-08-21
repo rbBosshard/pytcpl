@@ -1,8 +1,28 @@
 import numpy as np
+
 from .helper import get_er_est, get_mmed_conc, get_mmed, get_er_bounds
 
 
 def hill(field):
+    """
+    Create and return Hill equation model functions and parameters.
+
+    This function generates and returns different components of the Hill equation model, including the forward function,
+    inverse function, parameter names, parameter bounds, initial parameter guesses, and scaling function.
+
+    Args:
+        field (str): The field corresponding to the desired component of the Hill equation model.
+
+    Returns:
+        dict or lambda: Depending on the provided field, either a dictionary containing model information (such as functions,
+                        parameter names, bounds, etc.) or a lambda function representing the selected component.
+
+    Note:
+    The Hill equation model is commonly used to describe dose-response relationships. It includes a forward function to
+    calculate responses based on concentrations and model parameters, as well as an inverse function to estimate
+    concentrations from responses.
+
+    """
     def hill_inverse(y, tp, ga, p):
         epsilon = 1e-4
         try:

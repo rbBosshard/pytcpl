@@ -4,11 +4,23 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
-from .constants import LOG_DIR_PATH
+from src.utils.constants import LOG_DIR_PATH
 from .models.models import get_model
 
 
 def track_fitted_params(fit_params):
+    """
+    Track and visualize the fitted parameters from curve-fitting results.
+
+    This function collects fitted parameters from the curve-fitting results and generates histograms for each parameter
+    of each fit model. It calculates and reports the median, minimum, and maximum values for each parameter.
+
+    Args:
+        fit_params (list): A list of dictionaries containing fitted parameters for different fit models.
+
+    Outputs:
+        Generates histograms for each parameter and writes statistics to an output file.
+    """
     parameters = {}
     for result in fit_params:
         for model, params in result.items():

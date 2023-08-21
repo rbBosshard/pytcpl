@@ -10,6 +10,25 @@ from .sigmoid import sigmoid
 
 
 def get_model(fit_model):
+    """
+    Retrieve the model function based on the provided fit model name.
+
+    This function takes a fit model name as input and returns the corresponding model function that can be used for
+    curve fitting. The available fit models include constant, exponential decay (Exp4 and Exp5), gainloss (GNLS),
+    Hill, polynomial (poly1 and poly2), power-law (pow), and sigmoid models.
+
+    Args:
+        fit_model (str): The name of the fit model for which to retrieve the corresponding model function.
+
+    Returns:
+        dict or lambda: Depending on the provided fit_model, either a dictionary containing model information or a
+                        lambda function representing the selected model.
+
+    Note:
+    The function is designed to provide access to different curve fitting model functions based on the given model
+    name.
+
+    """
     return {
         'cnst': cnst,
         'exp4': exp4,

@@ -4,6 +4,26 @@ from .helper import get_er_est, get_mmed, get_er_bounds
 
 
 def pow(field):
+    """
+    Create and return power equation model functions and parameters.
+
+    This function generates and returns different components of the power equation model, including the forward
+    function, inverse function, parameter names, parameter bounds, initial parameter guesses, and scaling function.
+
+    Args:
+        field (str): The field corresponding to the desired component of the power equation model.
+
+    Returns:
+        dict or lambda: Depending on the provided field, either a dictionary containing model information (such as
+                        functions, parameter names, bounds, etc.) or a lambda function representing the selected
+                        component.
+
+    Note:
+    The power equation model describes a power-law relationship between variables. It includes a forward function to
+    calculate responses based on concentrations and model parameters, as well as an inverse function to estimate
+    concentrations from responses.
+
+    """
     return {
         "fun": lambda x, a, p: a * x ** p,
         "inv": lambda y, a, p, conc=None: (y / a) ** (1 / p),

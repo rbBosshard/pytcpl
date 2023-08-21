@@ -11,12 +11,12 @@ import streamlit as st
 import yaml
 from st_files_connection import FilesConnection
 
-from .constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    EXPORT_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
+from src.utils.constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
     CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH
-from .models.helper import get_mad
-from .query_db import get_sqlalchemy_engine
-from .query_db import query_db
+from src.utils.models.helper import get_mad
+from src.utils.query_db import get_sqlalchemy_engine
+from src.utils.query_db import query_db
 
 CONFIG = {}
 logger = logging.getLogger(__name__)
@@ -25,6 +25,16 @@ AEID = 0
 
 
 def launch(config, config_path):
+    """
+    Initialize the processing instance, set up logging, and retrieve a list of assay endpoints to process.
+
+    Args:
+        config (dict): Configuration settings.
+        config_path (str): Path to the configuration file.
+
+    Returns:
+        tuple: A tuple containing instance ID, total instances, assay endpoint ID list, and logger.
+    """
     init_config(config)
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--instance_id", type=int, help="Instance ID for workload distribution")
@@ -51,7 +61,6 @@ def launch(config, config_path):
 
     class ElapsedTimeFormatter(logging.Formatter):
         def __init__(self, fmt=None, datefmt=None, style='%'):
-
             super().__init__(fmt, datefmt, style)
             self.start_time = START_TIME
 
@@ -86,6 +95,13 @@ def launch(config, config_path):
 
 
 def prolog(new_aeid, instance_id):
+    """
+    Initialize processing for a specific assay endpoint.
+
+    Args:
+        new_aeid (int): New assay endpoint ID.
+        instance_id (int): Instance ID for workload distribution.
+    """
     init_aeid(new_aeid)
     with open(os.path.join(AEID_PATH, f'aeid_{instance_id}.in'), 'w') as f:
         f.write(str(AEID))
@@ -94,21 +110,61 @@ def prolog(new_aeid, instance_id):
     assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
     logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
 
+
 def init_aeid(new_aeid):
+    """
+    Initialize the global assay endpoint identifier (AEID).
+
+    This function sets the global AEID (assay endpoint identifier) to the provided value. The AEID is used to identify
+    the specific assay endpoint being processed.
+
+    Args:
+        new_aeid (int): The new AEID value to set.
+
+    Returns:
+        None
+    """
     global AEID
     AEID = int(new_aeid)
 
 
 def epilog():
+    """
+    Log the completion of processing for an assay endpoint.
+
+    This function is called to log the completion of processing for a specific assay endpoint. It can be used to
+    indicate that the processing for a particular assay endpoint has finished.
+
+    Returns:
+        None
+    """
     logger.info(f"🥕 Assay endpoint processing completed\n")
 
 
 def bye():
+    """
+    Perform cleanup and logging as the pipeline completes.
+
+    This function is called at the end of the pipeline to perform any necessary cleanup tasks and log
+    completion messages.
+
+    Returns:
+        None
+    """
     logger.info(f"🎊 Pipeline completed!")
     logger.info(f"👋 Goodbye")
 
 
 def check_db():
+    """
+    Check the database schema for required tables and optionally drop new tables if enabled.
+
+    This function checks whether the required database tables exist in the schema. It also provides the option
+    to drop newly created tables if the configuration specifies enabling dropping new tables.
+
+    Returns:
+        None
+    """
     if CONFIG['enable_dropping_all_new_tables']:
         query_db(f"DROP TABLE IF EXISTS {', '.join(CONFIG['new_db_tables'])};")
         logger.info(f"🧹 Dropped all relevant tables")
@@ -121,6 +177,15 @@ def check_db():
 
 
 def get_assay_info(aeid):
+    """
+    Retrieve information about a specific assay endpoint.
+
+    Args:
+        aeid (int): Assay endpoint ID.
+
+    Returns:
+        dict: Dictionary containing assay endpoint information.
+    """
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
     path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}")
@@ -149,6 +214,12 @@ def get_assay_info(aeid):
 
 
 def fetch_raw_data():
+    """
+    Fetch raw data for a given assay endpoint and compute efficacy cutoffs.
+
+    Returns:
+        pandas.DataFrame: Processed DataFrame containing raw data.
+    """
     logger.info(f"⏳ Fetching raw data..")
     path = os.path.join(RAW_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
     if not os.path.exists(path):
@@ -192,6 +263,13 @@ def fetch_raw_data():
 
 
 def db_append(dat, tbl):
+    """
+    Append data to a database table.
+
+    Args:
+        dat (pandas.DataFrame): Data to append.
+        tbl (str): Table name.
+    """
     if CONFIG['enable_writing_db']:
         try:
             engine = get_sqlalchemy_engine()
@@ -199,20 +277,32 @@ def db_append(dat, tbl):
         except Exception as err:
             logger.error(err)
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
+    file_path = os.path.join(DATA_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
     dat.to_parquet(file_path, compression='gzip')
 
 
 def db_delete(tbl):
+    """
+    Delete data from a database table.
+
+    Args:
+        tbl (str): Table name.
+    """
     if CONFIG['enable_writing_db']:
         query_db(f"DELETE FROM {tbl} WHERE aeid = {AEID};")
 
-    file_path = os.path.join(EXPORT_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
+    file_path = os.path.join(DATA_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
     if os.path.exists(file_path):
         os.remove(file_path)
 
 
 def write_output(df):
+    """
+    Write output data to the database and custom output files.
+
+    Args:
+        df (pandas.DataFrame): DataFrame containing output data.
+    """
     df = get_metadata(df)
     df = subset_chemicals(df)
     df = df[CONFIG['output_cols_filter']]
@@ -229,6 +319,15 @@ def write_output(df):
 
 
 def subset_chemicals(dat):
+    """
+    Subset chemicals based on consensus hit logic and keep the first occurrence.
+
+    Args:
+        dat (pandas.DataFrame): DataFrame containing data.
+
+    Returns:
+        pandas.DataFrame: Subsetted DataFrame.
+    """
     # A chemical id (chid) can have more than one sample id (spid). Use consensus hit (chit) logic: max
     dat = dat.sort_values(by=['dsstox_substance_id', 'hitcall'], ascending=[True, False])
     # Drop duplicates based on 'chid' and keep the first occurrence (max 'hitcall' value)
@@ -236,12 +335,24 @@ def subset_chemicals(dat):
 
 
 def get_metadata(df):
+    """
+    Enhance the input DataFrame with additional metadata and replace missing chemical IDs.
+
+    This function takes a DataFrame containing experimental data and enhances it by adding chemical
+    information and replacing missing `dsstox_substance_id` values based on predefined replacement rules.
+
+    Args:
+        df (pandas.DataFrame): Input DataFrame containing experimental data.
+
+    Returns:
+        pandas.DataFrame: Enhanced DataFrame with added chemical information and replaced `dsstox_substance_id` values.
+    """
     df = df.drop(columns=['dsstox_substance_id'])
     chemical_df = get_chemical(df["spid"].unique())
     df = pd.merge(chemical_df, df, on="spid", how="right")
     df['chid'].fillna(0, inplace=True)
     df['chid'] = df['chid'].astype(int)
-    replacement_values = {'DMSO': 'DTXSID2021735', 'Beta-Estradiol': 'DTXSID0020573',}
+    replacement_values = {'DMSO': 'DTXSID2021735', 'Beta-Estradiol': 'DTXSID0020573', }
     index_mask = df['dsstox_substance_id'].isna()
     # Iterate through the DataFrame and replace masked values
     for index, row in df[index_mask].iterrows():
@@ -253,6 +364,15 @@ def get_metadata(df):
 
 
 def get_chemical(spids):
+    """
+    Retrieve chemical information for a list of sample IDs.
+
+    Args:
+        spids (list): List of sample IDs.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing chemical information for the specified sample IDs.
+    """
     sample = 'sample'
     chemical = 'chemical'
     path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{CONFIG['file_format']}")
@@ -286,6 +406,15 @@ def get_chemical(spids):
 
 
 def get_assay_component_endpoint(aeid):
+    """
+    Retrieve assay component endpoint information for a specific assay endpoint.
+
+    Args:
+        aeid (int): Assay endpoint ID.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing assay component endpoint information.
+    """
     tbl = 'assay_component_endpoint'
     path = os.path.join(INPUT_DIR_PATH, f"{tbl}{CONFIG['file_format']}")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
@@ -308,8 +437,14 @@ def get_assay_component_endpoint(aeid):
 
 
 def get_cutoff():
+    """
+    Retrieve efficacy cutoff values for a specific assay endpoint.
+
+    Returns:
+        pandas.DataFrame: DataFrame containing cutoff values.
+    """
     path = os.path.join(CUTOFF_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
-    if not os.path.exists(path) or  CONFIG['enable_allowing_reading_remote']:
+    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
                 SELECT bmad, bmed, onesd, cutoff
@@ -329,6 +464,16 @@ def get_cutoff():
 
 
 def mc4_mthds(mthd, df):
+    """
+    Compute specific metrics based on input data for level 4 methods.
+
+    Args:
+        mthd (str): Method name.
+        df (pandas.DataFrame): Input data.
+
+    Returns:
+        float: Computed metric value.
+    """
     cndx = df['cndx'].isin([1, 2])
     wllt_t = df['wllt'] == 't'
     mask = df.loc[cndx & wllt_t, 'resp']
@@ -344,6 +489,16 @@ def mc4_mthds(mthd, df):
 
 
 def mc5_mthds(mthd, bmad):
+    """
+    Get predefined values for level 5 methods or perform computations using bmad.
+
+    Args:
+        mthd (str): Method name.
+        bmad (float): Calculated bmad value.
+
+    Returns:
+        float: Method-specific value.
+    """
     return {
         'pc20': 20,
         'pc50': 50,
@@ -374,6 +529,16 @@ def mc5_mthds(mthd, bmad):
 
 
 def load_method(lvl, aeid):
+    """
+    Load and retrieve the list of methods for a specific level and assay endpoint.
+
+    Args:
+        lvl (int): Method level.
+        aeid (int): Assay endpoint ID.
+
+    Returns:
+        list: List of method names.
+    """
     tbl_aeid = f"mc{lvl}_aeid"
     tbl_methods = f"mc{lvl}_methods"
     path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
@@ -408,17 +573,39 @@ def load_method(lvl, aeid):
 
 
 def load_config():
+    """
+    Load and retrieve the configuration settings.
+
+    Returns:
+        tuple: A tuple containing configuration settings and configuration directory path.
+    """
     with open(CONFIG_PATH, 'r') as file:
         config = yaml.safe_load(file)
     return config, CONFIG_DIR_PATH
 
 
 def init_config(config):
+    """
+    Initialize the global configuration variable.
+
+    Args:
+        config (dict): Configuration settings.
+    """
     global CONFIG
     CONFIG = config
 
 
 def get_partition(instance_id, instances_total):
+    """
+    Divide a list of assay endpoints into partitions for distributed processing.
+
+    Args:
+        instance_id (int): Instance ID for workload distribution.
+        instances_total (int): Total number of instances.
+
+    Returns:
+        list: List of assay endpoint IDs for the given instance.
+    """
     def read_aeids():
         with open(AEIDS_LIST_PATH, 'r') as file:
             ids_list = [line.strip() for line in file]
@@ -432,6 +619,15 @@ def get_partition(instance_id, instances_total):
 
 
 def get_formatted_time_elapsed(start_time):
+    """
+    Get formatted time elapsed since a specific time.
+
+    Args:
+        start_time (datetime): Start time for elapsed time calculation.
+
+    Returns:
+        str: Formatted elapsed time string.
+    """
     delta = datetime.now() - start_time
     hours, remainder = divmod(delta.total_seconds(), 3600)
     minutes, seconds = divmod(remainder, 60)
@@ -441,4 +637,13 @@ def get_formatted_time_elapsed(start_time):
 
 
 def get_msg_with_elapsed_time(msg):
+    """
+    Add elapsed time to a message.
+
+    Args:
+        msg (str): Message.
+
+    Returns:
+        str: Message with elapsed time.
+    """
     return f"{get_formatted_time_elapsed(START_TIME)} {msg}"

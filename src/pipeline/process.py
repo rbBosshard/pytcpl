@@ -5,21 +5,57 @@ from scipy.optimize import minimize
 from scipy.stats import t, chi2
 from tqdm import tqdm
 
-from .constants import custom_format
-from .models.models import get_model
-from .models.objective_function import get_negative_log_likelihood
-from .pipeline_helper import get_msg_with_elapsed_time, get_cutoff
-from .track_fitted_params import track_fitted_params
+from src.utils.constants import custom_format
+from src.utils.models.models import get_model
+from src.utils.models.objective_function import get_negative_log_likelihood
+from src.pipeline.pipeline_helper import get_msg_with_elapsed_time, get_cutoff
+from src.utils.track_fitted_params import track_fitted_params
 
 
 def process(df, config, logger):
+    """
+    Process concentration-response data.
+
+    This function processes concentration-response data stored in a DataFrame. It performs various steps such as
+    grouping datapoints, curve fitting, and hit calling for each concentration-response series.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing concentration-response data.
+        config (dict): Configuration settings for data processing.
+        logger: Logger object for logging messages.
+
+    Returns:
+        pandas.DataFrame: A DataFrame with processed concentration-response data.
+    """
     cutoffs = get_cutoff()
     cutoff = cutoffs.iloc[0]['cutoff']
     onesd = cutoffs.iloc[0]['onesd']
 
     def group_datapoints_to_series(groups):
+        """
+        Group datapoints into concentration-response series.
+
+        Args:
+            groups (pandas.GroupBy): Grouped data by assay endpoint and substance.
+
+        Returns:
+            pandas.DataFrame: DataFrame with grouped concentration-response series.
+        """
         def shrink_series(series):
-            # Shrink series containing too many datapoints to handle. Often the case for positive control chemical
+            """
+            Shrink a concentration-response series if it contains too many datapoints.
+
+            This function takes a concentration-response series and checks if it contains too many datapoints to handle,
+            which is often the case for positive control chemicals. If the series exceeds the specified threshold,
+            it shrinks the series by calculating the median response for each unique concentration.
+
+            Args:
+                series (pandas.Series): A series containing concentration and response data.
+
+            Returns:
+                tuple: A tuple containing two lists - the shrunk concentrations and corresponding median responses,
+                       or the original concentration and response if not exceeded.
+            """
             conc, resp = series.conc, series.resp
             uconc = np.unique(conc)
             exceeded = len(conc) > config['max_num_datapoints_per_series_threshold']
@@ -32,11 +68,29 @@ def process(df, config, logger):
         return df
 
     def check_to_fit(series):
+        """
+        Check if a series is eligible for curve fitting.
+
+        Args:
+            series (pandas.Series): A series containing concentration-response data.
+
+        Returns:
+            bool: True if the series is eligible for curve fitting, False otherwise.
+        """
         conc, resp = np.array(series.conc), np.array(series.resp)
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
         return (rmds.size >= config['min_num_median_responses_threshold']) and np.any(rmds >= cutoff)
 
     def fit(series):
+        """
+        Fit concentration-response data to curve models.
+
+        Args:
+            series (pandas.Series): A series containing concentration-response data.
+
+        Returns:
+            dict: Dictionary containing fit results for various curve models.
+        """
         out = {}
         for fit_model in config['curve_fit_models']:
             conc = np.array(series.conc)
@@ -52,6 +106,15 @@ def process(df, config, logger):
         return out
 
     def hit(series):
+        """
+        Perform hit calling on a series.
+
+        Args:
+            series (pandas.Series): A series containing concentration-response data and fit results.
+
+        Returns:
+            dict: Dictionary containing hit call results for the series.
+        """
         conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
         aics = {fit_model: params[fit_model]['aic'] for fit_model in params.keys()}
 
@@ -92,7 +155,9 @@ def process(df, config, logger):
         p2 = 1 - p2  # odds of at least one point above cutoff
 
         ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
-        ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,fit_model=get_model(best_aic_model)('fun'))  # get log-likelihood at cutoff
+        ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,
+                                                 fit_model=get_model(best_aic_model)(
+                                                     'fun'))  # get log-likelihood at cutoff
         p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
 
         continuous_hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
