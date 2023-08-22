@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `output` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `aeid` int unsigned NOT NULL,
-  `spid` varchar(35) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `spid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dsstox_substance_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `best_aic_model` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `hitcall` double DEFAULT NULL,

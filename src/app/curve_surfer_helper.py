@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 
 import numpy as np
 import pandas as pd
@@ -20,7 +19,7 @@ ERR_MSG = f"No data found for this query"
 
 
 @st.cache_data
-def load_data(aeid):  # aeid parameter used to handle correct caching
+def load_assay_endpoint(aeid):  # aeid parameter used to handle correct caching
     """
     Load data for a specific AEID.
 
@@ -35,10 +34,30 @@ def load_data(aeid):  # aeid parameter used to handle correct caching
         tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
 
     """
-    df = get_output_data()
-    cutoff_df = get_cutoff()
+    df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
+    cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
     return df, cutoff_df
 
+
+@st.cache_data
+def load_compound(dsstox_substance_id):  # aeid parameter used to handle correct caching
+    """
+    Load data for a specific dsstox_substance_id.
+
+    This function loads data for a given dsstox_substance_id. It retrieves the data from an output table and a cutoff
+    table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
+    is returned as two dataframes.
+
+    Args:
+        aeid (int): Assay endpoint ID for which to load data.
+
+    Returns:
+        tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
+
+    """
+    df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
+    cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
+    return df, cutoff_df
 
 def get_output_data():
     """
@@ -290,8 +309,11 @@ def check_reset():
         st.session_state.trigger = ""
     if "df" not in st.session_state:
         st.session_state.df = None
+        st.session_state.cutoff = None
     if "series" not in st.session_state:
         st.session_state.series = None
+    if "df_all" not in st.session_state:
+        st.session_state.df_all, st.session_state.cutoff_all = load_assay_endpoint(0)
 
 
 def reset_id():
@@ -357,7 +379,7 @@ def update():
     fresh_load = "df" not in st.session_state or st.session_state.last_aeid != st.session_state.aeid
     refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
     if refresh_load:
-        st.session_state.df, st.session_state.cutoff = load_data(
+        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(
             st.session_state.aeid)  # requires id parameter for unique caching
         st.session_state.last_aeid = st.session_state.aeid
         if fresh_load:

@@ -33,7 +33,7 @@ def main():
     with st.sidebar:
         st.header(title + "🏄")
         aeid_value = 762
-        init_aeid(7)
+        init_aeid(aeid_value)
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
         col1, col2 = st.columns(2)
         with col1:

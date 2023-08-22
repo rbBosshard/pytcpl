@@ -37,7 +37,7 @@ pip install -r requirements.txt
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour
 - Goto [DDL](config/DDL) to set Data Definition Language (DDL) statements, used to create new MySQL database schema
   objects
-- [Automate](src/utils/generating_code/get_relevant_aeid_list.py) list generation [aeid_list.in](config/aeid_list.in) 
+- [Automate](src/utils/generating_code/get_relevant_aeid_list.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
 
 #### Run pipeline
 

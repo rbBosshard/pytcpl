@@ -173,7 +173,7 @@ def check_db():
         with open(ddl_file, 'r') as f:
             query_db(f.read())
 
-    print(f"👍 Verified the existence of required DB tables")
+    logger.info(f"👍 Verified the existence of required DB tables")
 
 
 def get_assay_info(aeid):
@@ -262,23 +262,27 @@ def fetch_raw_data():
     return df
 
 
-def db_append(dat, tbl):
+def db_append(df, tbl):
     """
     Append data to a database table.
 
     Args:
-        dat (pandas.DataFrame): Data to append.
+        df (pandas.DataFrame): Data to append.
         tbl (str): Table name.
     """
     if CONFIG['enable_writing_db']:
         try:
             engine = get_sqlalchemy_engine()
-            dat.to_sql(tbl, engine, if_exists='append', index=False)
+            chunk_size = CONFIG['chunk_size']
+            for start in range(0, len(df), chunk_size):
+                chunk = df[start: start + chunk_size]
+                chunk.to_sql(tbl, engine, if_exists='append', index=False)
+            engine.dispose()
         except Exception as err:
             logger.error(err)
 
     file_path = os.path.join(DATA_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
-    dat.to_parquet(file_path, compression='gzip')
+    df.to_parquet(file_path, compression='gzip')
 
 
 def db_delete(tbl):
@@ -447,7 +451,7 @@ def get_cutoff():
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
-                SELECT bmad, bmed, onesd, cutoff
+                SELECT *
                 FROM {CUTOFF_TABLE} 
                 WHERE aeid = {AEID};
                 """
@@ -458,7 +462,6 @@ def get_cutoff():
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
-    df = df[['bmad', 'bmed', 'onesd', 'cutoff']]
     logger.debug(f"Read from {path}")
     return df
 
