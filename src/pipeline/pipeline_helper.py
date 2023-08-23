@@ -12,8 +12,8 @@ import yaml
 from st_files_connection import FilesConnection
 
 from src.utils.constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, INPUT_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH
+    DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, METADATA_DIR_PATH, \
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH
 from src.utils.models.helper import get_mad
 from src.utils.query_db import get_sqlalchemy_engine
 from src.utils.query_db import query_db
@@ -188,8 +188,8 @@ def get_assay_info(aeid):
     """
     tbl_endpoint = 'assay_component_endpoint'
     tbl_component = 'assay_component'
-    path_endpoint = os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}")
-    path_component = os.path.join(INPUT_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}")
+    path_endpoint = os.path.join(METADATA_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}")
+    path_component = os.path.join(METADATA_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}")
     available = os.path.exists(path_endpoint) and os.path.exists(path_component)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -204,8 +204,8 @@ def get_assay_info(aeid):
             endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
             component_df = conn.read(path_component, input_format="parquet", ttl=600)
     else:
-        endpoint_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}"))
-        component_df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}"))
+        endpoint_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}"))
+        component_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}"))
 
     endpoint_df = endpoint_df[endpoint_df['aeid'] == aeid]
     df = pd.merge(endpoint_df, component_df, on='acid').iloc[0].to_dict()
@@ -281,7 +281,9 @@ def db_append(df, tbl):
         except Exception as err:
             logger.error(err)
 
-    file_path = os.path.join(DATA_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
+    folder_path = os.path.join(DATA_DIR_PATH, "all", tbl) if AEID == 0 else os.path.join(DATA_DIR_PATH, tbl)
+    os.makedirs(folder_path, exist_ok=True)
+    file_path = os.path.join(folder_path, f"{AEID}{CONFIG['file_format']}")
     df.to_parquet(file_path, compression='gzip')
 
 
@@ -379,8 +381,8 @@ def get_chemical(spids):
     """
     sample = 'sample'
     chemical = 'chemical'
-    path_sample = os.path.join(INPUT_DIR_PATH, f"{sample}{CONFIG['file_format']}")
-    path_chemical = os.path.join(INPUT_DIR_PATH, f"{chemical}{CONFIG['file_format']}")
+    path_sample = os.path.join(METADATA_DIR_PATH, f"{sample}{CONFIG['file_format']}")
+    path_chemical = os.path.join(METADATA_DIR_PATH, f"{chemical}{CONFIG['file_format']}")
     available = os.path.exists(path_sample) and os.path.exists(path_chemical)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -420,7 +422,7 @@ def get_assay_component_endpoint(aeid):
         pandas.DataFrame: DataFrame containing assay component endpoint information.
     """
     tbl = 'assay_component_endpoint'
-    path = os.path.join(INPUT_DIR_PATH, f"{tbl}{CONFIG['file_format']}")
+    path = os.path.join(METADATA_DIR_PATH, f"{tbl}{CONFIG['file_format']}")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
@@ -434,7 +436,7 @@ def get_assay_component_endpoint(aeid):
             path = f"{CONFIG['bucket']}/input/{tbl}{CONFIG['file_format']}"
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
-        df = pd.read_parquet(os.path.join(INPUT_DIR_PATH, f"{tbl}{CONFIG['file_format']}"))
+        df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl}{CONFIG['file_format']}"))
     df = df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
     logger.debug(f"Read from {path}")
     return df
@@ -544,8 +546,8 @@ def load_method(lvl, aeid):
     """
     tbl_aeid = f"mc{lvl}_aeid"
     tbl_methods = f"mc{lvl}_methods"
-    path_aeid = os.path.join(INPUT_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
-    path_methods = os.path.join(INPUT_DIR_PATH, f"{tbl_methods}{CONFIG['file_format']}")
+    path_aeid = os.path.join(METADATA_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
+    path_methods = os.path.join(METADATA_DIR_PATH, f"{tbl_methods}{CONFIG['file_format']}")
     available = os.path.exists(path_aeid) and os.path.exists(path_methods)
     if not available or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
@@ -650,3 +652,13 @@ def get_msg_with_elapsed_time(msg):
         str: Message with elapsed time.
     """
     return f"{get_formatted_time_elapsed(START_TIME)} {msg}"
+
+
+def merge_all_outputs():
+    aeid_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{CONFIG['file_format']}"))
+    output_paths = [os.path.join(OUTPUT_DIR_PATH, f"{aeid}{CONFIG['file_format']}") for aeid in aeid_sorted['aeid']]
+    cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{CONFIG['file_format']}") for aeid in aeid_sorted['aeid']]
+    cols = ['dsstox_substance_id', 'aeid', 'hitcall']
+    df_all = pd.concat([pd.read_parquet(file) for file in output_paths])
+    cutoff_all = pd.concat([pd.read_parquet(file) for file in cutoff_paths])
+    return df_all, cutoff_all

@@ -37,7 +37,7 @@ pip install -r requirements.txt
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour
 - Goto [DDL](config/DDL) to set Data Definition Language (DDL) statements, used to create new MySQL database schema
   objects
-- [Automate](src/utils/generating_code/get_relevant_aeid_list.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
+- [Automate](src/utils/generating_code/before_pipeline.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
 
 #### Run pipeline
 
@@ -54,7 +54,7 @@ python pytcpl/src/pipeline.py --instance_id 0 --instances_total 1
     - `pytcpl/src/pipeline.py --instance_id 1 --instances_total 2` on another machine
   
 #### Further automation steps
-- [Generate](src/utils/generating_code/generate_per_chemical_results.py) per-chemical-results from all processed assay endpoints
+- [Generate](src/utils/generating_code/after_pipeline.py) per-chemical-results from all processed assay endpoints
 - [Fetch](src/utils/generating_code/fetch_db_tables.py) relevant metadata tables from invitrodb
 - [Remove](src/utils/generating_code/remove_output_files_not_in_aeid_list.py) output files NOT contained in [aeid_list.in](config/aeid_list.in)
 

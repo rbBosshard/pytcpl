@@ -7,10 +7,10 @@ import streamlit as st
 from plotly import graph_objects as go, express as px
 from st_files_connection import FilesConnection
 
-from src.utils.constants import OUTPUT_DIR_PATH
+from src.utils.constants import OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH
 from src.utils.models.helper import pow_space
 from src.utils.models.models import get_model
-from src.pipeline.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical
+from src.pipeline.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical, merge_all_outputs
 from src.utils.query_db import query_db
 
 CONFIG = {}
@@ -34,60 +34,66 @@ def load_assay_endpoint(aeid):  # aeid parameter used to handle correct caching
         tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
 
     """
-    df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
-    cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
-    return df, cutoff_df
-
-
-@st.cache_data
-def load_compound(dsstox_substance_id):  # aeid parameter used to handle correct caching
-    """
-    Load data for a specific dsstox_substance_id.
-
-    This function loads data for a given dsstox_substance_id. It retrieves the data from an output table and a cutoff
-    table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
-    is returned as two dataframes.
-
-    Args:
-        aeid (int): Assay endpoint ID for which to load data.
-
-    Returns:
-        tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
-
-    """
-    df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
-    cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
-    return df, cutoff_df
-
-def get_output_data():
-    """
-    Retrieve output data for a specific AEID.
-
-    This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
-    a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.
-
-    Returns:
-        pd.DataFrame: DataFrame containing the output data for the specified AEID.
-
-    """
-    tbl = 'output'
-    path = os.path.join(OUTPUT_DIR_PATH, f"{st.session_state.aeid}{CONFIG['file_format']}")
-    print(f"Fetch data with assay ID {st.session_state.aeid}..")
-    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            qstring = f"SELECT * FROM {tbl} WHERE aeid = {st.session_state.aeid};"
-            df = query_db(query=qstring)
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = f"{CONFIG['bucket']}/{tbl}/{st.session_state.aeid}{CONFIG['file_format']}"
-            df = conn.read(data_source, input_format="parquet", ttl=600)
+    if aeid == 0:
+        df, cutoff_df = merge_all_outputs()
     else:
-        df = pd.read_parquet(path)
-    length = df.shape[0]
-    if length == 0:
-        st.error(f"No data found for AEID {st.session_state.aeid}", icon="🚨")
-    print(f"{length} series loaded")
-    return df
+        df = st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
+        cutoff_df = st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
+
+    return df, cutoff_df
+
+
+# @st.cache_data
+# def load_compound(dsstox_substance_id):  # aeid parameter used to handle correct caching
+#     """
+#     Load data for a specific dsstox_substance_id.
+#
+#     This function loads data for a given dsstox_substance_id. It retrieves the data from an output table and a cutoff
+#     table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
+#     is returned as two dataframes.
+#
+#     Args:
+#         aeid (int): Assay endpoint ID for which to load data.
+#
+#     Returns:
+#         tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
+#
+#     """
+#
+#     df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
+#     cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
+#     return df, cutoff_df
+
+
+# def get_output_data():
+#     """
+#     Retrieve output data for a specific AEID.
+#
+#     This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
+#     a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.
+#
+#     Returns:
+#         pd.DataFrame: DataFrame containing the output data for the specified AEID.
+#
+#     """
+#     cutoff_all, df_all = merge_all_outputs()
+#     path = os.path.join(OUTPUT_DIR_PATH, f"{st.session_state.aeid}{CONFIG['file_format']}")
+#     print(f"Fetch all output data")
+#     if CONFIG['enable_allowing_reading_remote']:
+#         if CONFIG['enable_reading_db']:
+#             qstring = f"SELECT * FROM {tbl};"
+#             df = query_db(query=qstring)
+#         else:
+#             conn = st.experimental_connection('s3', type=FilesConnection)
+#             data_source = f"{CONFIG['bucket']}/{tbl}/{st.session_state.aeid}{CONFIG['file_format']}"
+#             df = conn.read(data_source, input_format="parquet", ttl=600)
+#     else:
+#         df = pd.read_parquet(path)
+#     length = df.shape[0]
+#     if length == 0:
+#         st.error(f"No data found for AEID {st.session_state.aeid}", icon="🚨")
+#     print(f"{length} series loaded")
+#     return df
 
 
 def set_config_app(config):
@@ -314,7 +320,16 @@ def check_reset():
         st.session_state.series = None
     if "df_all" not in st.session_state:
         st.session_state.df_all, st.session_state.cutoff_all = load_assay_endpoint(0)
-
+    if "df_filter" not in st.session_state:
+        st.session_state.df_filter = st.session_state.df_all
+        st.session_state.cutoff_filter = st.session_state.cutoff_all
+    if "assay_endpoint_info" not in st.session_state:
+        st.session_state.assay_endpoint_info = None
+    if "assay_info" not in st.session_state:
+        st.session_state.assay_info = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{CONFIG['file_format']}"))
+    if "assay_info_distinct_values" not in st.session_state:
+        with open(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info_distinct_values.json"), "r") as json_file:
+            st.session_state.assay_info_distinct_values = json.load(json_file)
 
 def reset_id():
     """
@@ -379,8 +394,7 @@ def update():
     fresh_load = "df" not in st.session_state or st.session_state.last_aeid != st.session_state.aeid
     refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
     if refresh_load:
-        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(
-            st.session_state.aeid)  # requires id parameter for unique caching
+        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(st.session_state.aeid)  
         st.session_state.last_aeid = st.session_state.aeid
         if fresh_load:
             sort()

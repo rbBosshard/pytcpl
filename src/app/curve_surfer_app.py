@@ -32,7 +32,20 @@ def main():
     check_reset()
     with st.sidebar:
         st.header(title + "🏄")
-        aeid_value = 762
+        subset_assay_info_columns = ["aeid",
+                                     "assay_component_endpoint_name",
+                                     "biological_process_target", 
+                                     "intended_target_type", 
+                                     "intended_target_type_sub",
+                                     "intended_target_family",
+                                     "intended_target_family_sub",
+                                     "ToxicityEndpoint",
+                                     "MechanisticTarget"
+                                     ]
+        st.session_state.assay_info_column = st.selectbox("Select a column to filter:", subset_assay_info_columns)
+        st.session_state.assay_info_selected_fields = st.multiselect("Select a value:",  st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], on_change=trigger, args=("assay_info",))
+
+        aeid_value = 66
         init_aeid(aeid_value)
         st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
         col1, col2 = st.columns(2)

@@ -10,11 +10,12 @@ DDL_PATH = os.path.join(CONFIG_DIR_PATH, 'DDL')
 
 DATA_DIR_PATH = os.path.join(ROOT_DIR, '../../data')
 RAW_DIR_PATH = os.path.join(DATA_DIR_PATH, 'raw')
-INPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'input')
+METADATA_DIR_PATH = os.path.join(DATA_DIR_PATH, 'metadata')
+METADATA_SUBSET_DIR_PATH = os.path.join(METADATA_DIR_PATH, 'subset')
+
 OUTPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'output')
 CUSTOM_OUTPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'custom_output')
 CHEMICAL_RESULT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'chemical_results')
-METADATA_DIR_PATH = os.path.join(DATA_DIR_PATH, 'metadata')
 CUTOFF_DIR_PATH = os.path.join(DATA_DIR_PATH, 'cutoff')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
