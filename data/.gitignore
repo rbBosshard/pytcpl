@@ -1,2 +1,6 @@
 chemical_results/*
 chemical_results/.gitkeep
+
+output/0.parquet.gzip
+custom_output/0.parquet.gzip
+cutoff/0.parquet.gzip
