@@ -358,14 +358,26 @@ def get_metadata(df):
     df = pd.merge(chemical_df, df, on="spid", how="right")
     df['chid'].fillna(0, inplace=True)
     df['chid'] = df['chid'].astype(int)
-    replacement_values = {'DMSO': 'DTXSID2021735', 'Beta-Estradiol': 'DTXSID0020573', }
+
+    # Some SPIDs are not correctly handeld/mapped to DTXSID by DB and have synonyms
+    replacement_values = {'DMSO': 'DTXSID2021735', 'Beta-Estradiol': 'DTXSID0020573',
+                          'E2': 'DTXSID0020573'}
     index_mask = df['dsstox_substance_id'].isna()
-    # Iterate through the DataFrame and replace masked values
+
     for index, row in df[index_mask].iterrows():
         spid_value = row['spid']
-        replacement_value = replacement_values.get(spid_value)
-        if replacement_value:
-            df.loc[index, 'dsstox_substance_id'] = replacement_value
+        if 'dmso' in spid_value.lower():
+            replacement_value = replacement_values.get('DMSO')
+            if replacement_value:
+                df.loc[index, 'dsstox_substance_id'] = replacement_value
+        elif 'beta-estradiol' in spid_value.lower():
+            replacement_value = replacement_values.get('Beta-Estradiol')
+            if replacement_value:
+                df.loc[index, 'dsstox_substance_id'] = replacement_value
+        else:
+            replacement_value = replacement_values.get(spid_value)
+            if replacement_value:
+                df.loc[index, 'dsstox_substance_id'] = replacement_value
     return df
 
 

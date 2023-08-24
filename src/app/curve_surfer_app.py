@@ -8,8 +8,9 @@ import streamlit as st
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 pd.options.mode.chained_assignment = None  # default='warn'
 
-from src.app.curve_surfer_helper import check_reset, trigger, filter_spid, update, get_assay_and_sample_info, set_config_app
-from src.pipeline.pipeline_helper import load_config, init_aeid
+from src.app.curve_surfer_helper import check_reset, trigger, update, get_assay_and_sample_info, \
+    set_config_app, subset_assay_info_columns
+from src.pipeline.pipeline_helper import load_config
 
 
 def main():
@@ -29,30 +30,34 @@ def main():
     config, _ = load_config()
     set_config_app(config)
 
-    check_reset()
+    with st.spinner('Wait for it...'):
+        check_reset()
+
     with st.sidebar:
         st.header(title + "🏄")
-        subset_assay_info_columns = ["aeid",
-                                     "assay_component_endpoint_name",
-                                     "biological_process_target", 
-                                     "intended_target_type", 
-                                     "intended_target_type_sub",
-                                     "intended_target_family",
-                                     "intended_target_family_sub",
-                                     "ToxicityEndpoint",
-                                     "MechanisticTarget"
-                                     ]
-        st.session_state.assay_info_column = st.selectbox("Select a column to filter:", subset_assay_info_columns)
-        st.session_state.assay_info_selected_fields = st.multiselect("Select a value:",  st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], on_change=trigger, args=("assay_info",))
 
-        aeid_value = 66
-        init_aeid(aeid_value)
-        st.session_state.aeid = int(st.number_input(label="Input assay endpoint ID (AEID)", value=aeid_value))
-        col1, col2 = st.columns(2)
-        with col1:
-            st.button(":arrow_left: Previous", on_click=trigger, args=("prev",))
-        with col2:
-            st.button("Next :arrow_right:", on_click=trigger, args=("next",))
+        st.divider()
+
+        st.subheader("Assay endpoint settings")
+
+        st.session_state.assay_info_column = st.selectbox("Filter on:", subset_assay_info_columns, on_change=trigger, args=("assay_info_column",))
+        st.session_state.assay_info_selected_fields = [st.session_state.assay_info_distinct_values[st.session_state.assay_info_column][0]]
+        with st.form("Filter assay endpoints"):
+            st.session_state.assay_info_selected_fields = st.multiselect("Select fields:",  
+                st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], 
+                default=st.session_state.assay_info_selected_fields)
+            submitted = st.form_submit_button("Submit", on_click=trigger, args=("assay_info",))
+            placeholder_assay_info = st.empty()
+            placeholder_assay_info.write(f"{st.session_state.num_assay_endpoints_filtered} assay endpoints in filter")
+
+        st.button(":arrow_up_small: Next assay", on_click=trigger, args=("next_assay_endpoint",))
+        st.button(":arrow_down_small: Previous assay", on_click=trigger, args=("prev_assay_endpoint",))
+
+        st.divider()
+
+        st.subheader("Compounds settings")
+        st.button(":arrow_up_small: Next compound", on_click=trigger, args=("next_compound",))
+        st.button(":arrow_down_small: Previous compound", on_click=trigger, args=("prev_compound",))
         st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=trigger,
                                                 args=("sort_by",))
         st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=trigger, args=("asc",))
@@ -60,15 +65,17 @@ def main():
             st.session_state.hitcall_slider = st.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0))
             submitted = st.form_submit_button("Submit", on_click=trigger, args=("hitcall_slider",))
             placeholder_hitcall_slider = st.empty()
+            placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")        
         with st.form("Input assay endpoint ID (SPID)"):
-            st.session_state.spid = st.text_input(label="Input sample ID (SPID)")
-            submitted = st.form_submit_button("Submit", on_click=filter_spid)
+            st.session_state.spid = st.selectbox("Input sample ID (SPID)", st.session_state.df["spid"].unique())
+            submitted = st.form_submit_button("Submit", on_click=trigger, args=("spid",))
 
     fig, pars_dict = update()
 
     placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")
+    placeholder_assay_info.write(f"{st.session_state.num_assay_endpoints_filtered} assay endpoints in filter")
 
-    height = 710
+    height = 720
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
 

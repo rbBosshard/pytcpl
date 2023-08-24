@@ -5,13 +5,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from plotly import graph_objects as go, express as px
-from st_files_connection import FilesConnection
 
-from src.utils.constants import OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH
+from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, merge_all_outputs
+from src.utils.constants import METADATA_SUBSET_DIR_PATH
 from src.utils.models.helper import pow_space
 from src.utils.models.models import get_model
-from src.pipeline.pipeline_helper import get_assay_info, get_cutoff, init_config, get_chemical, merge_all_outputs
-from src.utils.query_db import query_db
 
 CONFIG = {}
 SUFFIX = ''
@@ -34,66 +32,16 @@ def load_assay_endpoint(aeid):  # aeid parameter used to handle correct caching
         tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
 
     """
-    if aeid == 0:
-        df, cutoff_df = merge_all_outputs()
-    else:
-        df = st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
-        cutoff_df = st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
+
+    df = st.session_state.df_all[st.session_state.df_all['aeid'] == aeid].reset_index(drop=True)
+    cutoff_df = st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid].reset_index(drop=True)
 
     return df, cutoff_df
 
 
-# @st.cache_data
-# def load_compound(dsstox_substance_id):  # aeid parameter used to handle correct caching
-#     """
-#     Load data for a specific dsstox_substance_id.
-#
-#     This function loads data for a given dsstox_substance_id. It retrieves the data from an output table and a cutoff
-#     table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
-#     is returned as two dataframes.
-#
-#     Args:
-#         aeid (int): Assay endpoint ID for which to load data.
-#
-#     Returns:
-#         tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
-#
-#     """
-#
-#     df = get_output_data() if aeid == 0 else st.session_state.df_all[st.session_state.df_all['aeid'] == aeid]
-#     cutoff_df = get_cutoff() if aeid == 0 else st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid]
-#     return df, cutoff_df
-
-
-# def get_output_data():
-#     """
-#     Retrieve output data for a specific AEID.
-#
-#     This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
-#     a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.
-#
-#     Returns:
-#         pd.DataFrame: DataFrame containing the output data for the specified AEID.
-#
-#     """
-#     cutoff_all, df_all = merge_all_outputs()
-#     path = os.path.join(OUTPUT_DIR_PATH, f"{st.session_state.aeid}{CONFIG['file_format']}")
-#     print(f"Fetch all output data")
-#     if CONFIG['enable_allowing_reading_remote']:
-#         if CONFIG['enable_reading_db']:
-#             qstring = f"SELECT * FROM {tbl};"
-#             df = query_db(query=qstring)
-#         else:
-#             conn = st.experimental_connection('s3', type=FilesConnection)
-#             data_source = f"{CONFIG['bucket']}/{tbl}/{st.session_state.aeid}{CONFIG['file_format']}"
-#             df = conn.read(data_source, input_format="parquet", ttl=600)
-#     else:
-#         df = pd.read_parquet(path)
-#     length = df.shape[0]
-#     if length == 0:
-#         st.error(f"No data found for AEID {st.session_state.aeid}", icon="🚨")
-#     print(f"{length} series loaded")
-#     return df
+@st.cache_data
+def merge_all_outputs_wrapper(cache_id):
+    return merge_all_outputs()
 
 
 def set_config_app(config):
@@ -143,6 +91,7 @@ def get_chem_info(spid):
         tuple: A tuple containing CAS number, chemical name, and DSSTox substance ID.
 
     """
+    
     chem = get_chemical([spid]).iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
@@ -170,7 +119,11 @@ def init_figure(series, cutoff_df):
     onesd = cutoff_df['onesd'].iloc[0]
     st.session_state.series.update({"cutoff": cutoff, "bmad": bmad, "onesd": onesd})
     fig = go.Figure()
-    casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
+    try:
+        casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
+    except IndexError:
+        casn, chnm, dsstox_substance_id = None, None, None
+        st.warning(f"No chemical information found for SPID {series['spid']}")
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
@@ -204,10 +157,6 @@ def add_curves(series, fig):
 
     """
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
-
-    fig.add_trace(
-        go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
-                   marker=dict(color="gray", symbol="x-thin-open", size=10), name="Repsonse", showlegend=True))
 
     potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd"] if potency in series]
     efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
@@ -250,7 +199,7 @@ def add_curves(series, fig):
                 go.Scatter(x=np.log10(x), y=y, opacity=opacity, legendgroup="Fit models",
                            legendgrouptitle_text="Fit models",
                            marker=dict(color=color), mode='lines',
-                           visible="legendonly" if fit_model == 'cnst' else True,
+                           visible=True,
                            name=name, line=dict(width=width, dash=dash)))
 
     for i, efficacy in enumerate(efficacies):
@@ -286,7 +235,12 @@ def add_curves(series, fig):
                 legendgrouptitle_text="Potency estimates",
             ))
 
+    fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
+                             marker=dict(color="blue", symbol="circle-open-dot", size=20), name="Repsonse", showlegend=True))
+
+    
     return pars_dict
+
 
 
 def check_reset():
@@ -299,8 +253,6 @@ def check_reset():
     """
     if "id" not in st.session_state:
         reset_id()
-    if "aeid" not in st.session_state:
-        st.session_state.aeid = 0
     if "last_aeid" not in st.session_state:
         st.session_state.last_aeid = -1
     if "spid" not in st.session_state:
@@ -312,17 +264,9 @@ def check_reset():
     if "length" not in st.session_state:
         st.session_state.length = 0
     if "trigger" not in st.session_state:
-        st.session_state.trigger = ""
-    if "df" not in st.session_state:
-        st.session_state.df = None
-        st.session_state.cutoff = None
-    if "series" not in st.session_state:
-        st.session_state.series = None
+        st.session_state.trigger = "assay_info"
     if "df_all" not in st.session_state:
-        st.session_state.df_all, st.session_state.cutoff_all = load_assay_endpoint(0)
-    if "df_filter" not in st.session_state:
-        st.session_state.df_filter = st.session_state.df_all
-        st.session_state.cutoff_filter = st.session_state.cutoff_all
+        st.session_state.df_all, st.session_state.cutoff_all = merge_all_outputs_wrapper(0)
     if "assay_endpoint_info" not in st.session_state:
         st.session_state.assay_endpoint_info = None
     if "assay_info" not in st.session_state:
@@ -330,6 +274,25 @@ def check_reset():
     if "assay_info_distinct_values" not in st.session_state:
         with open(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info_distinct_values.json"), "r") as json_file:
             st.session_state.assay_info_distinct_values = json.load(json_file)
+    if "aeids" not in st.session_state:
+        st.session_state.aeids_all = pd.read_parquet(
+            os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{CONFIG['file_format']}"))['aeid'].reset_index(drop=True)
+        st.session_state.aeids = st.session_state.aeids_all.copy()
+    if "aeid" not in st.session_state:
+        st.session_state.aeid = st.session_state.aeids.iloc[-1]
+    if "aeid_index" not in st.session_state:
+        st.session_state.aeid_index = 0
+    if "num_assay_endpoints_filtered" not in st.session_state:
+        st.session_state.num_assay_endpoints_filtered = len(st.session_state.aeids)
+    if "assay_info_column" not in st.session_state:
+        st.session_state.assay_info_column = "aeid"
+    if "assay_info_selected_fields" not in st.session_state:
+        st.session_state.assay_info_selected_fields = [st.session_state.aeid]
+    if "df" not in st.session_state:
+        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(st.session_state.aeid) 
+    if "series" not in st.session_state:
+        st.session_state.series = get_series()
+
 
 def reset_id():
     """
@@ -353,17 +316,9 @@ def trigger(trigger):
 
     """
     st.session_state.trigger = trigger
+    if trigger == "spid":
+        st.session_state.hitcall_slider = (0.0, 1.0)
 
-
-def filter_spid():
-    """
-    Filter data based on the selected SPID.
-
-    This function filters the data based on the selected Sample ID (SPID) and updates the hitcall slider accordingly.
-
-    """
-    st.session_state.trigger = "spid"
-    st.session_state.hitcall_slider = (0.0, 1.0)
 
 
 def sort():
@@ -391,6 +346,22 @@ def update():
 
     """
     trigger = st.session_state.trigger
+
+    if trigger == "next_assay_endpoint":
+        st.session_state.aeid_index += 1
+    if trigger == "prev_assay_endpoint":
+        st.session_state.aeid_index -= 1
+
+    if trigger == "assay_info":
+        st.session_state.aeids = st.session_state.assay_info[
+            st.session_state.assay_info[st.session_state.assay_info_column].isin(
+                st.session_state.assay_info_selected_fields)]['aeid']
+        st.session_state.aeid_index = 0
+
+    st.session_state.aeid_index = st.session_state.aeid_index % len(st.session_state.aeids)
+    st.session_state.aeid = st.session_state.aeids.iloc[st.session_state.aeid_index]
+
+
     fresh_load = "df" not in st.session_state or st.session_state.last_aeid != st.session_state.aeid
     refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
     if refresh_load:
@@ -411,9 +382,9 @@ def update():
     if trigger in ["sort_by", "asc", "hitcall_slider"]:
         sort()
 
-    if trigger == "next":
+    if trigger == "next_compound":
         st.session_state.id += 1
-    if trigger == "prev":
+    if trigger == "prev_compound":
         st.session_state.id -= 1
         length = st.session_state.length
 
@@ -428,8 +399,8 @@ def update():
             st.error(f"Input string {st.session_state.spid}' not found", icon="🚨")
         else:
             st.session_state.id = res.index[0]
-    else:
-        st.session_state.spid = st.session_state.df.iloc[st.session_state.id]['spid']
+
+    st.session_state.spid = st.session_state.df.iloc[st.session_state.id]['spid']
 
     st.session_state.series = get_series()
     if st.session_state.series is None:
@@ -455,7 +426,12 @@ def get_assay_and_sample_info():
     assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
     # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
-    casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
+    try:
+        casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
+    except IndexError:
+        casn, chnm, dsstox_substance_id = None, None, None
+        st.warning(f"No chemical information found for SPID {st.session_state.spid}")
+
     dsstox_substance_id = f"https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id}" if dsstox_substance_id else "N/A"
     casn = f"https://commonchemistry.cas.org/detail?cas_rn={casn}" if casn else "N/A"
     df = pd.DataFrame(
@@ -487,3 +463,15 @@ def get_assay_and_sample_info():
                      use_container_width=True,
                      )
     return assay_component_endpoint_desc
+
+
+subset_assay_info_columns = ["aeid",
+                             "assay_component_endpoint_name",
+                             "biological_process_target",
+                             "intended_target_type",
+                             "intended_target_type_sub",
+                             "intended_target_family",
+                             "intended_target_family_sub",
+                             "ToxicityEndpoint",
+                             "MechanisticTarget"
+                             ]
