@@ -13,8 +13,10 @@ RAW_DIR_PATH = os.path.join(DATA_DIR_PATH, 'raw')
 METADATA_DIR_PATH = os.path.join(DATA_DIR_PATH, 'metadata')
 METADATA_SUBSET_DIR_PATH = os.path.join(METADATA_DIR_PATH, 'subset')
 
+
 OUTPUT_DIR_PATH = os.path.join(DATA_DIR_PATH, 'output')
 CUTOFF_DIR_PATH = os.path.join(DATA_DIR_PATH, 'cutoff')
+OUTPUT_COMPOUNDS_DIR_PATH = os.path.join(DATA_DIR_PATH, 'output_compounds')
 
 LOG_DIR_PATH = os.path.join(ROOT_DIR, '../../logs')
 PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')

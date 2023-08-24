@@ -450,25 +450,25 @@ def get_assay_component_endpoint(aeid):
     return df
 
 
-def get_cutoff():
+def get_cutoff(aeid=AEID):
     """
     Retrieve efficacy cutoff values for a specific assay endpoint.
 
     Returns:
         pandas.DataFrame: DataFrame containing cutoff values.
     """
-    path = os.path.join(CUTOFF_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
+    path = os.path.join(CUTOFF_DIR_PATH, f"{aeid}{CONFIG['file_format']}")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"""
                 SELECT *
                 FROM {CUTOFF_TABLE} 
-                WHERE aeid = {AEID};
+                WHERE aeid = {aeid};
                 """
             return query_db(query=qstring)
         else:
             conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{AEID}{CONFIG['file_format']}"
+            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{aeid}{CONFIG['file_format']}"
             df = conn.read(path, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
@@ -739,3 +739,35 @@ def query_db(query):
     except Exception as e:
         print(f"Error querying MySQL: {e}")
         return None
+
+
+def get_output_data(aeid=AEID):
+    """
+    Retrieve output data for a specific AEID.
+
+    This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
+    a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the output data for the specified AEID.
+
+    """
+    tbl = 'output'
+    path = os.path.join(OUTPUT_DIR_PATH, f"{aeid}{CONFIG['file_format']}")
+    print(f"Fetch data with assay ID {aeid}..")
+    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
+        if CONFIG['enable_reading_db']:
+            qstring = f"SELECT * FROM {tbl} WHERE aeid = {aeid};"
+            df = query_db(query=qstring)
+        else:
+            conn = st.experimental_connection('s3', type=FilesConnection)
+            data_source = f"{CONFIG['bucket']}/{tbl}/{aeid}{CONFIG['file_format']}"
+            df = conn.read(data_source, input_format="parquet", ttl=600)
+    else:
+        df = pd.read_parquet(path)
+    length = df.shape[0]
+    if length == 0:
+        st.error(f"No data found for AEID {aeid}", icon="🚨")
+    print(f"{length} series loaded")
+    return df
+

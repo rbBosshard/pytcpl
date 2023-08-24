@@ -43,12 +43,12 @@ def main():
         st.session_state.assay_info_column = st.selectbox("Filter on:", subset_assay_info_columns, on_change=trigger, args=("assay_info_column",))
         st.session_state.assay_info_selected_fields = [st.session_state.assay_info_distinct_values[st.session_state.assay_info_column][0]]
         with st.form("Filter assay endpoints"):
-            st.session_state.assay_info_selected_fields = st.multiselect("Select fields:",  
+            st.session_state.assay_info_selected_fields = st.multiselect("Multiselect fields:",  
                 st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], 
-                default=st.session_state.assay_info_selected_fields)
-            submitted = st.form_submit_button("Submit", on_click=trigger, args=("assay_info",))
+                default=st.session_state.assay_info_selected_fields, placeholder="ALL")
+            submitted = st.form_submit_button("Go!", on_click=trigger, args=("assay_info",))
             placeholder_assay_info = st.empty()
-            placeholder_assay_info.write(f"{st.session_state.num_assay_endpoints_filtered} assay endpoints in filter")
+            placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
 
         st.button(":arrow_up_small: Next assay", on_click=trigger, args=("next_assay_endpoint",))
         st.button(":arrow_down_small: Previous assay", on_click=trigger, args=("prev_assay_endpoint",))
@@ -63,17 +63,17 @@ def main():
         st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=trigger, args=("asc",))
         with st.form("Select hitcall range"):
             st.session_state.hitcall_slider = st.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0))
-            submitted = st.form_submit_button("Submit", on_click=trigger, args=("hitcall_slider",))
+            submitted = st.form_submit_button("Go!", on_click=trigger, args=("hitcall_slider",))
             placeholder_hitcall_slider = st.empty()
             placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")        
         with st.form("Input assay endpoint ID (SPID)"):
             st.session_state.spid = st.selectbox("Input sample ID (SPID)", st.session_state.df["spid"].unique())
-            submitted = st.form_submit_button("Submit", on_click=trigger, args=("spid",))
+            submitted = st.form_submit_button("Go!", on_click=trigger, args=("spid",))
 
     fig, pars_dict = update()
 
     placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")
-    placeholder_assay_info.write(f"{st.session_state.num_assay_endpoints_filtered} assay endpoints in filter")
+    placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
 
     height = 720
     fig.update_layout(height=height)

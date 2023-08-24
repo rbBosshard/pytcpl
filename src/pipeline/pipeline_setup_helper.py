@@ -8,10 +8,6 @@ from src.pipeline.pipeline_helper import query_db
 
 pd.set_option('mode.chained_assignment', None)
 
-INSTANCES_TOTAL = 4
-THRESHOLD_COMPOUNDS_TESTED = 2000
-THRESHOLD_HIT_RATIO = 0.005
-
 
 def save_aeids(config, df):
     aeids = df['aeid'].unique()
@@ -34,25 +30,25 @@ def generate_balanced_aeid_list(config, df):
     df = df.sort_values('hitc_1_count', ascending=False).reset_index(drop=True)
     aeids = save_aeids(config, df)
     num_aeids = len(aeids)
-    tasks_per_instance = (len(aeids) + INSTANCES_TOTAL - 1) // INSTANCES_TOTAL
-    distributed_tasks = distribute_aeids_to_instances(aeids, INSTANCES_TOTAL)
+    tasks_per_instance = (len(aeids) + config['instances_total'] - 1) // config['instances_total']
+    distributed_tasks = distribute_aeids_to_instances(aeids, config['instances_total'])
     with open(AEIDS_LIST_PATH, "w") as file:
         for i, instance_tasks in enumerate(distributed_tasks):
             for task_id in instance_tasks[:tasks_per_instance]:
                 file.write(str(task_id) + "\n")
-    print(f"Instances total: {INSTANCES_TOTAL}")
+    print(f"Instances total: {config['instances_total']}")
     print(f"Total num aeids to process: {num_aeids}")
     print(f"Num aeids per instance to process: {tasks_per_instance}")
 
 
-def keep_viability_assay_endpoints_together(df):
+def keep_viability_assay_endpoints_together(config, df):
     # Separate dataframes based on endpoint names
     ratio_df = df[
-        df['assay_component_endpoint_name'].str.endswith("_ratio") & (df['count'] > THRESHOLD_COMPOUNDS_TESTED) & (
-                df['ratio'] > THRESHOLD_HIT_RATIO)]
+        df['assay_component_endpoint_name'].str.endswith("_ratio") & (df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (
+                df['ratio'] > config['threshold_subsetting_aeids_on_hit_ratio'])]
     viability_df = df[df['assay_component_endpoint_name'].str.endswith("_viability")]
     filtered_df = df[~df['assay_component_endpoint_name'].str.endswith(("_ratio", "_viability", "_ch1", "_ch2")) & (
-            df['count'] > THRESHOLD_COMPOUNDS_TESTED) & (df['ratio'] > THRESHOLD_HIT_RATIO)]
+            df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (df['ratio'] > config['threshold_subsetting_aeids_on_hit_ratio'])]
     # Create prefixes and match rows
     ratio_df['pre'] = ratio_df['assay_component_endpoint_name'].str.replace('_ratio', '')
     viability_df['pre'] = viability_df['assay_component_endpoint_name'].str.replace('_viability', '')

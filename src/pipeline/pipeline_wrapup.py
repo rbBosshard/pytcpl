@@ -1,7 +1,8 @@
 import time
 
-from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
-from src.pipeline.pipeline_wrapup_helper import merge_all_results, remove_files_not_matching_to_aeid_list
+from src.pipeline.pipeline_helper import load_config, init_config, init_aeid, merge_all_outputs
+from src.pipeline.pipeline_wrapup_helper import save_all_results, remove_files_not_matching_to_aeid_list, \
+    get_chemical_results
 
 
 def main():
@@ -13,7 +14,8 @@ def main():
     init_aeid(0)
 
     remove_files_not_matching_to_aeid_list()
-    merge_all_results(config)
+    df_all, cutoff_all = merge_all_outputs()
+    save_all_results(config, df_all, cutoff_all)
 
     print("Finished")
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")

@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 from plotly import graph_objects as go, express as px
 
-from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, merge_all_outputs
+from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, merge_all_outputs, get_output_data, get_cutoff
 from src.pipeline.pipeline_constants import METADATA_SUBSET_DIR_PATH
 from src.pipeline.models.helper import pow_space
 from src.pipeline.models.models import get_model
@@ -33,8 +33,8 @@ def load_assay_endpoint(aeid):  # aeid parameter used to handle correct caching
 
     """
 
-    df = st.session_state.df_all[st.session_state.df_all['aeid'] == aeid].reset_index(drop=True)
-    cutoff_df = st.session_state.cutoff_all[st.session_state.cutoff_all['aeid'] == aeid].reset_index(drop=True)
+    df = get_output_data(aeid).reset_index(drop=True)
+    cutoff_df = get_cutoff(aeid).reset_index(drop=True)
 
     return df, cutoff_df
 
@@ -138,6 +138,7 @@ def init_figure(series, cutoff_df):
     fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='black', opacity=0.1, layer='below', line=dict(width=0),
                   annotation_text="efficacy cutoff", annotation_position="top left")
     fig.update_layout(legend=dict(groupclick="toggleitem"))
+
     return fig
 
 
@@ -237,10 +238,7 @@ def add_curves(series, fig):
 
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
                              marker=dict(color="blue", symbol="circle-open-dot", size=20), name="Repsonse", showlegend=True))
-
-    
     return pars_dict
-
 
 
 def check_reset():
@@ -265,8 +263,6 @@ def check_reset():
         st.session_state.length = 0
     if "trigger" not in st.session_state:
         st.session_state.trigger = "assay_info"
-    if "df_all" not in st.session_state:
-        st.session_state.df_all, st.session_state.cutoff_all = merge_all_outputs_wrapper(0)
     if "assay_endpoint_info" not in st.session_state:
         st.session_state.assay_endpoint_info = None
     if "assay_info" not in st.session_state:
@@ -353,8 +349,11 @@ def update():
         st.session_state.aeid_index -= 1
 
     if trigger == "assay_info":
-        st.session_state.aeids = st.session_state.assay_info[
-            st.session_state.assay_info[st.session_state.assay_info_column].isin(
+        if st.session_state.assay_info_selected_fields == []:
+            st.session_state.aeids = st.session_state.aeids_all.copy()
+        else:
+            st.session_state.aeids = st.session_state.assay_info[
+                st.session_state.assay_info[st.session_state.assay_info_column].isin(
                 st.session_state.assay_info_selected_fields)]['aeid']
         st.session_state.aeid_index = 0
 
