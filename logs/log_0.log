@@ -1,17 +1,17 @@
 [00:00:00:00] 🚀 Pytcpl launched!
-[00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\utils\../../config
+[00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
 [00:00:00:00] 📜 Running pipeline for 1 assay endpoints (See 'config/aeid_list.in')
 [00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:03] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
-[00:00:00:03] ⏳ Fetching raw data..
+[00:00:00:04] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
+[00:00:00:04] ⏳ Fetching raw data..
 [00:00:00:04] ℹ️ Loaded 6400 single datapoints
 [00:00:00:04] 🌡️ Computing efficacy cutoff
-[00:00:00:06] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:04:56] 💽 Writing output data to DB (~0.21 MB)..
-[00:00:04:59] 🥕 Assay endpoint processing completed
+[00:00:00:07] 💻 Processing (fit & hit) 320 concentration-response series
+[00:00:04:06] 💽 Writing output data to DB (~0.21 MB)..
+[00:00:04:09] 🥕 Assay endpoint processing completed
 
-[00:00:04:59] 🎊 Pipeline completed!
-[00:00:04:59] 👋 Goodbye
+[00:00:04:09] 🎊 Pipeline completed!
+[00:00:04:09] 👋 Goodbye

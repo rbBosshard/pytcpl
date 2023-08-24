@@ -1,9 +1,9 @@
 import cProfile
 import os
 
-from src.utils.constants import ROOT_DIR, PROFILER_PATH, LOG_DIR_PATH
+from src.pipeline.pipeline_constants import ROOT_DIR, PROFILER_PATH, LOG_DIR_PATH
 from src.pipeline.pipeline_helper import load_config, prolog, launch, fetch_raw_data, bye, write_output, epilog
-from src.pipeline.process import process
+from src.pipeline.pipeline_core import process
 
 
 def pipeline(config, confg_path):

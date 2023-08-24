@@ -7,9 +7,9 @@ import streamlit as st
 from plotly import graph_objects as go, express as px
 
 from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, merge_all_outputs
-from src.utils.constants import METADATA_SUBSET_DIR_PATH
-from src.utils.models.helper import pow_space
-from src.utils.models.models import get_model
+from src.pipeline.pipeline_constants import METADATA_SUBSET_DIR_PATH
+from src.pipeline.models.helper import pow_space
+from src.pipeline.models.models import get_model
 
 CONFIG = {}
 SUFFIX = ''

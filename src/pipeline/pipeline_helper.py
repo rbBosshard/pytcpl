@@ -9,14 +9,14 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import yaml
+from mysql import connector as mysql
+from sqlalchemy import create_engine, text
 from st_files_connection import FilesConnection
 
-from src.utils.constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
-    DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, CUSTOM_OUTPUT_DIR_PATH, METADATA_DIR_PATH, \
+from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
+    DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \
     CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH
-from src.utils.models.helper import get_mad
-from src.utils.query_db import get_sqlalchemy_engine
-from src.utils.query_db import query_db
+from src.pipeline.models.helper import get_mad
 
 CONFIG = {}
 logger = logging.getLogger(__name__)
@@ -318,10 +318,6 @@ def write_output(df):
         df.loc[:, col] = df[col].apply(json.dumps)
     db_delete("output")
     db_append(df, "output")
-
-    # Custom data
-    file_path = os.path.join(CUSTOM_OUTPUT_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
-    df[['dsstox_substance_id', 'hitcall']].to_parquet(file_path, compression='gzip')
 
 
 def subset_chemicals(dat):
@@ -674,3 +670,72 @@ def merge_all_outputs():
     df_all = pd.concat([pd.read_parquet(file) for file in output_paths])
     cutoff_all = pd.concat([pd.read_parquet(file) for file in cutoff_paths])
     return df_all, cutoff_all
+
+
+def get_db_config():
+    """
+    Retrieve database configuration parameters from a YAML file.
+
+    Reads the database configuration file based on the user's login name and extracts the necessary parameters.
+
+    Returns:
+        tuple: A tuple containing the username, password, host, port, and database name for the MySQL connection.
+    """
+    with open(os.path.join(CONFIG_DIR_PATH, 'config_db.yaml'), "r") as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+        login_name = os.getlogin()
+        config_db = config[login_name]
+        return config_db['username'], config_db['password'], config_db['host'], config_db['port'], config_db['db']
+
+
+def get_sqlalchemy_engine():
+    """
+    Create a SQLAlchemy database engine.
+
+    Constructs and returns an SQLAlchemy engine object using the retrieved database configuration parameters.
+
+    Returns:
+        sqlalchemy.engine.base.Engine: The SQLAlchemy database engine object.
+    """
+    username, password, host, port, db = get_db_config()
+    url = f"mysql+mysqlconnector://{username}:{password}@{host}:{port}/{db}"
+    try:
+        return create_engine(url)
+    except Exception as error:
+        print(f"Error connecting to MySQL: {error}")
+        return None
+
+
+def query_db(query):
+    """
+    Execute a SQL query on a MySQL database.
+
+    Executes the provided SQL query on a MySQL database. If the query is a DELETE, CREATE, or DROP statement,
+    it is executed using the mysql.connector library. For other queries, an SQLAlchemy engine is used, and the
+    results are returned as a pandas DataFrame.
+
+    Args:
+        query (str): The SQL query to be executed.
+
+    Returns:
+        pandas.DataFrame or None: If the query is a SELECT statement, returns the query results as a DataFrame.
+                                 Otherwise, returns None.
+    """
+    try:
+        if any(query.lower().startswith(x) for x in ["delete", "create", "drop"]):
+            user, pw, host, port, db = get_db_config()
+            db_conn = mysql.connect(host=host, user=user, password=pw, port=port, database=db)
+            cursor = db_conn.cursor()
+            cursor.execute(query)
+            db_conn.commit()
+            db_conn.close()
+        else:
+            engine = get_sqlalchemy_engine()
+            con = engine.connect()
+            df = pd.read_sql(text(query), con=con)
+            con.close()
+            engine.dispose()
+            return df
+    except Exception as e:
+        print(f"Error querying MySQL: {e}")
+        return None
