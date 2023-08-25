@@ -15,7 +15,7 @@ from st_files_connection import FilesConnection
 
 from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH, OUTPUT_COMPOUNDS_DIR_PATH
 from src.pipeline.models.helper import get_mad
 
 CONFIG = {}
@@ -754,7 +754,6 @@ def get_output_data(aeid=AEID):
     """
     tbl = 'output'
     path = os.path.join(OUTPUT_DIR_PATH, f"{aeid}{CONFIG['file_format']}")
-    print(f"Fetch data with assay ID {aeid}..")
     if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
         if CONFIG['enable_reading_db']:
             qstring = f"SELECT * FROM {tbl} WHERE aeid = {aeid};"
@@ -767,7 +766,17 @@ def get_output_data(aeid=AEID):
         df = pd.read_parquet(path)
     length = df.shape[0]
     if length == 0:
-        st.error(f"No data found for AEID {aeid}", icon="🚨")
+        print(f"No data found for AEID {aeid}")
     print(f"{length} series loaded")
     return df
 
+
+def get_output_compound(dsstox_substance_id):
+    path = os.path.join(OUTPUT_COMPOUNDS_DIR_PATH, f"{dsstox_substance_id}{CONFIG['file_format']}")
+    print(f"Fetch compound data: {dsstox_substance_id}..")
+    df = pd.read_parquet(path)
+    length = df.shape[0]
+    if length == 0:
+        print(f"No data found for compound: {dsstox_substance_id}")
+    print(f"{length} series loaded")
+    return df

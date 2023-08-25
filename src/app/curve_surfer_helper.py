@@ -5,8 +5,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from plotly import graph_objects as go, express as px
+from IPython.display import HTML
 
-from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, merge_all_outputs, get_output_data, get_cutoff
+
+from src.pipeline.pipeline_helper import get_assay_info, init_config, get_chemical, get_output_data, \
+    get_cutoff, get_output_compound
 from src.pipeline.pipeline_constants import METADATA_SUBSET_DIR_PATH
 from src.pipeline.models.helper import pow_space
 from src.pipeline.models.models import get_model
@@ -17,31 +20,20 @@ ERR_MSG = f"No data found for this query"
 
 
 @st.cache_data
-def load_assay_endpoint(aeid):  # aeid parameter used to handle correct caching
-    """
-    Load data for a specific AEID.
-
-    This function loads data for a given assay endpoint ID (AEID). It retrieves the data from an output table and a cutoff
-    table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
-    is returned as two dataframes.
-
-    Args:
-        aeid (int): Assay endpoint ID for which to load data.
-
-    Returns:
-        tuple: A tuple containing two dataframes, one for the output data and the other for the cutoff data.
-
-    """
-
+def load_assay_endpoint(aeid):  # id used to facilitate caching
     df = get_output_data(aeid).reset_index(drop=True)
-    cutoff_df = get_cutoff(aeid).reset_index(drop=True)
-
-    return df, cutoff_df
+    return df
 
 
 @st.cache_data
-def merge_all_outputs_wrapper(cache_id):
-    return merge_all_outputs()
+def load_cutoff(aeid):  # id used to facilitate caching
+    cutoff_df = get_cutoff(aeid).reset_index(drop=True)
+    return cutoff_df
+
+
+@st.cache_data
+def load_output_compound(dss_tox_substance_id):  # id used to facilitate caching
+    return get_output_compound(dss_tox_substance_id).reset_index(drop=True)
 
 
 def set_config_app(config):
@@ -70,11 +62,16 @@ def get_series():
         dict: Dictionary containing the series data.
 
     """
-    series = st.session_state.df.iloc[st.session_state.id]
+    series = st.session_state.df.iloc[st.session_state.df_index]
     series['conc'] = json.loads(series['conc'])
     series['resp'] = json.loads(series['resp'])
     series['fit_params'] = json.loads(series['fit_params'])
-    return series.to_dict()
+    st.session_state.series = series.to_dict()
+
+    if st.session_state.series is None:  # Todo: check if this is needed
+        raise Exception(ERR_MSG)
+    
+    return st.session_state.series
 
 
 def get_chem_info(spid):
@@ -99,7 +96,7 @@ def get_chem_info(spid):
     return casn, chnm, dsstox_substance_id
 
 
-def init_figure(series, cutoff_df):
+def init_figure():
     """
     Initialize the plot figure for visualizing data.
 
@@ -114,10 +111,12 @@ def init_figure(series, cutoff_df):
         go.Figure: Initialized Plotly figure object.
 
     """
+    series = st.session_state.series
+    cutoff_df = st.session_state.cutoff_df
     cutoff = cutoff_df['cutoff'].iloc[0]
     bmad = cutoff_df['bmad'].iloc[0]
     onesd = cutoff_df['onesd'].iloc[0]
-    st.session_state.series.update({"cutoff": cutoff, "bmad": bmad, "onesd": onesd})
+    series.update({"cutoff": cutoff, "bmad": bmad, "onesd": onesd})
     fig = go.Figure()
     try:
         casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
@@ -133,7 +132,7 @@ def init_figure(series, cutoff_df):
     title = "AEID: " + str(st.session_state.aeid) + " | " + assay_component_endpoint_name
     hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
     subtitle = f"<br><sup>Hitcall: {hitcall} | {str(series['spid'])} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
-    fig.update_layout(title=title + subtitle, title_font=dict(size=26))
+    # fig.update_layout(title=title + subtitle, title_font=dict(size=26))
     fig.update_layout(margin=dict(t=150), xaxis_title="log10(Concentration) μM", yaxis_title=str(normalized_data_type))
     fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='black', opacity=0.1, layer='below', line=dict(width=0),
                   annotation_text="efficacy cutoff", annotation_position="top left")
@@ -142,7 +141,7 @@ def init_figure(series, cutoff_df):
     return fig
 
 
-def add_curves(series, fig):
+def add_curves(fig):
     """
     Add curves to the plot based on series data.
 
@@ -157,6 +156,7 @@ def add_curves(series, fig):
         dict: Dictionary containing fitted curve parameters.
 
     """
+    series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
     potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd"] if potency in series]
@@ -249,18 +249,16 @@ def check_reset():
     initialized or reset as needed.
 
     """
-    if "id" not in st.session_state:
-        reset_id()
+    if "df_index" not in st.session_state:
+        reset_df_index()
     if "last_aeid" not in st.session_state:
         st.session_state.last_aeid = -1
-    if "spid" not in st.session_state:
-        st.session_state.spid = ""
     if "sort_by" not in st.session_state:
         st.session_state.sort_by = "hitcall"
     if "asc" not in st.session_state:
         st.session_state.asc = False
-    if "length" not in st.session_state:
-        st.session_state.length = 0
+    if "df_length" not in st.session_state:
+        st.session_state.df_length = 0
     if "trigger" not in st.session_state:
         st.session_state.trigger = "assay_info"
     if "assay_endpoint_info" not in st.session_state:
@@ -275,7 +273,7 @@ def check_reset():
             os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{CONFIG['file_format']}"))['aeid'].reset_index(drop=True)
         st.session_state.aeids = st.session_state.aeids_all.copy()
     if "aeid" not in st.session_state:
-        st.session_state.aeid = st.session_state.aeids.iloc[-1]
+        st.session_state.aeid = st.session_state.aeids.iloc[0]
     if "aeid_index" not in st.session_state:
         st.session_state.aeid_index = 0
     if "num_assay_endpoints_filtered" not in st.session_state:
@@ -285,22 +283,32 @@ def check_reset():
     if "assay_info_selected_fields" not in st.session_state:
         st.session_state.assay_info_selected_fields = [st.session_state.aeid]
     if "df" not in st.session_state:
-        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(st.session_state.aeid) 
+        st.session_state.df = load_assay_endpoint(st.session_state.aeid) 
+        st.session_state.cutoff_df = load_cutoff(st.session_state.aeid)
+        sort()
     if "series" not in st.session_state:
         st.session_state.series = get_series()
+    if "compound_id" not in st.session_state:
+        st.session_state.compound_id = ''
+    if "focus_on_compound" not in st.session_state:
+        st.session_state.focus_on_compound = False
+    if "focus_on_compound_submitted" not in st.session_state:
+        st.session_state.focus_on_compound_submitted = False
+    if "init" not in st.session_state:
+        st.session_state.init = True
 
 
-def reset_id():
+def reset_df_index():
     """
     Reset the index (id) of the current series.
 
     This function resets the index (id) of the currently selected series to the initial value.
 
     """
-    st.session_state.id = 0
+    st.session_state.df_index = 0
 
 
-def trigger(trigger):
+def set_trigger(trigger):
     """
     Set the trigger in session state.
 
@@ -312,9 +320,8 @@ def trigger(trigger):
 
     """
     st.session_state.trigger = trigger
-    if trigger == "spid":
+    if trigger == "select_compound":
         st.session_state.hitcall_slider = (0.0, 1.0)
-
 
 
 def sort():
@@ -327,87 +334,104 @@ def sort():
     """
     st.session_state.df = st.session_state.df.sort_values(
         by=st.session_state.sort_by, ascending=st.session_state.asc, na_position='last').reset_index(drop=True)
-    reset_id()
+    reset_df_index()
 
 
-def update():
-    """
-    Update the app state and visualization.
+def update_spid():
+    st.session_state.compound_id = st.session_state.df.iloc[st.session_state.df_index]['spid']
 
-    This function updates the app's state and visualization based on user interactions and triggers. It handles loading data,
-    filtering, sorting, and updating the Plotly figure.
 
-    Returns:
-        tuple: A tuple containing the updated Plotly figure and a dictionary of fitted curve parameters.
+def on_select_compound(trigger):
+    if trigger == "select_compound" and st.session_state.compound_id != "":
+        res = st.session_state.df[st.session_state.df['dsstox_substance_id'] == st.session_state.compound_id]
+        if res.empty:
+            res = st.session_state.df[st.session_state.df['spid'] == st.session_state.compound_id]
+            if res.empty:
+                st.error(f"Input string {st.session_state.compound_id} not found", icon="🚨")
+                return
+        st.session_state.df_index = res.index[0]
 
-    """
-    trigger = st.session_state.trigger
+
+def update_df_index():
+    st.session_state.df_index = st.session_state.df_index % st.session_state.df_length
+
+
+def on_iterate_compounds(trigger):
+    if trigger == "next_compound":
+        st.session_state.df_index += 1
+    if trigger == "prev_compound":
+        st.session_state.df_index -= 1
+
+
+def on_iterate_assay_endpoint(trigger):
+    if st.session_state.focus_on_compound:
+        if trigger == "next_assay_endpoint":
+            st.session_state.df_index += 1
+        if trigger == "prev_assay_endpoint":
+            st.session_state.df_index -= 1
 
     if trigger == "next_assay_endpoint":
         st.session_state.aeid_index += 1
     if trigger == "prev_assay_endpoint":
         st.session_state.aeid_index -= 1
 
-    if trigger == "assay_info":
-        if st.session_state.assay_info_selected_fields == []:
+
+def check_sort(trigger):
+    if trigger in ["sort_by", "asc", "hitcall_slider"]:
+        sort()
+
+
+def update_df_length():
+    st.session_state.df_length =  len(st.session_state.df)
+    if st.session_state.df_length == 0:
+        raise Exception(ERR_MSG)
+
+
+def on_hitcall_slider(trigger):
+    if trigger == "hitcall_slider":
+        interval = st.session_state.hitcall_slider
+        df = st.session_state.df.query(f'{interval[0]} <= hitcall <= {interval[1]}').reset_index(drop=True)
+        st.session_state.df = pd.concat([df, st.session_state.df.query("hitcall.isna()")]) if interval[0] == 0.0 else df
+        reset_df_index()
+
+
+def refresh_data(trigger):
+    fresh_load = st.session_state.last_aeid != st.session_state.aeid or st.session_state.focus_on_compound_submitted
+    refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
+    if refresh_load:
+            if st.session_state.focus_on_compound_submitted and st.session_state.focus_on_compound:
+                output_compound = load_output_compound(st.session_state.series['dsstox_substance_id'])
+                st.session_state.df = pd.merge(output_compound, st.session_state.aeids, on='aeid', how='inner')
+            else:
+                st.session_state.df = load_assay_endpoint(st.session_state.aeid)  
+
+            st.session_state.cutoff_df = load_cutoff(st.session_state.aeid)
+            st.session_state.last_aeid = st.session_state.aeid
+            if fresh_load:
+                sort()
+
+
+def update_aeid():
+    st.session_state.aeid_index = st.session_state.aeid_index % len(st.session_state.aeids)
+    st.session_state.aeid = st.session_state.aeids.iloc[st.session_state.aeid_index]
+
+
+def on_filter_assay_endpoints(trigger):
+    if trigger == "filter_assay_endpoints":
+        if not st.session_state.assay_info_selected_fields:
             st.session_state.aeids = st.session_state.aeids_all.copy()
         else:
             st.session_state.aeids = st.session_state.assay_info[
                 st.session_state.assay_info[st.session_state.assay_info_column].isin(
                 st.session_state.assay_info_selected_fields)]['aeid']
         st.session_state.aeid_index = 0
+        if st.session_state.focus_on_compound:
+            st.session_state.df = pd.merge(st.session_state.df, st.session_state.aeids, on='aeid', how='inner')
 
-    st.session_state.aeid_index = st.session_state.aeid_index % len(st.session_state.aeids)
-    st.session_state.aeid = st.session_state.aeids.iloc[st.session_state.aeid_index]
 
-
-    fresh_load = "df" not in st.session_state or st.session_state.last_aeid != st.session_state.aeid
-    refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
-    if refresh_load:
-        st.session_state.df, st.session_state.cutoff = load_assay_endpoint(st.session_state.aeid)  
-        st.session_state.last_aeid = st.session_state.aeid
-        if fresh_load:
-            sort()
-
-    if trigger == "hitcall_slider":
-        interval = st.session_state.hitcall_slider
-        df = st.session_state.df.query(f'{interval[0]} <= hitcall <= {interval[1]}').reset_index(drop=True)
-        st.session_state.df = pd.concat([df, st.session_state.df.query("hitcall.isna()")]) if interval[0] == 0.0 else df
-        reset_id()
-
-    length = len(st.session_state.df)
-    st.session_state.length = length
-
-    if trigger in ["sort_by", "asc", "hitcall_slider"]:
-        sort()
-
-    if trigger == "next_compound":
-        st.session_state.id += 1
-    if trigger == "prev_compound":
-        st.session_state.id -= 1
-        length = st.session_state.length
-
-    if length == 0:
-        raise Exception(ERR_MSG)
-
-    st.session_state.id = st.session_state.id % st.session_state.length
-
-    if trigger == "spid" and st.session_state.spid != "":
-        res = st.session_state.df[st.session_state.df['spid'] == st.session_state.spid]
-        if res.empty:
-            st.error(f"Input string {st.session_state.spid}' not found", icon="🚨")
-        else:
-            st.session_state.id = res.index[0]
-
-    st.session_state.spid = st.session_state.df.iloc[st.session_state.id]['spid']
-
-    st.session_state.series = get_series()
-    if st.session_state.series is None:
-        raise Exception(ERR_MSG)
-
-    fig = init_figure(st.session_state.series, st.session_state.cutoff)
-    pars_dict = add_curves(st.session_state.series, fig)
-    return fig, pars_dict
+def get_trigger():
+    trigger = st.session_state.trigger
+    return trigger
 
 
 def get_assay_and_sample_info():
@@ -422,46 +446,28 @@ def get_assay_and_sample_info():
 
     """
     assay_infos = get_assay_info(st.session_state.aeid)
-    assay_component_endpoint_name = assay_infos["assay_component_endpoint_name"]
     assay_component_endpoint_desc = assay_infos["assay_component_endpoint_desc"]
-    # st.subheader(f"AEID: {st.session_state.aeid} | {assay_component_endpoint_name}")
     try:
-        casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.spid)
+        casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.compound_id)
     except IndexError:
         casn, chnm, dsstox_substance_id = None, None, None
-        st.warning(f"No chemical information found for SPID {st.session_state.spid}")
 
-    dsstox_substance_id = f"https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id}" if dsstox_substance_id else "N/A"
-    casn = f"https://commonchemistry.cas.org/detail?cas_rn={casn}" if casn else "N/A"
+    dsstox_substance_id_link = f"https://comptox.epa.gov/dashboard/chemical/details/{dsstox_substance_id}"
+    dsstox_substance_id_link = f'<a href="{dsstox_substance_id_link}">{dsstox_substance_id}</a>' if dsstox_substance_id is not None else "N/A"
+    casn_link = f'https://commonchemistry.cas.org/detail?cas_rn={casn}' if casn is not None else 'N/A'
     df = pd.DataFrame(
         {
             "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
-            "SPID": [st.session_state.spid],
-            "Chemical": [chnm],
-            "DSSTOXSID": [dsstox_substance_id],
-            "CASRN": [casn],
+            "DSSTOXSID": [dsstox_substance_id_link],
+            "CASRN": [f'<a href="{casn_link}">{casn}</a>'],
+            "SPID": [st.session_state.compound_id],
+            "Compound Name": [chnm],
         }
     )
-    with st.expander("Sample info :petri_dish:", expanded=True):
-        st.dataframe(df, column_config={
-            "Hitcall": st.column_config.ProgressColumn(
-                "Hitcall",
-                help="Bioactivity score :biohazard_sign: ",
-                format="%.2f",
-                min_value=0,
-                max_value=1,
-            ),
-            "Chemical": st.column_config.TextColumn(label="Chemical", help="Chemical Name :test_tube:"),
-            "SPID": st.column_config.TextColumn(label="SPID", help="Sample :id:"),
-            "DSSTOXSID": st.column_config.LinkColumn("DSSTOXSID",
-                                                     help="Distributed Structure-Searchable Toxicity Substance ID. Link to dashboard :bar_chart:"),
-            "CASRN": st.column_config.LinkColumn(label="CASRN",
-                                                 help="CAS Registry Number :information_source:"),
-        },
-                     hide_index=True,
-                     use_container_width=True,
-                     )
-    return assay_component_endpoint_desc
+
+    df = HTML(df.to_html(escape=False, index=False))
+    
+    return df, assay_component_endpoint_desc
 
 
 subset_assay_info_columns = ["aeid",

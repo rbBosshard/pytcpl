@@ -2,14 +2,16 @@ import os
 import sys
 import traceback
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 pd.options.mode.chained_assignment = None  # default='warn'
 
-from src.app.curve_surfer_helper import check_reset, trigger, update, get_assay_and_sample_info, \
-    set_config_app, subset_assay_info_columns
+from src.app.curve_surfer_helper import check_reset, set_trigger, get_assay_and_sample_info, \
+    set_config_app, subset_assay_info_columns, get_series, load_output_compound
+from src.app.curve_surfer_core import update
 from src.pipeline.pipeline_helper import load_config
 
 
@@ -40,46 +42,63 @@ def main():
 
         st.subheader("Assay endpoint settings")
 
-        st.session_state.assay_info_column = st.selectbox("Filter on:", subset_assay_info_columns, on_change=trigger, args=("assay_info_column",))
+        st.session_state.assay_info_column = st.selectbox("Filter on:", subset_assay_info_columns, on_change=set_trigger, args=("assay_info_column",))
         st.session_state.assay_info_selected_fields = [st.session_state.assay_info_distinct_values[st.session_state.assay_info_column][0]]
         with st.form("Filter assay endpoints"):
             st.session_state.assay_info_selected_fields = st.multiselect("Multiselect fields:",  
                 st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], 
                 default=st.session_state.assay_info_selected_fields, placeholder="ALL")
-            submitted = st.form_submit_button("Go!", on_click=trigger, args=("assay_info",))
+            submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("filter_assay_endpoints",))
             placeholder_assay_info = st.empty()
             placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
 
-        st.button(":arrow_up_small: Next assay", on_click=trigger, args=("next_assay_endpoint",))
-        st.button(":arrow_down_small: Previous assay", on_click=trigger, args=("prev_assay_endpoint",))
+        st.button(":arrow_up_small: Next assay", on_click=set_trigger, args=("next_assay_endpoint",))
+        st.button(":arrow_down_small: Previous assay", on_click=set_trigger, args=("prev_assay_endpoint",))
 
         st.divider()
 
         st.subheader("Compounds settings")
-        st.button(":arrow_up_small: Next compound", on_click=trigger, args=("next_compound",))
-        st.button(":arrow_down_small: Previous compound", on_click=trigger, args=("prev_compound",))
-        st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=trigger,
-                                                args=("sort_by",))
-        st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=trigger, args=("asc",))
-        with st.form("Select hitcall range"):
-            st.session_state.hitcall_slider = st.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0))
-            submitted = st.form_submit_button("Go!", on_click=trigger, args=("hitcall_slider",))
-            placeholder_hitcall_slider = st.empty()
-            placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")        
         with st.form("Input assay endpoint ID (SPID)"):
-            st.session_state.spid = st.selectbox("Input sample ID (SPID)", st.session_state.df["spid"].unique())
-            submitted = st.form_submit_button("Go!", on_click=trigger, args=("spid",))
+            spids = st.session_state.df["spid"]
+            dtxsids = st.session_state.df["dsstox_substance_id"]
+            ids = pd.concat([dtxsids, spids])
+            id = st.selectbox(label="Input DTXSID or SPID", options=ids)
+            focus_on_compound = st.checkbox(label=f"Focus on this compound", value=st.session_state.focus_on_compound)
+            st.session_state.focus_on_compound_submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("select_compound",))
+            if st.session_state.focus_on_compound_submitted:
+                st.session_state.focus_on_compound = focus_on_compound
+                st.session_state.compound_id = id
 
+        if not st.session_state.focus_on_compound:
+            st.button(":arrow_up_small: Next compound", on_click=set_trigger, args=("next_compound",))
+            st.button(":arrow_down_small: Previous compound", on_click=set_trigger, args=("prev_compound",))
+            st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=set_trigger,
+                                                    args=("sort_by",))
+            st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=set_trigger, args=("asc",))
+            with st.form("Select hitcall range"):
+                st.session_state.hitcall_slider = st.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0))
+                submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("hitcall_slider",))
+                placeholder_hitcall_slider = st.empty()
+                placeholder_hitcall_slider.write(f"{st.session_state.df_length} series in filter")        
+    
+
+    compound_info_container = st.empty()
     fig, pars_dict = update()
-
-    placeholder_hitcall_slider.write(f"{st.session_state.length} series in filter")
     placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
+
+    if not st.session_state.focus_on_compound:
+        placeholder_hitcall_slider.write(f"{st.session_state.df_length} series in filter")
+
+    compound_info, assay_component_endpoint_desc = get_assay_and_sample_info()
+    compound_info_container.write(compound_info, unsafe_allow_html=True)
+   
+
 
     height = 720
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
 
-    assay_component_endpoint_desc = get_assay_and_sample_info()
+    
     # Todo: Provide curve fit model functions
     with st.expander("Curve fit parameters"):
         st.json(pars_dict)

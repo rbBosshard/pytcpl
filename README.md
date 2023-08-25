@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 #### Required
 
-- Goto [config_db.yaml](config/config_db.yaml) to add/set your MySQL database connection parameters
+- Goto [config_db.yaml](config/config_db.yaml) to add/set your own MySQL database connection parameters
 - Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline
   
 #### Optional
