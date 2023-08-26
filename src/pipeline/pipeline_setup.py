@@ -1,4 +1,11 @@
 import time
+
+import sys
+import os
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.append(parent_dir)
+
 from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
 from src.pipeline.pipeline_setup_helper import generate_balanced_aeid_list, \
     keep_viability_assay_endpoints_together, subset_candidate_assay_endoints_on_counts_and_hit_ratio, \

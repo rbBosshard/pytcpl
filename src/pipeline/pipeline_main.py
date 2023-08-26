@@ -1,6 +1,10 @@
 import cProfile
-import os
 import traceback
+import sys
+import os
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.append(parent_dir)
 
 from src.pipeline.pipeline_constants import ROOT_DIR, PROFILER_PATH, LOG_DIR_PATH
 from src.pipeline.pipeline_helper import load_config, prolog, launch, fetch_raw_data, bye, write_output, epilog

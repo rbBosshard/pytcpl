@@ -1,8 +1,12 @@
+import os
+import sys
 import time
 
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.append(parent_dir)
+
 from src.pipeline.pipeline_helper import load_config, init_config, init_aeid, merge_all_outputs
-from src.pipeline.pipeline_wrapup_helper import save_all_results, remove_files_not_matching_to_aeid_list, \
-    get_chemical_results
+from src.pipeline.pipeline_wrapup_helper import save_all_results, remove_files_not_matching_to_aeid_list
 
 
 def main():

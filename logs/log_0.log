@@ -1,17 +1,11 @@
 [00:00:00:00] 🚀 Pytcpl launched!
 [00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
-[00:00:00:00] 📜 Running pipeline for 1 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 📜 Running pipeline for 271 assay endpoints (See 'config/aeid_list.in')
 [00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:03] 🌱 Start processing new assay endpoint: ACEA_ER_80hr (aeid=2)
+[00:00:00:03] 🌱 Start processing new assay endpoint: TOX21_DT40_100 (aeid=2130)
 [00:00:00:03] ⏳ Fetching raw data..
-[00:00:00:05] ℹ️ Loaded 82508 single datapoints
-[00:00:00:05] 🌡️ Computing efficacy cutoff
-[00:00:00:17] 💻 Processing (fit & hit) 3416 concentration-response series
-[00:00:48:30] 💽 Writing output data to DB (~2.23 MB)..
-[00:00:48:55] 🥕 Assay endpoint processing completed
-
-[00:00:48:55] 🎊 Pipeline completed!
-[00:00:48:55] 👋 Goodbye
+[00:00:00:09] ℹ️ Loaded 622080 single datapoints
+[00:00:00:09] 🌡️ Computing efficacy cutoff
