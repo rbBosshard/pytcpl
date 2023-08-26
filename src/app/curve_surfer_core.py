@@ -5,7 +5,7 @@ from src.app.curve_surfer_helper import get_trigger, on_filter_assay_endpoints, 
     on_select_compound, update_spid, get_series, init_figure, add_curves
 
 
-def update():
+def update(slider):
     """
     Update the app state and visualization.
 
@@ -29,7 +29,7 @@ def update():
     update_aeid()
 
     # Refresh data
-    if not st.session_state.focus_on_compound:
+    if not st.session_state.focus_on_compound or trigger == 'hitcall_slider':
         refresh_data(trigger)
 
     # Filter compounds on hitcall range
@@ -48,7 +48,7 @@ def update():
     update_df_index()
 
     # Select current compound
-    on_select_compound(trigger)
+    on_select_compound(trigger, slider)
 
     # Update current specific
     update_spid()

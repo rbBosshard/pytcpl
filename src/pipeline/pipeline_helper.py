@@ -106,7 +106,8 @@ def prolog(new_aeid, instance_id):
     with open(os.path.join(AEID_PATH, f'aeid_{instance_id}.in'), 'w') as f:
         f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
-    assay_component_endpoint_name = get_assay_info(AEID)['assay_component_endpoint_name']
+    assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{CONFIG['file_format']}"))
+    assay_component_endpoint_name = assay_info_df[assay_info_df['aeid'] == AEID]['assay_component_endpoint_name']
     assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
     logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
 
