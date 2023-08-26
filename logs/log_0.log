@@ -1,11 +1,20 @@
 [00:00:00:00] 🚀 Pytcpl launched!
-[00:00:00:00] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
-[00:00:00:00] 📜 Running pipeline for 271 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=1
+[00:00:00:00] ⚙️ Configuration located in /home/bossh/pytcpl/src/pipeline/../../config
+[00:00:00:00] 📜 Running pipeline for 67 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:00] 🧩 Engine: instance_id=0, instances_total=4
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:03] 🌱 Start processing new assay endpoint: TOX21_DT40_100 (aeid=2130)
-[00:00:00:03] ⏳ Fetching raw data..
-[00:00:00:09] ℹ️ Loaded 622080 single datapoints
-[00:00:00:09] 🌡️ Computing efficacy cutoff
+[00:00:01:04] 🌱 Start processing new assay endpoint: TOX21_DT40_100 (aeid=2130)
+[00:00:01:04] ⏳ Fetching raw data..
+[00:00:01:37] ℹ️ Loaded 622080 single datapoints
+[00:00:01:37] 🌡️ Computing efficacy cutoff
+[00:00:02:78] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:01:01:47] Assay endpoint with aeid=2130 failed: Length of values (544) does not match length of index (4070)
+[00:01:01:52] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:01:01:53] 🌱 Start processing new assay endpoint: TOX21_TR_LUC_GH3_Antagonist (aeid=804)
+[00:01:01:53] ⏳ Fetching raw data..
+[00:01:01:77] ℹ️ Loaded 617472 single datapoints
+[00:01:01:77] 🌡️ Computing efficacy cutoff
+[00:01:03:08] 💻 Processing (fit & hit) 10499 concentration-response series
