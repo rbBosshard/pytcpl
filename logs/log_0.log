@@ -5,13 +5,13 @@
 
 [00:00:00:00] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:07] 🌱 Start processing new assay endpoint: APR_HepG2_CellLoss_1h_dn (aeid=5)
-[00:00:00:07] ⏳ Fetching raw data..
-[00:00:00:07] ℹ️ Loaded 6400 single datapoints
-[00:00:00:08] 🌡️ Computing efficacy cutoff
-[00:00:00:14] 💻 Processing (fit & hit) 320 concentration-response series
-[00:00:08:66] 💽 Writing output data to DB (~0.21 MB)..
-[00:00:08:69] 🥕 Assay endpoint processing completed
+[00:00:00:03] 🌱 Start processing new assay endpoint: ACEA_ER_80hr (aeid=2)
+[00:00:00:03] ⏳ Fetching raw data..
+[00:00:00:05] ℹ️ Loaded 82508 single datapoints
+[00:00:00:05] 🌡️ Computing efficacy cutoff
+[00:00:00:17] 💻 Processing (fit & hit) 3416 concentration-response series
+[00:00:48:30] 💽 Writing output data to DB (~2.23 MB)..
+[00:00:48:55] 🥕 Assay endpoint processing completed
 
-[00:00:08:69] 🎊 Pipeline completed!
-[00:00:08:69] 👋 Goodbye
+[00:00:48:55] 🎊 Pipeline completed!
+[00:00:48:55] 👋 Goodbye

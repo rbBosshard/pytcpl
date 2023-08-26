@@ -57,7 +57,7 @@ def update(slider):
     get_series()
 
     # Refresh data when focused on compound
-    if st.session_state.focus_on_compound_submitted:
+    if st.session_state.focus_on_compound_submitted or (trigger == 'hitcall_slider' and st.session_state.focus_on_compound):
         refresh_data(trigger)
 
     fig = init_figure()

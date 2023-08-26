@@ -39,10 +39,10 @@ pip install -r requirements.txt
   objects
 - [Automate](src/pipeline/pipeline_setup.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
 
-#### Run pipeline
+#### Run pipeline (on single machine)
 
 ```bash 
-python pytcpl/src/pipeline.py --instance_id 0 --instances_total 1
+python src/pipeline/pipeline_main.py --instance_id 0 --instances_total 1
 ```
 
 - Goto [logs](logs) to see the redirected terminal logs and check in the error logs what went wrong for which assay
@@ -50,8 +50,8 @@ python pytcpl/src/pipeline.py --instance_id 0 --instances_total 1
 - Note: Parameters `instance_id` and `instances_total` are used for distributing workload onto multiple compute engine
   instances (e.g. gcloud VMs).
 - Example: Distribute [workload](config/aeid_list.in) onto 2 VM instances. Run:
-    - `pytcpl/src/pipeline.py --instance_id 0 --instances_total 2` on one machine and
-    - `pytcpl/src/pipeline.py --instance_id 1 --instances_total 2` on another machine
+    - `src/pipeline/pipeline_main.py --instance_id 0 --instances_total 2` on one machine and
+    - `src/pipeline/pipeline_main.py --instance_id 1 --instances_total 2` on another machine
   
 #### Further automation steps
 - [Generate](src/pipeline/pipeline_wrapup.py) per-chemical-results from all processed assay endpoints

@@ -49,7 +49,7 @@ def sigmoid(field):
         "bounds": lambda conc=None, resp=None: ((1e-4, 1.2 * np.max(resp)),
                                                 (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
                                                 (1e-4, 5),
-                                                (1e-4, 2),
+                                                (1e-4, 1),
                                                 (get_er_bounds())),
         "x0": lambda conc=None, resp=None: [get_mmed(conc, resp) or 0.01,
                                             get_mmed_conc(conc, resp) / np.sqrt(10),

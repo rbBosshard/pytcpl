@@ -7,16 +7,14 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import streamlit as st
 import yaml
 from mysql import connector as mysql
 from sqlalchemy import create_engine, text
-from st_files_connection import FilesConnection
 
+from src.pipeline.models.helper import get_mad
 from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \
     CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH, OUTPUT_COMPOUNDS_DIR_PATH
-from src.pipeline.models.helper import get_mad
 
 CONFIG = {}
 logger = logging.getLogger(__name__)
@@ -107,7 +105,7 @@ def prolog(new_aeid, instance_id):
         f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
     assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{CONFIG['file_format']}"))
-    assay_component_endpoint_name = assay_info_df[assay_info_df['aeid'] == AEID]['assay_component_endpoint_name']
+    assay_component_endpoint_name = assay_info_df[assay_info_df['aeid'] == AEID]['assay_component_endpoint_name'].iloc[0]
     assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
     logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
 
@@ -192,18 +190,11 @@ def get_assay_info(aeid):
     path_endpoint = os.path.join(METADATA_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}")
     path_component = os.path.join(METADATA_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}")
     available = os.path.exists(path_endpoint) and os.path.exists(path_component)
-    if not available or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
-            acid = query_db(endpoint_query).iloc[0]['acid']
-            component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
-            return pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            path_endpoint = f"{CONFIG['bucket']}/input/{tbl_endpoint}{CONFIG['file_format']}"
-            path_component = f"{CONFIG['bucket']}/input/{tbl_component}{CONFIG['file_format']}"
-            endpoint_df = conn.read(path_endpoint, input_format="parquet", ttl=600)
-            component_df = conn.read(path_component, input_format="parquet", ttl=600)
+    if CONFIG['enable_reading_db'] or not available:
+        endpoint_query = f"SELECT * FROM {tbl_endpoint} WHERE aeid = {aeid};"
+        acid = query_db(endpoint_query).iloc[0]['acid']
+        component_query = f"SELECT * FROM {tbl_component} WHERE acid = {acid};"
+        return pd.merge(query_db(endpoint_query), query_db(component_query), on='acid').iloc[0].to_dict()
     else:
         endpoint_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl_endpoint}{CONFIG['file_format']}"))
         component_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl_component}{CONFIG['file_format']}"))
@@ -393,21 +384,14 @@ def get_chemical(spids):
     path_sample = os.path.join(METADATA_DIR_PATH, f"{sample}{CONFIG['file_format']}")
     path_chemical = os.path.join(METADATA_DIR_PATH, f"{chemical}{CONFIG['file_format']}")
     available = os.path.exists(path_sample) and os.path.exists(path_chemical)
-    if not available or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            qstring = f"""
-              SELECT spid, chid, dsstox_substance_id, chnm, casn
-              FROM {sample}
-              LEFT JOIN {chemical} ON {chemical}.chid = {sample}.chid
-              WHERE spid IN {str(tuple(spids))};
-              """
-            return query_db(query=qstring).drop_duplicates()
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            path_sample = f"{CONFIG['bucket']}/input/{sample}{CONFIG['file_format']}"
-            path_chemical = f"{CONFIG['bucket']}/input/{chemical}{CONFIG['file_format']}"
-            sample_df = conn.read(path_sample, input_format="parquet", ttl=600)
-            chemical_df = conn.read(path_chemical, input_format="parquet", ttl=600)
+    if CONFIG['enable_reading_db'] or not available:
+        qstring = f"""
+          SELECT spid, chid, dsstox_substance_id, chnm, casn
+          FROM {sample}
+          LEFT JOIN {chemical} ON {chemical}.chid = {sample}.chid
+          WHERE spid IN {str(tuple(spids))};
+          """
+        return query_db(query=qstring).drop_duplicates()
     else:
         sample_df = pd.read_parquet(path_sample)
         chemical_df = pd.read_parquet(path_chemical)
@@ -432,18 +416,13 @@ def get_assay_component_endpoint(aeid):
     """
     tbl = 'assay_component_endpoint'
     path = os.path.join(METADATA_DIR_PATH, f"{tbl}{CONFIG['file_format']}")
-    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            qstring = f"""
-                SELECT aeid, assay_component_endpoint_name, normalized_data_type
-                FROM {tbl} 
-                WHERE aeid = {aeid};
-                """
-            return query_db(query=qstring)
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/input/{tbl}{CONFIG['file_format']}"
-            df = conn.read(path, input_format="parquet", ttl=600)
+    if CONFIG['enable_reading_db']:
+        qstring = f"""
+            SELECT aeid, assay_component_endpoint_name, normalized_data_type
+            FROM {tbl} 
+            WHERE aeid = {aeid};
+            """
+        return query_db(query=qstring)
     else:
         df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"{tbl}{CONFIG['file_format']}"))
     df = df[df['aeid'] == aeid][['aeid', 'assay_component_endpoint_name', 'normalized_data_type']]
@@ -451,29 +430,23 @@ def get_assay_component_endpoint(aeid):
     return df
 
 
-def get_cutoff(aeid=AEID):
+def get_cutoff():
     """
     Retrieve efficacy cutoff values for a specific assay endpoint.
 
     Returns:
         pandas.DataFrame: DataFrame containing cutoff values.
     """
-    path = os.path.join(CUTOFF_DIR_PATH, f"{aeid}{CONFIG['file_format']}")
-    if not os.path.exists(path) or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            qstring = f"""
-                SELECT *
-                FROM {CUTOFF_TABLE} 
-                WHERE aeid = {aeid};
-                """
-            return query_db(query=qstring)
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            path = f"{CONFIG['bucket']}/{CUTOFF_TABLE}/{aeid}{CONFIG['file_format']}"
-            df = conn.read(path, input_format="parquet", ttl=600)
+    path = os.path.join(CUTOFF_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
+    if CONFIG['enable_reading_db']:
+        qstring = f"""
+            SELECT *
+            FROM {CUTOFF_TABLE} 
+            WHERE aeid = {AEID};
+            """
+        df = query_db(query=qstring)
     else:
         df = pd.read_parquet(path)
-    logger.debug(f"Read from {path}")
     return df
 
 
@@ -558,22 +531,14 @@ def load_method(lvl, aeid):
     path_aeid = os.path.join(METADATA_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
     path_methods = os.path.join(METADATA_DIR_PATH, f"{tbl_methods}{CONFIG['file_format']}")
     available = os.path.exists(path_aeid) and os.path.exists(path_methods)
-    if not available or CONFIG['enable_allowing_reading_remote']:
-        if CONFIG['enable_reading_db']:
-            flds = [f"b.mc{lvl}_mthd AS mthd"]
-            tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
-            qstring = f"SELECT {', '.join(flds)} " \
-                      f"FROM {', '.join(tbls)} " \
-                      f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
-                      f"AND aeid = {aeid};"
-            return query_db(query=qstring)["mthd"].tolist()
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            path_aeid = f"{CONFIG['bucket']}/input/{tbl_aeid}{CONFIG['file_format']}"
-            path_methods = f"{CONFIG['bucket']}/input/{tbl_methods}{CONFIG['file_format']}"
-            df_aeid = conn.read(path_aeid, input_format="parquet", ttl=600)
-            df_methods = conn.read(path_methods, input_format="parquet", ttl=600)
-
+    if CONFIG['enable_reading_db'] or not available:
+        flds = [f"b.mc{lvl}_mthd AS mthd"]
+        tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
+        qstring = f"SELECT {', '.join(flds)} " \
+                  f"FROM {', '.join(tbls)} " \
+                  f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
+                  f"AND aeid = {aeid};"
+        return query_db(query=qstring)["mthd"].tolist()
     else:
         df_aeid = pd.read_parquet(path_aeid)
         df_methods = pd.read_parquet(path_methods)
@@ -759,10 +724,6 @@ def get_output_data(aeid=AEID):
         if CONFIG['enable_reading_db']:
             qstring = f"SELECT * FROM {tbl} WHERE aeid = {aeid};"
             df = query_db(query=qstring)
-        else:
-            conn = st.experimental_connection('s3', type=FilesConnection)
-            data_source = f"{CONFIG['bucket']}/{tbl}/{aeid}{CONFIG['file_format']}"
-            df = conn.read(data_source, input_format="parquet", ttl=600)
     else:
         df = pd.read_parquet(path)
     length = df.shape[0]

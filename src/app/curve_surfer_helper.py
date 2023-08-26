@@ -8,7 +8,7 @@ from plotly import graph_objects as go, express as px
 
 from src.pipeline.models.helper import pow_space
 from src.pipeline.models.models import get_model
-from src.pipeline.pipeline_helper import init_config, get_chemical, get_output_data, \
+from src.pipeline.pipeline_helper import init_aeid, init_config, get_chemical, get_output_data, \
     get_cutoff, get_output_compound
 
 CONFIG = {}
@@ -24,7 +24,7 @@ def load_assay_endpoint(aeid):  # id used to facilitate caching
 
 @st.cache_data
 def load_cutoff(aeid):  # id used to facilitate caching
-    cutoff_df = get_cutoff(aeid).reset_index(drop=True)
+    cutoff_df = get_cutoff().reset_index(drop=True)
     return cutoff_df
 
 
@@ -199,16 +199,16 @@ def on_select_compound(trigger, slider):
     if trigger == "select_compound" or (trigger == "select_compound_focus_changed" and st.session_state.focus_on_compound):
         res = st.session_state.df[st.session_state.df['dsstox_substance_id'] == st.session_state.compound_id]
         if res.empty:
-            res = st.session_state.df[st.session_state.df['spid'] == st.session_state.compound_id]
-            if res.empty:
-                st.error(f"Input string {st.session_state.compound_id} not found", icon="🚨")
-                return
+            st.error(f"Input string {st.session_state.compound_id} not found", icon="🚨")
+            return
         st.session_state.df_index = res.index[0]
 
     if trigger.startswith("select_compound"):
         slider.empty()
         st.session_state.slider_iteration += 1
         slider.slider("Select hitcall range", 0.0, 1.0, (0.0, 1.0), key=st.session_state.slider_iteration)
+
+
 
 
 def update_df_index():
@@ -256,11 +256,13 @@ def on_hitcall_slider(trigger):
 
 def refresh_data(trigger):
     fresh_load = st.session_state.last_aeid != st.session_state.aeid or st.session_state.focus_on_compound_submitted
-    refresh_load = fresh_load or trigger in ["spid", "hitcall_slider"]
+    refresh_load = fresh_load or trigger in ["compound", "hitcall_slider"]
     if refresh_load:
+            init_aeid(st.session_state.aeid)
             if (trigger == 'hitcall_slider' or st.session_state.focus_on_compound_submitted) and st.session_state.focus_on_compound:
                 output_compound = load_output_compound(st.session_state.series['dsstox_substance_id'])
                 st.session_state.df = pd.merge(output_compound, st.session_state.aeids, on='aeid', how='inner')
+                on_hitcall_slider("hitcall_slider")
             else:
                 st.session_state.df = load_assay_endpoint(st.session_state.aeid)  
 
@@ -272,6 +274,8 @@ def refresh_data(trigger):
 
 def update_aeid():
     if st.session_state.focus_on_compound:
+        if len(st.session_state.df) == 0:
+            raise Exception(ERR_MSG)
         st.session_state.aeid_index = st.session_state.aeid_index % len(st.session_state.df)
         merged = pd.merge(st.session_state.df, st.session_state.aeids, on='aeid', how='inner')
         st.session_state.aeid = merged.iloc[st.session_state.aeid_index]['aeid']
