@@ -13,8 +13,6 @@ from src.app.curve_surfer_helper import set_trigger, get_compound_info, \
 from src.app.curve_surfer_core import update
 from src.app.curve_surfer_session_state import check_reset
 from src.pipeline.pipeline_helper import load_config
-import random
-
 
 
 def main():
