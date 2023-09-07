@@ -1,0 +1,18 @@
+Assay endpoint with aeid=673 failed: Length of values (48) does not match length of index (80)
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 188, in process
+    df_fitted = df_to_fit.assign(fit_params=fit_params)
+  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4844, in assign
+    data[k] = com.apply_if_callable(v, data)
+  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 3950, in __setitem__
+    self._set_item(key, value)
+  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4143, in _set_item
+    value = self._sanitize_column(value)
+  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4870, in _sanitize_column
+    com.require_length_match(value, self.index)
+  File "/usr/local/lib/python3.9/dist-packages/pandas/core/common.py", line 576, in require_length_match
+    raise ValueError(
+ValueError: Length of values (48) does not match length of index (80)
+
