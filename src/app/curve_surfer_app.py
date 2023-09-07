@@ -108,7 +108,7 @@ def main():
     assay_info_container.dataframe(get_assay_info(subset=True, transpose=True, replace=True), hide_index=True, use_container_width=True)
     compound_info_container.dataframe(compund_info_df, column_config=column_config, hide_index=True, use_container_width=True)
 
-    height = 680
+    height = 720
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
 

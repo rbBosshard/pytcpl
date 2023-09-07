@@ -170,8 +170,16 @@ def add_curves(fig):
                 legendgrouptitle_text="Potency estimates",
             ))
 
-    fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Response", legendgrouptitle_text="Repsonse",
-                             marker=dict(color="royalblue", symbol="circle-open-dot", size=20), name="Repsonse", showlegend=True))
+    fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",
+                             marker=dict(color="royalblue", symbol="circle-open-dot", size=20), name="Repsonses", showlegend=True))
+
+    unique_conc = np.unique(conc)
+    # get max response (i.e. max median response for multi-valued responses) and corresponding conc
+    resp = np.array(resp)
+    median_resp = np.array([np.median(np.array(resp)[conc == c]) for c in unique_conc])
+    fig.add_trace(
+        go.Scatter(x=np.log10(unique_conc), y=median_resp, mode='markers', legendgroup="Observed responses",
+                   marker=dict(color="red", symbol="circle-open-dot", size=25), name="Median responses", showlegend=True))
     return pars_dict
 
 

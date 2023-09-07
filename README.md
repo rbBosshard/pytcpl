@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 - Goto [config_db.yaml](config/config_db.yaml) to add/set your own MySQL database connection parameters
 - Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline
-  
+
 #### Optional
 
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour
@@ -39,19 +39,19 @@ pip install -r requirements.txt
   objects
 - [Automate](src/pipeline/pipeline_setup.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
 
-#### Run pipeline (on single machine)
+#### Run pipeline (on single machine) 
 
 ```bash 
 python src/pipeline/pipeline_main.py --instance_id 0 --instances_total 1
 ```
-
+- Replace `python` with `python3` or `py` depending on your python version
 - Goto [logs](logs) to see the redirected terminal logs and check in the error logs what went wrong for which assay
   endpoint id
 - Note: Parameters `instance_id` and `instances_total` are used for distributing workload onto multiple compute engine
   instances (e.g. gcloud VMs).
 - Example: Distribute [workload](config/aeid_list.in) onto 2 VM instances. Run:
-    - `src/pipeline/pipeline_main.py --instance_id 0 --instances_total 2` on one machine and
-    - `src/pipeline/pipeline_main.py --instance_id 1 --instances_total 2` on another machine
+    - `python src/pipeline/pipeline_main.py --instance_id 0 --instances_total 2` on one machine and
+    - `python src/pipeline/pipeline_main.py --instance_id 1 --instances_total 2` on another machine
   
 #### Further automation steps
 - [Generate](src/pipeline/pipeline_wrapup.py) per-chemical-results from all processed assay endpoints

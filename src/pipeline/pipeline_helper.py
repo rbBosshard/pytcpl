@@ -11,6 +11,10 @@ import yaml
 from mysql import connector as mysql
 from sqlalchemy import create_engine, text
 
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+sys.path.append(parent_dir)
+
+
 from src.pipeline.models.helper import get_mad
 from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \
@@ -18,7 +22,7 @@ from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_
 
 CONFIG = {}
 logger = logging.getLogger(__name__)
-START_TIME = 0
+START_TIME = datetime.now()
 AEID = 0
 
 
@@ -45,8 +49,6 @@ def launch(config, config_path):
     instance_id = args.instance_id
     instances_total = args.instances_total
 
-    global START_TIME
-    START_TIME = datetime.now()
 
     def create_empty_log_file(filename):
         with open(filename, 'w', encoding='utf-8'):
@@ -273,7 +275,7 @@ def db_append(df, tbl):
         except Exception as err:
             logger.error(err)
 
-    folder_path = os.path.join(DATA_DIR_PATH, "all", tbl) if AEID == 0 else os.path.join(DATA_DIR_PATH, tbl)
+    folder_path = os.path.join(DATA_DIR_PATH, "merged", tbl) if AEID == 0 else os.path.join(DATA_DIR_PATH, tbl)
     os.makedirs(folder_path, exist_ok=True)
     file_path = os.path.join(folder_path, f"{AEID}{CONFIG['file_format']}")
     df.to_parquet(file_path, compression='gzip')

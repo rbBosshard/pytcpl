@@ -1,6 +1,17 @@
 NA
-inducer
-antibody
 stain
+antibody
+inducer
 substrate
+substrate;substrate
+ligand
+ligand;antibody
+None
+coupled substrate
+pre-stimulation
 chemical
+fluorescent oxygen sensor
+protease substrate
+stain;stain
+luciferase assay
+ratio

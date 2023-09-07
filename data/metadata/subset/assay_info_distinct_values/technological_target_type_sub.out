@@ -1,12 +1,89 @@
 cellular
-mRNA
+dna-unspecified
 protein-specified
-protein-unspecified
-receptor
-ATP
-enzyme
 mitochondria
-intracellular calcium
-receptor binding
+mRNA
+protein-unspecified
+enzyme
+receptor
+transporter
+ATP
+physical feature
+11-Deoxycortisol
+17alpha-hydroxypregnenolone
+17alpha-hydroxyprogesterone
+Androstenedione
+Corticosterone
+Cortisol
+11-Deoxycorticosterone
+Estradiol
+Estrone
+Progesterone
+Testosterone
+embryonic mortality
+extraembryonic membrane development
+body axis morphogenesis
+embryonic eye development
+embryonic snout morphogenesis
+embryonic jaw development
+otic vesicle morphogenesis
+embryonic morphogenesis
+brain morphogenesis
+somitogenesis
+pectoral fin morphogenesis
+caudal fin morphogenesis
+embryonic pigmentation
+angiogenesis
+swim bladder morphogenesis
+embryonic notochord morphogenesis
+embryonic functional response
+cystine/C13Cystine
+ornithine/C13Ornithine
+NA
+living cells
+labelled nuclei
+Ki-67
+neurite length
+neurites per neuron
+branch points per neurite
+substrate uptake
+Cortisol 
 nuclear DNA
 caspase
+intracellular calcium
+receptor binding
+dissolved oxygen
+electrical activity
+fluorogenic probe
+enzyme: lactate dehydrogenase
+neurite area
+number of Hoechst labelled nuclei
+number of migrated cells
+average ratio between the rise time and the decay time of the calcium flux
+average peak frequency, in beats per second
+BrdU labeled DNA
+sphere size
+caspase activation
+number of neurons
+number of neurites
+number of branch points
+ATP content
+number of cell body-associated synapses (synaptophysin puncta) per neuron
+number of neurite-associated synapses (synaptophysin puncta) per neuron
+number of neurite-associated synapses (synaptophysin puncta) per unit length of neurite
+number of synpases per neuron
+percentage of BrdU positive cells
+mean average intensity of BrdU labeling in the nucleus
+migration distance of radial glia at 72hr
+migration distance of radial glia at 120hr
+migration distance of neurons at 120hr
+migration distance of oligodendrocytes at 120hr
+neuronal differentiation at 120 hr
+neurite length at 120hr
+neurite area at 120hr
+oligodendrocyte differentiation at 120hr
+mean tubule length
+endothelial migration in wound recovery
+nuclear translocation of CTNB
+transcription factor
+nucleus

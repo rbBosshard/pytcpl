@@ -148,7 +148,7 @@ def get_all_related_assay_infos(config):
 
     def save_distinct_values(column, values):
         out_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "assay_info_distinct_values", f"{column}.out")
-        with open(out_file_path, 'w') as out_file:
+        with open(out_file_path, 'w', encoding='utf-8') as out_file:
             out_file.write('\n'.join(map(str, values)))
 
     os.makedirs(os.path.join(METADATA_SUBSET_DIR_PATH, "assay_info_distinct_values"), exist_ok=True)

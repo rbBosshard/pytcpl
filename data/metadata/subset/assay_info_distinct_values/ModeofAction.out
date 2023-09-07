@@ -5,19 +5,33 @@ None
 Cancer - KCC8: Receptor Mediated Effects
 CardioTox - Endothelial Injury/Coagulation
 None
-DART - Androgen Receptor Modulation
-Androgen - Androgen Receptor Modulation
-DART - Retinoid X Receptor Modulation
-Cancer - KCC10: Cell Proliferation/Death/Energetics
-AcuteTox - Cytotoxicity
-DART - Steroid Hormone Metabolism
-CardioTox - Cardiomyocyte/Myocardial Injury
 Other Steroid Hormone - Steroid Hormone Metabolism
-Cancer - KCC2: Genotoxic Effects
+DART - Steroid Hormone Metabolism
+AcuteTox - Neuronal Transmission
 CardioTox - Change in Vasoactivity
+Cancer - KCC10: Cell Proliferation/Death/Energetics
+CardioTox - Change in Inotropy
+Cancer - KCC4: Epigenetic Alterations
+CardioTox - Cardiomyocyte/Myocardial Injury
+DART - Angiogenic Process
+Cancer - KCC6: Chronic Inflammation
+DART - Epigenetic Process
+DART - Neuronal Development
+DART - Cell Death Process
+CardioTox - Valvular Injury/Proliferation
+CardioTox - Change in Action Potential
+AcuteTox - Steroid Hormone Metabolism
+DART - Progesterone Receptor Modulation
+Other Steroid Hormone - Progesterone Receptor Modulation
+Androgen - Androgen Receptor Modulation
+DART - Androgen Receptor Modulation
 Other Steroid Hormone - Glucocorticoid Receptor Modulation
-AcuteTox - Energy Metabolism Process
+DART - Retinoic Acid Receptor Modulation
 Thyroid Hormone - Thyroid Receptor Modulation
+DART - Retinoid X Receptor Modulation
+AcuteTox - Cytotoxicity
+Cancer - KCC2: Genotoxic Effects
+AcuteTox - Energy Metabolism Process
 DART - Aryl Hydrocarbon Receptor Modulation
 AcuteTox - p53 Signaling Pathway
 DART - p53 Signaling Pathway
@@ -25,14 +39,9 @@ Cancer - KCC5: Oxidative Stress
 Cancer - KCC3: Alteration of DNA Repair/Genomic Stability
 AcuteTox - Oxidative Stress
 DART - Oxidative Stress
-Cancer - KCC6: Chronic Inflammation
-DART - Retinoic Acid Receptor Modulation
-Thyroid Hormone - TSH Receptor Modulation
 Thyroid Hormone - Thyroid Hormone Metabolic Process
+Thyroid Hormone - TSH Receptor Modulation
 DART - Thyroid Hormone Metabolic Process
 DART - Estrogen-related Receptor Modulation
 Estrogen - Estrogen-related Receptor Modulation
-Cancer - KCC4: Epigenetic Alterations
 DART - Other Developmental Signaling Transcription Factors
-DART - Progesterone Receptor Modulation
-Other Steroid Hormone - Progesterone Receptor Modulation

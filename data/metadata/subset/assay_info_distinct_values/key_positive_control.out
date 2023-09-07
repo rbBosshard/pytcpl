@@ -1,4 +1,7 @@
 17b-Estradiol
+Camptothecin;Anisomycin
+Camptothecin;Anisomycin;Paclitaxel;CCCP
+Paclitaxel;CCCP
 6-formylindolo carbazole
 NA
 Forskolin
@@ -16,6 +19,144 @@ Retinoic Acid
 T3
 1a,25-Dihydroxyvitamin D3
 colchicine
+Ketoconazole
+Ketoconazole;Ketanserin
+Furafylline
+Alpha-Naphthoflavone
+Tranylcypromine
+Clotrimazole
+quercetin
+Sulfaphenazole
+quinidine
+chlormethiazole
+ellipticine
+Ketoconazole;Tranylcypromine
+Propranolol HCl
+(+/-) Verapamil HCl
+Staurosporine
+physostigmine
+Ammonium Molybdate (NH4MoO4)
+OM99-02
+Ac-YVAD-CHO
+Ac-DEVD-CHO
+z-VDVAD-CHO
+Ac-LEHD-CHO
+5-iodotubericidin
+Ursolic acid
+K252a
+trichostatin
+SB203580
+Galardin (GM6001)
+Tyr-Hydroxamic acid
+trequinsin
+Dipyridamole
+PI-103
+H 89
+sodium fluoride
+calyculin A
+bpV (bipy)
+Suramin;Ammonium Molybdate (NH4MoO4)
+Suramin
+Nicotinamide
+SC-560
+DuP-697
+Sulfasalazine
+2-BFI
+Physostigmine
+Nitro-L-Arginine
+OR-486
+Ro 41-1049;Tetrindole mesylate
+Ro 16-6491
+5"-N-ethylcarboxamidoadenosine (NECA)
+Angiotensin II
+Spiperone HCl
+Tripolidine
+porcine neuropeptide Y
+Serotonin
+rat ANP
+Bradykinin TFA salt
+Tiotidine
+Leukotriene B4 (LTB4)
+Leukotriene D4 (LTD4)
+Atropine sulfate
+U-69593
+Ketanserin
+Methiothepin mesylate
+5-carboxamidotryptamine
+2-chloroadenosine
+Oxymetazoline HCl
+Alprenolol HCl
+human rC5a
+R(+)-SCH 23390
+Haloperidol
+Endothelin-1
+Methylscopolamine bromide
+Neurokinin A
+neurotensin
+Naltriben methanesulfonate
+Naloxone HCl
+Nociceptin
+ADPbS
+Pinane-thromboxane A2
+(Phenyl[1]ac, D-Tyr(Me)[2],Arg[6,8],Lys-NH2[9])-vasopressin;Arg8-Vasopressin (AVP)
+Cholecystokinin 8 (CCK-8) (26-33) sulfated
+Mianserin HCl
+Methysergide maleate
+C16-PAF
+Phentolamine mesylate
+Tyr0-oCRF
+(+/-)-Baclofen
+porcine Galanin
+NCS-382
+N-a-methylhistamine (NAMH)
+Oxymetazoline HCl;Norepinephrine
+L-Glutamate
+MPEP
+Substance P
+Eledoisin
+Neurotensin
+Oxytocin
+Somatostatin
+TRH
+Vasoactive intestinal peptide (VIP)
+Terfenadine
+Diltiazem HCl
+W-Conotoxin GVIA
+Nifedipine
+Kainic acid
+Glibenclamide
+Apamin
+Aconitine
+GABA
+Ro 15-1788 (Flumazenil)
+L-655,708
+MDL-72222
+(+/-)-Epibatidine
+(+/-)-AMPA HBr
+N-methyl-D-aspartate (NMDA)
+(+)-MK-801
+Strychnine nitrate
+Methyllycaconitine
+PK11195
+Promegestone
+Methyltrienolone
+CITCO
+Guggulsterone
+Triamcinolone acetonide
+Ciglitazone
+TO901317
+RO415253
+TTNPB
+Bisphenol A
+Spironolactone
+FK506
+GBR-12909
+Nitrobenzylthioinosine (NBTI)
+Desipramine
+Imipramine HCl;Clomipramine HCl
+Imipramine HCl
+Reserpine
+6-alpha-Fluorotestosterone
 4,5-alpha-Dihydrotestosterone
 (Z)-4-Hydroxytamoxifen
 GW4064
@@ -26,17 +167,20 @@ Cyproterone acetate
 tetraoctylammonium bromide
 Nilutamide
 Letrozole
+Fluorescein;Rose Bengal Sodium;Triamterene
 5-Fluorouridine
 4-hydroxytamoxifen
 Mifeprostone
 FCCP
+0.092 uM T3
 1 nM T3
 Omeprazole
+Prochloraz;Forskolin
+None
 Beta-Naphthoflavone
 17-AAG
 Mitomycin C;Nutlin3
 Chenodeoxycholic acid
-Guggulsterone
 L-165,041
 MK886
 GW9662
@@ -44,28 +188,147 @@ Calcitriol
 1alpha,25-Dihydroxy vitamin D3
 Tetraoctyl ammonium bromide
 TNFa
+methimazole (MMI)
+LUCINH1;LUCINH2
 Retinol
 TO-901317
+Methotrexate
+cytochalasin D
 ER50891
 Etoposide
 EGF
+b-naphthoquinone
+testosterone
+NaClO4
 TSH
 no TSH stimulation
-CITCO
-PK11195
 Genistein
 XCT790
 Trichostatin A
 Cobalt(II)chloride hexahydrate
+PTC124
 SAG
 Cyclopamine
 promegestone (R5020)
 RU486
+prochloraz; forskolin
+1 nM T21_TR_RXR_BLA_Antagonist
+1 nM Nlity
+1 nM N6
+1 nM Nosis
+1 nM N12
+1 nM N24
+6-propyl-thiouracil (PTU)
 46 uM rifampicin 
-TRH
 1 nM T293
-Staurosporine
 TGFb
 DMSO
 dihydroxytestosterone (DHT)
-1 nM N6
+2,4-Dinitrophenol
+none
+bicuculline methiodide; picrotoxin
+17beta-estradiol
+xanthohumol
+Tritonx100
+Narciclasine
+3-Isobutyl-1-methylxanthine
+staurosporine
+IC 261
+hypericin
+sodium orthovanadate
+hydrochloride
+3',4'dichloroisocoumarin
+PP2
+PP1
+trichostatin A
+clorgiline
+deprenyl
+PP1 Analog II. 1NM-PP1
+Ilomastat
+papaverine
+Ro 20-1724
+rolipram
+1-(5-ISOQUINOLINESULFONYL)-2-M
+(NH4)6Mo7O24
+ns-398
+(NH4)6Mo7O24Â 
+nicotinamide
+cAMP
+CHEMBL83954
+ANF (rat)
+CPA
+NECA
+WB-4101
+yohimbine
+S(-)-Propranolol
+ICI 118551
+alprenolol 
+saralasin
+[d(CH2)51,Tyr(Me)2]-AVP
+Npc 567
+devazepide
+CCK-8s
+pirenzepine
+methoctramine
+4-Damp methiodide
+leukotriene D4
+SCH 23390
+butaclamol
+spiperone
+galanin
+pyrilamine
+8-OH-DPAT
+serotonin
+LTB4
+NPY
+DPDPE
+nociceptin
+DAMGO
+oxytocin
+L-703606
+MEN-10376
+VIP 
+NCS382
+datpalphas
+nitrendipine
+diltiazem
+glyburide potassium salt
+apamin
+veratridine
+muscimol
+strychnine
+kainic acid
+PK 11195
+Z-Guggulsterone
+triamcinolone
+SB 242084
+promegestone
+GW 7647
+rosiglitazone
+idazoxan
+nitrobenzylthioinosine
+protriptyline
+BTCP
+imipramine
+tetrabenazine
+diazepam
+Cytochalasin D
+media without growth factors
+lysed cells
+staurosporine (0.1 uM)
+Rac 1 inhibitor (10uM)
+sodium orthovanadate (10uM)
+aphidicolin (10uM)
+SRC kinase inhibitor PP2
+BMP7
+suramin
+BIO-acetoxime
+3-Nitro-L-tyrosine (0.05 M NaOH for model inhibitor (MNT))
+Dutasteride, Finasteride
+3,5,3,5-tetraiodothyronine (T4)
+Methimizole
+3-Nitro-L-tyrosine (MNT)
+Triphenyl phosphate
+Bexarotene
+Estradiol
+11-keto Testosterone
