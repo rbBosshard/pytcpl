@@ -1,18 +1,1956 @@
-Assay endpoint with aeid=673 failed: Length of values (48) does not match length of index (80)
+Assay endpoint with aeid=56 failed: [Errno 32] Broken pipe
 Traceback (most recent call last):
   File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
     df = process(df, config, logger)
-  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 188, in process
-    df_fitted = df_to_fit.assign(fit_params=fit_params)
-  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4844, in assign
-    data[k] = com.apply_if_callable(v, data)
-  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 3950, in __setitem__
-    self._set_item(key, value)
-  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4143, in _set_item
-    value = self._sanitize_column(value)
-  File "/usr/local/lib/python3.9/dist-packages/pandas/core/frame.py", line 4870, in _sanitize_column
-    com.require_length_match(value, self.index)
-  File "/usr/local/lib/python3.9/dist-packages/pandas/core/common.py", line 576, in require_length_match
-    raise ValueError(
-ValueError: Length of values (48) does not match length of index (80)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=423 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=188 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=463 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2958 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2796 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3090 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=252 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2775 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=597 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1955 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1967 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=539 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2165 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=699 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=551 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3088 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=429 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3023 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=44 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2954 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2946 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=694 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2031 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=300 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2960 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=515 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=139 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=555 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2503 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2511 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=650 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1919 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2497 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2495 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1965 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2244 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=90 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=244 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1959 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=654 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2157 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3022 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=599 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=891 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1915 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3123 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2501 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2931 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=174 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=525 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=704 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=373 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=341 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3031 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1367 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=501 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=483 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3029 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1917 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2827 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2517 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=158 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2304 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=690 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2935 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=226 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2957 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2760 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=774 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=779 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2899 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3021 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2254 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=634 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=685 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=276 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=316 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2907 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=270 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2865 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2297 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2161 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=469 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=776 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=150 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=773 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3024 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=701 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3135 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2237 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1356 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=557 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3025 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2640 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2564 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2583 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2643 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2587 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2580 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2652 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2570 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2662 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2567 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2684 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2632 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2626 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2683 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3121 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2616 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2651 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2574 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2947 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2593 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2590 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2596 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2585 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3101 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=168 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2913 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2833 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2676 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1646 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1750 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2679 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2685 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2669 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1618 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2660 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1624 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=471 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2601 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2597 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=198 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=240 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=379 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=517 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2557 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=312 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2546 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=26 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1760 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1748 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2675 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2845 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2863 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2664 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3151 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2698 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2702 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2770 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1778 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1770 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2891 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1352 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1349 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2627 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2620 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=3143 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2639 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2905 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=2929 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
+
+Assay endpoint with aeid=1369 failed: [Errno 32] Broken pipe
+Traceback (most recent call last):
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_main.py", line 43, in pipeline
+    df = process(df, config, logger)
+  File "/home/bossh/pytcpl/src/pipeline/pipeline_core.py", line 177, in process
+    it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 1097, in __init__
+    self.sp = self.status_printer(self.fp)
+  File "/usr/local/lib/python3.9/dist-packages/tqdm/std.py", line 451, in status_printer
+    getattr(sys.stderr, 'flush', lambda: None)()
+BrokenPipeError: [Errno 32] Broken pipe
 
