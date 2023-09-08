@@ -186,7 +186,7 @@ def process(df, config, logger):
     it = tqdm(df_to_fit.iterrows(), total=df_to_fit.shape[0], desc=desc, bar_format=custom_format)
     fit_params = Parallel(n_jobs=nj)(delayed(fit)(i) for _, i in it) if p else [fit(i) for _, i in it]
     df_fitted = df_to_fit.assign(fit_params=fit_params)
-    df_no_fit.loc[:, 'fit_params'] = None
+    df_no_fit['fit_params'] = None
     if config['enable_curve_fit_parameter_tracking']:
         track_fitted_params(df_fitted['fit_params'])
 
