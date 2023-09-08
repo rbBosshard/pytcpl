@@ -596,7 +596,11 @@ def get_partition(instance_id, instances_total):
     partition_size = len(all_ids) // instances_total
     start_idx = instance_id * partition_size
     end_idx = start_idx + partition_size
-    return all_ids[start_idx:end_idx]
+    if instance_id != instances_total - 1:
+        return all_ids[start_idx:end_idx]
+    else:
+        # Last instance is assigned to remaining tasks in case total num tasks is non-divisible by instances_total
+        return all_ids[start_idx:]
 
 
 def get_formatted_time_elapsed(start_time):
