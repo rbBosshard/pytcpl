@@ -1,60 +1,20 @@
 real-time cell-growth kinetics
-cell phenotype
-cell number
-protein conformation
-dye binding
-dna content
-enzyme activity
 mRNA induction
 immunoassay: elisa
 protein content
 dehydrogenase activity determination
-radioligand binding
-fret
-fluorescent polarization
-luciferase induction
 protein fragment complementation assay
 fluorescent protein induction
 beta lactamase induction
 ATP content
+luciferase induction
 artifact detection
-hormone induction
-embryonic mortality
-anatomical entity
-embryo development
-metabolite detection
-cytokine-specific antibody bead-based method
-cell viability
-cell migration
-neurite outgrowth
-radioactive substrate uptake
+dye binding
+cell number
 cAMP measurement
-coactivator recruitment
-membrane impermeable stain for DNA
-Caspase 3/7 activity
 intracellular calcium
 caspase activity
 living cells
 protein-protein binding
-basal respiration
-maximal respiration
-inhibited respiration
-electrical activity
-lactate dehydrogenase activity
-FRET
-neural crest cell migration
-QT interval
-beating
-apoptosis
-synaptogenesis and neurite maturation
-proliferation
-radial glia migration
-neuronal migration
-oligodendrocyte migration
-neuronal differentiation
-neuronal morphology
-oligodendrocyte differentiation
-tubulogenesis
-donor luminescence emission
-acceptor fluorescence emission
-ratio
+membrane impermeable stain for DNA
+Caspase 3/7 activity

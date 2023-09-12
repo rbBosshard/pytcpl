@@ -1,88 +1,38 @@
 Estrogen Receptor Modulation
 CardioTox_ER Alpha
 None
-Aromatase Activity Modulation
-Cytochrome P450 Activity Modulation
-Unspecified
-Acetylcholinesterase Activity Modulation
-CardioTox_ACHE
-Cell Cycle
-Inflammation
-CardioTox_TyrKinase
-Butyrylcholinesterase Activity Modulation
-Histone Modification
-CardioTox_JNK
-CardioTox_PDE
-Protein Deacetylation
-CardioTox_VEGF
-Vascularization
-CardioTox_COX
-Folate Metabolism
-Neurotransmission
-Monoamine Oxidase Activity Modulation
-CardioTox_MAO
-CardioTox_ADORA
-Adenosine Receptor Modulation
-Apoptosis
-Dopamine Receptor Modulation
-CardioTox_DRD
-CardioTox_HRH
-CardioTox_HTR
-Serotonin Receptor Modulation
-CardioTox_NPA
-CardioTox_CHRM
-Muscarinic Acetylcholine Receptor Modulation
-CardioTox_OPRM
-Opioid Receptor Modulation
-Adrenergic Receptor Modulation
-CardioTox_ADRB
-CardioTox_EDNR
-CardioTox_AVPR
-CardioTox_VascularTissue
-Glutamide-gated Chloride Channel Modulation
-Metabotropic Glutamate Receptor Modulation
-CardioTox_KCNH2
-CardioTox_CACNA
-Voltage-gated Calcium Channel Activity Modulation
-CardioTox_SCNA
-Gamma-aminobutyric Acid Receptor Modulation
-Nicotinic Acid Receptor Modulation
-CardioTox_CHRNA
-Cholesterol Transport
-Progesterone Receptor Modulation
 Androgen Receptor Modulation
-Constitutive Androstane Receptor Modulation
 Farnesoid X-activated Receptor Modulation
-Glucocorticoid Receptor Modulation
-CardioTox_NR3C1
-Peroxisome Proliferator Activated Receptor Modulation
-CardioTox_PPARG
-Pregnane X Receptor Modulation
-Retinoic Acid Receptor Modulation
-Thyroid Receptor Modulation
-Other Transcription Factors
-Dopamine Transporter Activity Modulation
-Norepinephrine Transporter Modulation
-CardioTox_SLC6A
-Serotonin Plasma Membrane Transporter Modulation
 Retinoid X Receptor Modulation
+CardioTox_PPARG
+Peroxisome Proliferator Activated Receptor Modulation
 Cell Viability
+Aromatase Activity Modulation
 CardioTox_AroPro
 DNA Damage
+Glucocorticoid Receptor Modulation
+CardioTox_NR3C1
 CardioTox_Mt Dys
 Mitochondrial Function
+Thyroid Receptor Modulation
 Aryl Hydrocarbon Receptor Modulation
 CardioTox_AHR
 p53 Modulation
 CardioTox_TP53
 DNA Repair
-Not Annotated
+Other Transcription Factors
 Oxidative Stress
+Inflammation
 CardioTox_NFKB
+Retinoic Acid Receptor Modulation
 RAR-related Orphan Receptor Modulation
+Histone Modification
+Cell Cycle
 CardioTox_AP-1
-Sodium/Iodide Cotransporter
 TSH Receptor Modulation
+Constitutive Androstane Receptor Modulation
 Estrogen-related Receptor Modulation
 CardioTox_H1FA
 Other Developmental Signaling Transcription Factors
+Progesterone Receptor Modulation
+Apoptosis

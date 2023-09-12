@@ -49,9 +49,10 @@ def main():
                 assay_info_selected_fields = st.multiselect("Multiselect fields:",  
                     st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], 
                     placeholder="ALL", label_visibility="collapsed")
-                submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("filter_assay_endpoints",))
+                submitted = st.form_submit_button("Submit!")
                 if submitted:
                     st.session_state.assay_info_selected_fields = assay_info_selected_fields
+                    set_trigger("filter_assay_endpoints")
                 placeholder_assay_info = st.empty()
                 placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
 

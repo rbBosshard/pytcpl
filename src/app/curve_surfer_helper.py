@@ -80,7 +80,7 @@ def init_figure():
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
     fig.update_layout(xaxis_title="log10(Concentration) μM", yaxis_title=str(st.session_state.assay_info['normalized_data_type']))
-    fig.add_hrect(y0=-cutoff, y1=cutoff, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
+    fig.add_hrect(y0=0, y1=cutoff, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
                   annotation_text="efficacy cutoff", annotation_position="top left")
     fig.update_layout(legend=dict(groupclick="toggleitem"))
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
@@ -189,6 +189,17 @@ def reset_df_index():
 
 def set_trigger(trigger):
     st.session_state.trigger = trigger
+    if trigger == 'filter_assay_endpoints':
+        on_filter_assay_endpoints(trigger)
+        update_aeid()
+        refresh_data(trigger)
+        update_df_length()
+        update_df_index()
+        # Update current specific
+        update_spid()
+
+        # Get corresponding series from dataframe
+        get_series()
     if trigger.startswith("select_compound"):
         st.session_state.hitcall_slider = (0.0, 1.0)
 

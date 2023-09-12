@@ -30,7 +30,7 @@ def remove_files_not_matching_to_aeid_list():
 def save_all_results(config, df_all, cutoff_all):
     print("Wait for it..")
     # For writing to DB ensure it holds that in config/config.yaml: enable_writing_db: 1
-    check_db()
+    # check_db()
     print("Takes approx. 10 minutes depending on CPUs")
     db_append(cutoff_all, 'cutoff')
     db_append(df_all, 'output')

@@ -1,13 +1,9 @@
-import pandas as pd
-import streamlit as st
+import torch
 
-# Create a sample DataFrame with links
-data = {'Name': ['John', 'Jane', 'Mike'],
-        'Email': ['john@example.com', 'jane@example.com', 'mike@example.com']}
-df = pd.DataFrame(data)
-
-# Add a new column with HTML links
-df['Profile'] = df['Name'].apply(lambda name: f'<a href="https://example.com/profile/{name}">Profile</a>')
-
-# Display the DataFrame with links
-st.table(df, unsafe_allow_html=True)
+# Check if a GPU is available
+if torch.cuda.is_available():
+    # Get the number of available GPUs
+    num_gpus = torch.cuda.device_count()
+    print(f"GPU(s) are available. Number of GPUs: {num_gpus}")
+else:
+    print("No GPU available. Using CPU.")
