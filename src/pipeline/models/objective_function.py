@@ -27,12 +27,13 @@ def get_negative_log_likelihood(params, conc, resp, fit_model, errfun="dt4"):
     Optimization objective function is called "loss/cost function" and we want to minimize the loss/cost
     https://stats.stackexchange.com/questions/260505/why-do-we-use-negative-log-likelihood-to-estimate-parameters-for-ml
     """
-
     pred = fit_model(conc, *params[:-1])
+
     scale = np.exp(params[-1])
     df = 4  # len(conc) - len(params)  # Degrees of freedom
     # error = resp - pred
     # sigma_squared = np.var(error)
     # scale = np.sqrt(sigma_squared)
     log_likelihood = np.sum(t.logpdf(x=resp, df=df, loc=pred, scale=scale))
+
     return -log_likelihood

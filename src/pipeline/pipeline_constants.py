@@ -24,6 +24,8 @@ PROFILER_PATH = os.path.join(LOG_DIR_PATH, 'pipeline.prof')
 OUTPUT_TABLE = "output"
 CUTOFF_TABLE = "cutoff"
 
+FILE_FORMAT = '.parquet.gzip'
+
 COLORS_DICT = {
     "WHITE": "\033[37m",
     "BLUE": "\033[34m",

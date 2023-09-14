@@ -44,11 +44,13 @@ def generate_balanced_aeid_list(config, df):
 def keep_viability_assay_endpoints_together(config, df):
     # Separate dataframes based on endpoint names
     ratio_df = df[
-        df['assay_component_endpoint_name'].str.endswith("_ratio") & (df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (
+        df['assay_component_endpoint_name'].str.endswith("_ratio") & (
+                    df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (
                 df['ratio'] > config['threshold_subsetting_aeids_on_hit_ratio'])]
     viability_df = df[df['assay_component_endpoint_name'].str.endswith("_viability")]
     filtered_df = df[~df['assay_component_endpoint_name'].str.endswith(("_ratio", "_viability", "_ch1", "_ch2")) & (
-            df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (df['ratio'] > config['threshold_subsetting_aeids_on_hit_ratio'])]
+            df['count'] > config['threshold_subsetting_aeids_on_count_compounds_tested']) & (
+                                 df['ratio'] > config['threshold_subsetting_aeids_on_hit_ratio'])]
     # Create prefixes and match rows
     ratio_df['pre'] = ratio_df['assay_component_endpoint_name'].str.replace('_ratio', '')
     viability_df['pre'] = viability_df['assay_component_endpoint_name'].str.replace('_viability', '')
@@ -65,32 +67,47 @@ def keep_viability_assay_endpoints_together(config, df):
     return df
 
 
-def subset_candidate_assay_endoints_on_counts_and_hit_ratio():
+def subset_for_candidate_assay_endpoints():
     os.makedirs(METADATA_SUBSET_DIR_PATH, exist_ok=True)
     dest_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"candidate_assay_endpoints.parquet.gzip")
-    if not os.path.exists(dest_path):
-        query = f"SELECT aeid, " \
-                f"COUNT(*) as count, " \
-                f"SUM(hitc = 1) AS hitc_1_count, " \
-                f"SUM(hitc = 0) AS hitc_0_count, " \
-                f"SUM(hitc = 1) / COUNT(*) AS ratio " \
-                f"FROM invitrodb_v3o5.mc5 " \
-                f"GROUP BY aeid;"
-        df_counts = query_db(query)
+    # if not os.path.exists(dest_path):
+    df_1 = get_count_and_hit_ratio()
+    df_2 = filter_on_assay_format_and_function_type()
+    df = df_1.merge(df_2, on="aeid", how="inner")
 
-        query = f"SELECT aeid, " \
-                f"assay_component_endpoint_name, " \
-                f"analysis_direction," \
-                f"signal_direction " \
-                f"FROM invitrodb_v3o5.assay_component_endpoint " \
-                f"WHERE analysis_direction='positive' " \
-            # f"AND signal_direction='gain';"
-        df_analysis_direction = query_db(query)
+    df = df[~df['assay_component_endpoint_name'].str.endswith(('ch1', 'ch2'))]
 
-        df = df_counts.merge(df_analysis_direction, on="aeid", how="inner")
-        df.to_parquet(dest_path, compression='gzip')
-    else:
-        df = pd.read_parquet(dest_path)
+    df.to_parquet(dest_path, compression='gzip')
+    # else:
+    #     df = pd.read_parquet(dest_path)
+    return df
+
+
+def filter_on_assay_format_and_function_type():
+    query = f"SELECT ace.aeid, " \
+            f"ace.assay_component_endpoint_name, " \
+            f"ace.burst_assay, " \
+            f"a.assay_format_type " \
+            f"FROM invitrodb_v3o5.assay_component_endpoint AS ace " \
+            f"INNER JOIN assay_component AS ac ON ace.acid = ac.acid " \
+            f"INNER JOIN assay AS a ON ac.aid = a.AID " \
+            f"WHERE assay_format_type IN ('cell-based') " \
+            f"AND assay_function_type NOT IN ('background control') " \
+            # f"AND ace.analysis_direction = 'positive' AND signal_direction='gain' " \
+
+    df = query_db(query)
+    return df
+
+
+def get_count_and_hit_ratio():
+    query = f"SELECT aeid, " \
+            f"COUNT(*) as count, " \
+            f"SUM(hitc = 1) AS hitc_1_count, " \
+            f"SUM(hitc = 0) AS hitc_0_count, " \
+            f"SUM(hitc = 1) / COUNT(*) AS ratio " \
+            f"FROM invitrodb_v3o5.mc5 " \
+            f"GROUP BY aeid;"
+    df = query_db(query)
     return df
 
 
@@ -116,9 +133,9 @@ def export_metadata_tables_to_parquet():
     """
     Export data from specified MySQL tables to Parquet files.
     """
-    tables = ["assay_component", "assay_component_endpoint",
+    tables = ["assay", "assay_component", "assay_component_endpoint",
               "assay_component_endpoint_descriptions",
-              "sample", "chemical",
+              "sample", "chemical", "cytotox",
               "mc4_aeid", "mc5_aeid",
               "mc4_methods", "mc5_methods"]
 
@@ -135,6 +152,7 @@ def get_mechanistic_target_and_mode_of_action_annotations_from_ice():
     df = pd.read_excel(src_path, sheet_name=tab_name)
     destination_path = os.path.join(METADATA_DIR_PATH, f"mechanistic_target_and_mode_of_action.parquet.gzip")
     df.to_parquet(destination_path, compression='gzip')
+    return df
 
 
 def get_all_related_assay_infos(config):
@@ -180,7 +198,7 @@ def get_all_related_assay_infos(config):
 
             assay_info_distinct_values[column] = distinct_values
             save_distinct_values(column, distinct_values)
-            length_file.write(f"{column}: {len(distinct_values)}):\n")
+            length_file.write(f"{column}: {len(distinct_values)}:\n")
 
     json_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "assay_info_distinct_values.json")
     with open(json_file_path, 'w') as json_file:

@@ -11,6 +11,10 @@ enable_output_compounds: 1
 chunk_size: 10000
 threshold_subsetting_aeids_on_count_compounds_tested: 2000 # -1 #2000
 threshold_subsetting_aeids_on_hit_ratio: 0.005 # -1  #0.005
+threshold_cytotox_min_test: 0.8
+threshold_cytotox_default_pt: 3
+threshold_cytotox_hitc_num: 0.9
+
 file_format: .parquet.gzip
 instance_id: 0
 instances_total: 4

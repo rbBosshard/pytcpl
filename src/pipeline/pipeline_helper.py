@@ -634,16 +634,6 @@ def get_msg_with_elapsed_time(msg):
     return f"{get_formatted_time_elapsed(START_TIME)} {msg}"
 
 
-def merge_all_outputs():
-    aeid_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{CONFIG['file_format']}"))
-    output_paths = [os.path.join(OUTPUT_DIR_PATH, f"{aeid}{CONFIG['file_format']}") for aeid in aeid_sorted['aeid']]
-    cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{CONFIG['file_format']}") for aeid in aeid_sorted['aeid']]
-    cols = ['dsstox_substance_id', 'aeid', 'hitcall']
-    df_all = pd.concat([pd.read_parquet(file) for file in output_paths])
-    cutoff_all = pd.concat([pd.read_parquet(file) for file in cutoff_paths])
-    return df_all, cutoff_all
-
-
 def get_db_config():
     """
     Retrieve database configuration parameters from a YAML file.

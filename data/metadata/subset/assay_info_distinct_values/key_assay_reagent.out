@@ -1,10 +1,10 @@
 NA
+Hoechst-33342 dye
 AhRE RTU
 AP-1 RTU
 AP-2 RTU
 BRE RTU
 C/EBP RTU
-CMV RTU
 CRE RTU
 LXRE RTU
 RARE RTU
@@ -16,14 +16,13 @@ Ets RTU
 FoxA RTU
 FoxO RTU
 GATA RTU
+GLI RTU
 GRE RTU
 HIF1a RTU
 HNF6 RTU
 HSE RTU
 IR1 RTU
 ISRE RTU
-M19 RTU
-M32 RTU
 MRE RTU
 Myb RTU
 Myc RTU
@@ -42,24 +41,19 @@ SOX RTU
 Sp1 RTU
 SREBP RTU
 STAT RTU
-TA RTU
-TAL RTU
 TGF RTU
 VDRE RTU
 Xbp1 RTU
 GAL4-AR RTU
 GAL4-CAR RTU
 GAL4-ERa RTU
+GAL4-ERRa RTU
 GAL4-ERRg RTU
 GAL4-FXR RTU
 GAL4-GR RTU
 GAL4-HNF4a RTU
 GAL4-LXRa RTU
 GAL4-LXRb RTU
-GAL4-M_06 RTU
-GAL4-M_19 RTU
-GAL4-M_32 RTU
-GAL4-M_61 RTU
 GAL4-NURR1 RTU
 GAL4-PPARa RTU
 GAL4-PPARd RTU
@@ -68,22 +62,28 @@ GAL4-PXR RTU
 GAL4-RARa RTU
 GAL4-RARb RTU
 GAL4-RARg RTU
+GAL4-RORb RTU
 GAL4-RORg RTU
 GAL4-RXRa RTU
 GAL4-RXRb RTU
 GAL4-THRa RTU
 GAL4-VDR RTU
 E-selectin antibody
+HLA-DR antibody
+ICAM-1 antibody
 IL-8 antibody
 MCP-1 antibody
+MIG antibody
+0.1% sulforhodamine
 Thrombomodulin antibody
 Tissue Factor antibody
 uPAR antibody
+VCAM-1 antibody
 Eotaxin-3 antibody
 P-Selectin antibody
 VEGFRII antibody
-HLA-DR antibody
 IL-1a antibody
+IP-10 antibody
 MMP-1 antibody
 PAI-1 antibody
 tPA antibody
@@ -91,21 +91,19 @@ uPA antibody
 IL-6 antibody
 LDLR antibody
 M-CSF antibody
-MIG antibody
-0.1% sulforhodamine
 SAA antibody
-VCAM-1 antibody
 Collagen antibody
 EGFR antibody
-IP-10 antibody
 TIMP-1 antibody
-ICAM-1 antibody
+MMP-9 antibody
 TIMP-2 antibody
+CD40 antibody
 IL-a antibody
 PGE2 antibody
 CD142 Tissue Factor antibody
 TNF-a antibody
 CD38 antibody
+CD69 antibody
 Alamar blue
 CCF4-AM
 CellTiter-Glo
@@ -114,8 +112,9 @@ Mito-MPS
 XTT reagent
 CellTox Green
 d2-labeled cAMP
+NanoLuc/profurimazine
+CellTiter-Fluor reagent
 intracellular calcium
 Caspase-Glo 3/7 reagent
-CellTiter-Fluor reagent
 propidium iodide
 CellEvent Caspase 3/7 Green detection reagent

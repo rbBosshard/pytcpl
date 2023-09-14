@@ -1,4 +1,5 @@
 real-time cell-growth kinetics
+cell number
 mRNA induction
 immunoassay: elisa
 protein content
@@ -10,11 +11,12 @@ ATP content
 luciferase induction
 artifact detection
 dye binding
-cell number
 cAMP measurement
+dead cells
+metabolic activity
+living cells
 intracellular calcium
 caspase activity
-living cells
 protein-protein binding
 membrane impermeable stain for DNA
 Caspase 3/7 activity

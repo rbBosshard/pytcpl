@@ -98,7 +98,9 @@ def process(df, config, logger):
             x0 = get_model(fit_model)('x0')(conc, resp)
             bounds = get_model(fit_model)('bounds')(conc, resp)
             args = (conc, resp, get_model(fit_model)('fun'))
+
             fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args)
+
             pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
             aic = 2 * len(pars) - 2 * ll
