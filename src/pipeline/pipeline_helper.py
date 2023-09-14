@@ -49,7 +49,6 @@ def launch(config, config_path):
     instance_id = args.instance_id
     instances_total = args.instances_total
 
-
     def create_empty_log_file(filename):
         with open(filename, 'w', encoding='utf-8'):
             pass

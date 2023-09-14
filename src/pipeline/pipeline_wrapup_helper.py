@@ -11,24 +11,30 @@ from src.pipeline.pipeline_constants import METADATA_SUBSET_DIR_PATH, OUTPUT_DIR
     CUTOFF_DIR_PATH, AEIDS_LIST_PATH, OUTPUT_COMPOUNDS_DIR_PATH, FILE_FORMAT, METADATA_DIR_PATH
 
 
-def remove_files_not_matching_to_aeid_list():
+def remove_files_not_matching_to_aeid_list(delete=False):
     directories = [OUTPUT_DIR_PATH, CUTOFF_DIR_PATH]
 
-    with open(AEIDS_LIST_PATH, 'r') as f:
+    with open(os.path.join(METADATA_SUBSET_DIR_PATH, 'aeids.out'), 'r') as f:
         ids = set(line.strip() for line in f)
 
+    ids_files = []
     for directory in directories:
         for filename in os.listdir(directory):
             if filename.endswith('.parquet.gzip'):
                 id = filename.replace('.parquet.gzip', '')
+                ids_files.append(id)
                 if id not in ids:
-                    file_path = os.path.join(directory, filename)
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                        print(f"Deleted: {file_path}")
-                    else:
-                        print(f"Warning: File not found: {file_path} (aeid: {id})")
+                    if delete:  # deletes files not contained in aeid list
+                        file_path = os.path.join(directory, filename)
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                            print(f"Deleted: {file_path}")
+                        else:
+                            print(f"Warning: File not found: {file_path} (aeid: {id})")
 
+    for id in ids:
+        if id not in ids_files:
+            print(f"{id}")
 
 def merge_all_outputs_and_save(df_all, cutoff_all):
     # For writing to DB ensure it holds that in config/config.yaml: enable_writing_db: 1
@@ -66,7 +72,7 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
 
 
 def merge_all_outputs():
-    aeid_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))[-200:]
+    aeid_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))[:20]
     output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeid_sorted['aeid']]
     cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}") for aeid in aeid_sorted['aeid']]
     cols = ['dsstox_substance_id', 'aeid', 'hitcall']
@@ -135,12 +141,18 @@ def compute_cytotoxicity_info(config, df_all):
     burst_assays = df_all[df_all['aeid'].isin(burst_assays_aeids)]
     # burst_assays = burst_assays[~burst_assays['best_aic_model'].isin(['gnls', 'sigmoid'])]
     hitc_num = config['threshold_cytotox_hitc_num']
-    burst_assays = burst_assays.groupby(['dsstox_substance_id']).agg(med=('hitcall', lambda x: np.median(np.log10(x[x >= hitc_num]))),
-                                         mad=('hitcall', lambda x: get_mad(np.log10(x.loc[x >= hitc_num, 'ac50']))),
-                                         ntst=('ac50', 'count'),
-                                         nhit=('hitcall', lambda x: np.sum(x >= hitc_num)),
-                                         burstpct=('hitcall', lambda x: np.sum(x >= hitc_num) / len(x))).reset_index()[
-        ['med', 'mad', 'ntst', 'nhit', 'burstpct']]
+
+    def compute_metrics(x):
+        med = np.median(np.log10(x.loc[x['hitcall'] >= hitc_num, 'ac50']))
+        mad = get_mad(np.log10(x.loc[x['hitcall'] >= hitc_num, 'ac50']))
+        ntst = len(x)
+        nhit = np.sum(x['hitcall'] >= hitc_num)
+        burstpct = nhit / ntst
+
+        result = {"med": med, "mad": mad, "ntst": ntst, "nhit": nhit, "burstpct": burstpct}
+        return pd.Series(result, name="metrics")
+
+    burst_assays = burst_assays.groupby(['dsstox_substance_id']).apply(compute_metrics).reset_index()
 
     burst_assays['used_in_global_mad_calc'] = burst_assays['burstpct'] > 0.05
     gb_mad = np.median(burst_assays[burst_assays['used_in_global_mad_calc']]['mad'])
