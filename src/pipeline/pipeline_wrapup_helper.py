@@ -36,7 +36,8 @@ def remove_files_not_matching_to_aeid_list(delete=False):
         if id not in ids_files:
             print(f"{id}")
 
-def merge_all_outputs_and_save(df_all, cutoff_all):
+
+def save_merged(df_all, cutoff_all):
     # For writing to DB ensure it holds that in config/config.yaml: enable_writing_db: 1
     # check_db()
     print("Takes approx. 10 minutes depending on CPUs")
@@ -73,7 +74,7 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
             executor.submit(process_compound, i, compound)
 
 
-def merge_all_outputs():
+def ice_curation_and_cytotoxicity_filtering_with_viability_assays():
     aeids_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))[:20]
     aeids_target_assays = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}"))
     output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
@@ -181,7 +182,7 @@ def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
     return df
 
 
-def compute_cytotoxicity_info(config, df_all):
+def compute_cytotoxicity_from_burst_assays(config, df_all):
     path = os.path.join(METADATA_DIR_PATH, f"assay_component_endpoint{FILE_FORMAT}")
     df = pd.read_parquet(path)
     burst_assays_aeids = df[df['burst_assay'] == 1]['aeid']
@@ -219,3 +220,19 @@ def compute_cytotoxicity_info(config, df_all):
     burst_assays.to_csv(path)
 
     return burst_assays
+
+
+def groupb_by_aeids(df_all):
+    aeids = df_all['aeid'].dropna().unique()
+    num_aeids = len(aeids)
+
+    def process_compound(i, aeid):
+        print(f"{i + 1}/{num_aeids}: {aeid}")
+        aeid_df = df_all[df_all['aeid'] == aeid]
+        output_file = os.path.join(OUTPUT_DIR_PATH, f'{aeid}{FILE_FORMAT}')
+        aeid_df.to_parquet(output_file, compression='gzip')
+
+    os.makedirs(OUTPUT_DIR_PATH, exist_ok=True)
+    with ThreadPoolExecutor(max_workers=max(os.cpu_count() * 2 - 1, 1)) as executor:
+        for i, aeid in enumerate(aeids):
+            executor.submit(process_compound, i, aeids)

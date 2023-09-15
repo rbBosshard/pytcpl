@@ -22,61 +22,51 @@ This assay endpoint, ATG_Ahr_CIS_up, was analyzed in the positive fitting direct
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene AHR. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-loop-helix protein.
-ATG_Ahr_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_AP_1_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_AP_1_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene FOS and JUN. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic leucine zipper.
-ATG_AP_1_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_AP_2_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_AP_2_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene TFAP2A and TFAP2B and TFAP2D. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-turn-helix leucine zipper.
-ATG_AP_2_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_BRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_BRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene SMAD1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is Smad protein.
-ATG_BRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_C_EBP_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_C_EBP_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene CEBPB. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic leucine zipper.
-ATG_C_EBP_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_CRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_CRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene CREB3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic leucine zipper.
-ATG_CRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_DR4_LXR_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_DR4_LXR_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1H2 and NR1H3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_DR4_LXR_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_DR5_RAR_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_DR5_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RARA and RARB and RARG. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_DR5_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_E_Box_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_E_Box_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene USF1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-loop-helix protein.
-ATG_E_Box_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_E2F_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_E2F_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene E2F1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is E2F transcription factor.
-ATG_E2F_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_EGR_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_EGR_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene EGR1. 
@@ -87,68 +77,56 @@ This assay endpoint, ATG_ERE_CIS_up, was analyzed in the positive fitting direct
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene ESR1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_ERE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Ets_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Ets_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene ETS1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is winged helix-turn-helix.
-ATG_Ets_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_FoxA2_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_FoxA2_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene FOXA2. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is forkhead box protein.
-ATG_FoxA2_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_FoxO_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_FoxO_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene FOXO1 and FOXO3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is forkhead box protein.
-ATG_FoxO_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_GATA_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_GATA_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene GATA1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is GATA proteins.
-ATG_GATA_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
-ATG_GLI_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_GRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_GRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR3C1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_GRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_HIF1a_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_HIF1a_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene HIF1A. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-loop-helix protein.
-ATG_HIF1a_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_HNF6_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_HNF6_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene ONECUT1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is homeobox protein.
-ATG_HNF6_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_HSE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_HSE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene HSF1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is heat shock protein.
-ATG_HSE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_IR1_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_IR1_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1H4. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_IR1_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_ISRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_ISRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene IRF1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is interferon regulatory factors.
-ATG_ISRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_MRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_MRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene MTF1. 
@@ -159,49 +137,41 @@ This assay endpoint, ATG_Myb_CIS_up, was analyzed in the positive fitting direct
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene MYB. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is MYB proteins.
-ATG_Myb_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Myc_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Myc_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene MYC. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-loop-helix leucine zipper.
-ATG_Myc_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_NF_kB_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_NF_kB_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NFKB1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is NF-kappa B.
-ATG_NF_kB_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_NFI_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_NFI_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NFIA. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is nuclear factor I.
-ATG_NFI_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_NRF1_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_NRF1_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NRF1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is nuclear respiratory factors.
-ATG_NRF1_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_NRF2_ARE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_NRF2_ARE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NFE2L2. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic leucine zipper.
-ATG_NRF2_ARE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Oct_MLP_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Oct_MLP_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene POU2F1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is POU domain protein.
-ATG_Oct_MLP_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_p53_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_p53_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene TP53. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is tumor suppressor.
-ATG_p53_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Pax6_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Pax6_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene PAX6. 
@@ -212,134 +182,111 @@ This assay endpoint, ATG_PBREM_CIS_up, was analyzed in the positive fitting dire
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1I3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_PBREM_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_PPRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_PPRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene PPARA and PPARD and PPARG. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_PPRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_PXRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_PXRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1I2. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_PXRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RORE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RORE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RORA and RORB and RORC. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is orphan.
-ATG_RORE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Sox_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Sox_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene SOX1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is HMG box protein.
-ATG_Sox_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Sp1_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Sp1_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene SP1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is zinc finger.
-ATG_Sp1_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_SREBP_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_SREBP_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene SREBF1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic helix-loop-helix leucine zipper.
-ATG_SREBP_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_STAT3_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_STAT3_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene STAT3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is stat protein.
-ATG_STAT3_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_TGFb_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_TGFb_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene TGFB1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the growth factor intended target family, where the subfamily is transforming growth factor beta.
-ATG_TGFb_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_VDRE_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_VDRE_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene VDR. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_VDRE_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_Xbp1_CIS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_Xbp1_CIS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene XBP1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the dna binding intended target family, where the subfamily is basic leucine zipper.
-ATG_Xbp1_CIS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_AR_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_AR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene AR. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_AR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_CAR_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_CAR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1I3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_CAR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_ERa_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_ERa_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene ESR1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_ERa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
-ATG_ERRa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_ERRg_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_ERRg_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene ESRRG. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_ERRg_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_FXR_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_FXR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1H4. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_FXR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_GR_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_GR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR3C1. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is steroidal.
-ATG_GR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_HNF4a_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_HNF4a_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene HNF4A. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is orphan.
-ATG_HNF4a_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_LXRa_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_LXRa_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1H3. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_LXRa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_LXRb_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_LXRb_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1H2. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_LXRb_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_NURR1_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_NURR1_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR4A2. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is orphan.
-ATG_NURR1_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_PPARa_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_PPARa_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene PPARA. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_PPARa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_PPARd_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_PPARd_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene PPARD. 
@@ -351,52 +298,42 @@ Using a type of inducible reporter, measures of mRNA for gain-of-signal activity
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
 Data from the assay component ATG_PXR_TRANS was analyzed into 1 assay endpoint. This assay endpoint, ATG_PXR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene NR1I2. Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_PXR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RARa_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RARa_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RARA. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_RARa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RARb_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RARb_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RARB. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_RARb_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RARg_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RARg_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RARG. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_RARg_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
-ATG_RORb_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RORg_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RORg_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RORC. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is orphan.
-ATG_RORg_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RXRa_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_RXRa_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RXRA. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_RXRa_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_RXRb_TRANS was analyzed into 1 assay endpoint. This assay endpoint, ATG_RXRb_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene RXRB. Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_RXRb_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_THRa1_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_THRa1_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene THRA. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_THRa1_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component ATG_VDR_TRANS was analyzed into 1 assay endpoint. 
 This assay endpoint, ATG_VDR_TRANS_up, was analyzed in the positive fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of inducible reporter, measures of mRNA for gain-of-signal activity can be used to understand the reporter gene at the transcription factor-level as they relate to the gene VDR. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a reporter gene function. 
 To generalize the intended target to other relatable targets, this assay endpoint is annotated to the nuclear receptor intended target family, where the subfamily is non-steroidal.
-ATG_VDR_TRANS_dn was not developed or optimized to detect loss of signal. Use data with caution.
 Data from the assay component BSK_3C_Eselectin was analyzed into 2 assay endpoints. This assay endpoint, BSK_3C_Eselectin_down, was analyzed in the negative fitting direction relative to DMSO as the negative control and baseline of activity. 
 Using a type of binding reporter, loss-of-signal activity can be used to understand changes in the signaling as they relate to the gene SELE. 
 Furthermore, this assay endpoint can be referred to as a primary readout, because this assay has produced multiple assay endpoints where this one serves a signaling function. 

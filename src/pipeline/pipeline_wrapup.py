@@ -7,7 +7,6 @@ pd.options.mode.chained_assignment = None
 
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # plt.style.use('seaborn')
 plt.style.use('ggplot')
@@ -15,22 +14,22 @@ plt.style.use('ggplot')
 # plt.style.use('bmh')
 # sns.set_style('ticks')
 
-from src.pipeline.pipeline_constants import FILE_FORMAT, METADATA_SUBSET_DIR_PATH, DATA_DIR_PATH, METADATA_DIR_PATH, \
-    OUTPUT_DIR_PATH
+from src.pipeline.pipeline_constants import FILE_FORMAT, METADATA_SUBSET_DIR_PATH, DATA_DIR_PATH
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
 
 from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
-from src.pipeline.pipeline_wrapup_helper import merge_all_outputs, compute_cytotoxicity_info, \
-    merge_all_outputs_and_save, \
-    groupb_by_compounds, remove_files_not_matching_to_aeid_list, correct_for_cytotoxicity
+from src.pipeline.pipeline_wrapup_helper import ice_curation_and_cytotoxicity_filtering_with_viability_assays, \
+    compute_cytotoxicity_from_burst_assays, \
+    save_merged, \
+    groupb_by_compounds, remove_files_not_matching_to_aeid_list, groupb_by_aeids
 
 
-def correct_cytotoxic_hitcalls(config, df_all):
+def cytotoxicity_curation_with_burst_assays(config, df_all):
+    cytotox = compute_cytotoxicity_from_burst_assays(config, df_all)
+
     # Some names have changed in the new version but is equivalent, e.g. cytotox_median_um = cyto_pt_um
-    path = os.path.join(METADATA_DIR_PATH, f"cytotox_{FILE_FORMAT}")
-    cytotox = pd.read_parquet(path)
     missing_vals = cytotox["cyto_pt_um"].isna()
     if missing_vals.sum() == 0:
         print("No incomplete cytotoxicity data")
@@ -206,6 +205,8 @@ def correct_cytotoxic_hitcalls(config, df_all):
     file_path = os.path.join(folder_path, f"{0}{FILE_FORMAT}")
     df_all_c.to_parquet(file_path, compression='gzip')
 
+    return df_all_c
+
 
 def main():
     print("Started")
@@ -215,16 +216,12 @@ def main():
     init_config(config)
     init_aeid(0)
 
-    # remove_files_not_matching_to_aeid_list(delete=False)
-    df_all, cutoff_all = merge_all_outputs()
-    # Potential hitcall correction based on ICE curation..
-    # curate()
-
-    # Potential hitcall correction based on cytotoxicity..
-    burst_assays = compute_cytotoxicity_info(config, df_all)
-    df_all = correct_cytotoxic_hitcalls(config, df_all)
-    # merge_all_outputs_and_save(df_all, cutoff_all)
-    # groupb_by_compounds(config, df_all)
+    remove_files_not_matching_to_aeid_list(delete=False)
+    df_all, cutoff_all = ice_curation_and_cytotoxicity_filtering_with_viability_assays()
+    df_all = cytotoxicity_curation_with_burst_assays(config, df_all)
+    groupb_by_aeids(df_all)
+    groupb_by_compounds(config, df_all)
+    save_merged(df_all, cutoff_all)
 
     print("Finished")
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")
