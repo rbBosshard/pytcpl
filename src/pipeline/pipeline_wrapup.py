@@ -15,7 +15,7 @@ plt.style.use('ggplot')
 # plt.style.use('bmh')
 # sns.set_style('ticks')
 
-from src.pipeline.pipeline_constants import FILE_FORMAT, METADATA_SUBSET_DIR_PATH, DATA_DIR_PATH
+from src.pipeline.pipeline_constants import FILE_FORMAT, METADATA_SUBSET_DIR_PATH, DATA_DIR_PATH, METADATA_DIR_PATH
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
@@ -27,7 +27,8 @@ from src.pipeline.pipeline_wrapup_helper import merge_all_outputs, compute_cytot
 
 
 def correct_cytotoxic_hitcalls(config, df_all):
-    path = os.path.join(METADATA_SUBSET_DIR_PATH, f"cytotox_{FILE_FORMAT}")
+    # Some names have changed in the new version but is equivalent, e.g. cytotox_median_um = cyto_pt_um
+    path = os.path.join(METADATA_DIR_PATH, f"cytotox_{FILE_FORMAT}")
     cytotox = pd.read_parquet(path)
     missing_vals = cytotox["cyto_pt_um"].isna()
     if missing_vals.sum() == 0:
@@ -40,8 +41,6 @@ def correct_cytotoxic_hitcalls(config, df_all):
         cytotox.loc[missing_vals, "cytotox_median_um"] = median_value
 
     # Plot overview of cytotoxicity data
-    # Create subplots
-
     fig, axes = plt.subplots(3, 2, figsize=(12, 8))
     axes = axes.flatten()
 
@@ -58,12 +57,7 @@ def correct_cytotoxic_hitcalls(config, df_all):
                     "(values > 120 not shown)",
                     "(all values shown)"]
 
-    data = [cytotox["cyto_pt"],
-            cytotox["mad"],
-            cytotox["lower_bnd_um"],
-            cytotox["ntst"],
-            cytotox["cyto_pt_um"],
-            cytotox["nhit"]]
+    data = [cytotox["cyto_pt"], cytotox["mad"], cytotox["lower_bnd_um"], cytotox["ntst"], cytotox["cyto_pt_um"], cytotox["nhit"]]
 
     for i, (ax, data, bins, title, x_label, y_label, legend_note, x_range, y_range) in enumerate(
             zip(axes, data, bins_list, titles, x_labels, y_labels, legend_notes, x_ranges, y_ranges)):
@@ -71,19 +65,16 @@ def correct_cytotoxic_hitcalls(config, df_all):
         ax.set_title(legend_note)
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
-        # ax.legend([legend_note])
         if x_range is not None:
             ax.set_xlim(x_range)
         if y_range is not None:
             ax.set_xlim(y_range)
-        # Hide y-axis ticks
         ax.set_yticks([])
 
     plt.tight_layout()
     plt.savefig(os.path.join(METADATA_SUBSET_DIR_PATH, "cytotox_overview_alldata.pdf"))
     plt.close()
 
-    # Some names have changed in the new version but is equivalent, e.g. cytotox_median_um = cyto_pt_um
     # Active and inactive cases
     df_all_act = df_all[df_all["hitcall"] > 0]
     print(df_all_act.shape)
@@ -96,7 +87,7 @@ def correct_cytotoxic_hitcalls(config, df_all):
     df = df_all_act.merge(cytotox, on="dsstox_substance_id", how="left")
 
     # Flag different cases
-    df["cytotox_flag"] = None
+    df.loc[: "cytotox_flag"] = None
 
     # Flag = 10: High confidence of cytotoxicity rather than specific toxicity
     upperlim = df["cyto_pt_um"] + (df["cyto_pt_um"] - df["lower_bnd_um"])
@@ -128,7 +119,6 @@ def correct_cytotoxic_hitcalls(config, df_all):
 
     # Print summary of flags
     flag_counts = df["cytotox_flag"].value_counts(dropna=False)
-    print("active", len(df_all_act))
     print("High conf. of cytotoxicity:", flag_counts.get(10, 0))
     print("Some conf. of cytotoxicity:", flag_counts.get(11, 0))
     print("Possible cytotoxicity:", flag_counts.get(12, 0))
@@ -144,7 +134,6 @@ def correct_cytotoxic_hitcalls(config, df_all):
 
     # Calculate hitc_acc
     df["hitc_acc"] = np.where(df["ctx_acc"] == "cytotoxic", 0, df["hitcall"])
-
     count_hitc = pd.DataFrame({'hitcall': ["inactive", "active"],
                                'count': [(df_all["hitcall"] == 0).sum(), (df_all["hitcall"] > 0).sum()]})
     count_hitacc = df["ctx_acc"].value_counts(dropna=False).reset_index()
@@ -158,14 +147,12 @@ def correct_cytotoxic_hitcalls(config, df_all):
     # Plot an overview of the flagging and hit calls
     fig, axes = plt.subplots(4, 1, figsize=(10, 10))
     axes = axes.flatten()
-
     titles = ["Hit calls in relevant target subset of assay endpoints", "Cytotox. flags for positive hit calls",
               "Positive hit calls, filtered for cytotox.", "Hit calls after cytotox filtering"]
     x_labels = ["Hitcall", "Cytotox. flag", "Hitcall, ct filtered", "Hitcall"]
     y_labels = ["Count"] * 4
 
     # Define custom qualitative colors
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
     color_group2 = "#FFCC66"  # Color for cytotox_flag 0-2
     color_group1 = "#78AB46"  # Color for cytotox_flag 10-12
     color_group3 = "grey"  # Color for cytotox_flag 50
@@ -173,21 +160,17 @@ def correct_cytotoxic_hitcalls(config, df_all):
     # Assign colors to different flag groups
     flag_colors = np.where(count_cytotox_flag["cytotox_flag"].isin([0, 1, 2]), color_group2,
                            np.where(count_cytotox_flag["cytotox_flag"].isin([10, 11, 12]), color_group1, color_group3))
-
     colors_list = [["blue", "red"], flag_colors, ["blue", "red", "grey"], ["blue", "red"]]
     categories_list = [count_hitc["hitcall"].unique(), count_cytotox_flag["cytotox_flag"].unique(),
                        count_hitacc["ctx_acc"].unique(), count_hitc["hitcall"].unique()]
     categories_list = [[str(value) for value in inner_list] for inner_list in categories_list]
-
-    values_list = [count_hitc["count"],
-                   count_cytotox_flag["count"],
-                   count_hitacc["count"],
+    labels_list = [None, ["inconclusive", "cytotoxic", "not cytotoxic"], None, None]
+    values_list = [count_hitc["count"],count_cytotox_flag["count"], count_hitacc["count"],
                    [  # inactive with cytotox filtering
                        count_hitc[(count_hitc['hitcall'] == "inactive")]['count'].iloc[0] -
                        count_hitacc[(count_hitacc['ctx_acc'] == "cytotoxic")]['count'].iloc[0],
                        # active with cytotox filtering
                        count_hitacc[(count_hitacc['ctx_acc'] == "not cytotoxic")]['count'].iloc[0]]]
-    labels_list = [None, ["inconclusive", "cytotoxic", "not cytotoxic"], None, None]
 
     for i, (ax, values, categories, colors, title, x_label, y_label, labels) in enumerate(
             zip(axes, values_list, categories_list, colors_list, titles, x_labels, y_labels, labels_list)):
@@ -204,7 +187,7 @@ def correct_cytotoxic_hitcalls(config, df_all):
     plt.savefig(os.path.join(METADATA_SUBSET_DIR_PATH, "counts_hitc_cytotox_flags.pdf"))
     plt.close()
 
-    # # Combine positive and negative hit call data frames
+    # Combine positive and negative hit call data frames
     df_all_inact.loc[:, "cytotox_flag"] = None
     df_all_inact.loc[:, "hitc_acc"] = 0
 
@@ -233,6 +216,9 @@ def main():
 
     # remove_files_not_matching_to_aeid_list(delete=False)
     df_all, cutoff_all = merge_all_outputs()
+    # Potential hitcall correction based on ICE curation..
+    # curate()
+
     # Potential hitcall correction based on cytotoxicity..
     burst_assays = compute_cytotoxicity_info(config, df_all)
     df_all = correct_cytotoxic_hitcalls(config, df_all)

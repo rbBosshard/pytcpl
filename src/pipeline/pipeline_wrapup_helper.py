@@ -14,8 +14,8 @@ from src.pipeline.pipeline_constants import METADATA_SUBSET_DIR_PATH, OUTPUT_DIR
 def remove_files_not_matching_to_aeid_list(delete=False):
     directories = [OUTPUT_DIR_PATH, CUTOFF_DIR_PATH]
 
-    with open(os.path.join(METADATA_SUBSET_DIR_PATH, 'aeids.out'), 'r') as f:
-        ids = set(line.strip() for line in f)
+    df = pd.read_csv(os.path.join(METADATA_SUBSET_DIR_PATH, 'aeids.csv'))
+    ids = set(df['aeid'])
 
     ids_files = []
     for directory in directories:
@@ -48,12 +48,14 @@ def merge_all_outputs_and_save(df_all, cutoff_all):
 def groupb_by_compounds(config, df_all):
     compounds = df_all['dsstox_substance_id'].dropna().unique()
     compounds_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"compounds_tested{config['file_format']}")
-    pd.DataFrame(compounds, columns=['dsstox_substance_id']).to_parquet(compounds_path, compression='gzip')
+    compounds_df = pd.DataFrame(compounds, columns=['dsstox_substance_id'])
+    compounds_df.to_parquet(compounds_path, compression='gzip')
+    compounds_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"compounds_tested.csv")
+    compounds_df.to_csv(compounds_path, index=False)
+
     num_compounds = len(compounds)
     print(f"Number of compounds tested: {num_compounds}")
-    with open(os.path.join(METADATA_SUBSET_DIR_PATH, 'compounds_tested.out'), 'w') as f:
-        for compound in compounds:
-            f.write(str(compound) + '\n')
+
     if config['enable_output_compounds']:
         get_compound_results(df_all, num_compounds, compounds)
 
@@ -94,11 +96,16 @@ def merge_all_outputs():
 
 
 def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
+    df["hitcall_c"] = df["hitcall"]
+    df.loc[:, 'cytotoxicity_class'] = None
 
     # For cell based assays, try finding matching viability/burst/background assays and correct hitc where
     # AC50 in the former > than AC50 in the latter (we can adjust boundaries around that).
     if aeid in viability_counterparts_aeid.values():
-        df['cytotoxicity_class'] = -1
+        df.loc[:, 'cytotoxicity_class'] = -1
+
+    if aeid in viability_counterparts_aeid.values():
+        df.loc[:, 'cytotoxicity_class'] = -1
 
     if aeid in viability_counterparts_aeid:
         viability_assay_endpoint_aeid = viability_counterparts_aeid[aeid]
@@ -118,11 +125,15 @@ def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
                 best_aic_model_viability = matching_row['best_aic_model'].iloc[0]
 
                 # Compare AC50 values and update 'hitcall' in target assay endpoint if needed
-                if ac50_viability < ac50 and hitcall_viability > 0.9 and best_aic_model_viability not in ['gnls', 'sigmoid']:
-                    df.at[index, 'hitcall'] = 0
-                    df.at[index, 'cytotoxicity_class'] = 1
+                contending_cytotoxicity = ac50_viability < ac50 \
+                                          and hitcall_viability > 0.9 \
+                                          and best_aic_model_viability not in ['gnls', 'sigmoid']
+
+                if contending_cytotoxicity:
+                    df.at[index, 'hitcall_c'] = 0
+                    df.at[index, 'cytotoxicity_class'] = 2
                 else:
-                    df.at[index, 'cytotoxicity_class'] = 0
+                    df.at[index, 'cytotoxicity_class'] = 1
 
     target_assay_endpoint_path = os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")
     df.to_parquet(target_assay_endpoint_path, compression='gzip')
@@ -162,9 +173,9 @@ def compute_cytotoxicity_info(config, df_all):
     burst_assays['cyto_pt_um'] = 10 ** burst_assays['cyto_pt']
     burst_assays['lower_bnd_um'] = 10 ** (burst_assays['cyto_pt'] - 3 * gb_mad)
     burst_assays = burst_assays.drop(columns=['burstpct'])
-    path = os.path.join(METADATA_SUBSET_DIR_PATH, f"cytotox_{FILE_FORMAT}")
+    path = os.path.join(METADATA_DIR_PATH, f"cytotox_{FILE_FORMAT}")
     burst_assays.to_parquet(path, compression='gzip')
-    path = os.path.join(METADATA_SUBSET_DIR_PATH, f"cytotox_.csv")
+    path = os.path.join(METADATA_DIR_PATH, f"cytotox_.csv")
     burst_assays.to_csv(path)
 
     return burst_assays

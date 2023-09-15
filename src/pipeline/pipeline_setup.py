@@ -87,8 +87,8 @@ def main():
     config, _ = load_config()
     init_config(config)
     init_aeid(0)
-    export_metadata_tables_to_parquet()
-    ice_df = get_mechanistic_target_and_mode_of_action_annotations_from_ice()
+    # export_metadata_tables_to_parquet()
+    # ice_df = get_mechanistic_target_and_mode_of_action_annotations_from_ice()
     df = subset_for_candidate_assay_endpoints()
     df = handle_viability_assays(config, df)
     generate_balanced_aeid_list(config, df)
@@ -101,13 +101,35 @@ def main():
 def handle_viability_assays(config, df):
     is_burst_assay = df['burst_assay'] == 1
     burst_assays = df[is_burst_assay]
+    aeids_burst_assays = df[is_burst_assay]['aeid']
     df_without_burst_assays = df[~is_burst_assay]
     target_assay_endpoints = df_without_burst_assays[~df_without_burst_assays['assay_component_endpoint_name'].str.endswith('viability')]
     target_assay_endpoints = filter_on_count_and_lower_hitcall_ratio(config, target_assay_endpoints)
+    aeids_target_assays = target_assay_endpoints['aeid']
     viability_assay_endpoints = df[df['assay_component_endpoint_name'].str.endswith('viability')]
     viability_assay_endpoints = adapt_viability_counterparts(target_assay_endpoints, viability_assay_endpoints)
+    aeids_target_viability_assays = viability_assay_endpoints['aeid']
     df = pd.concat([burst_assays, target_assay_endpoints, viability_assay_endpoints], ignore_index=True)
-    df = df.drop_duplicates()
+    df = df.drop_duplicates().reset_index()
+
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assays{FILE_FORMAT}")
+    export_df = pd.DataFrame({'aeid': aeids_burst_assays})
+    export_df.to_parquet(destination_path, compression='gzip')
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assays.csv")
+    export_df.to_csv(destination_path, index=False)
+
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}")
+    export_df = pd.DataFrame({'aeid': aeids_target_assays})
+    export_df.to_parquet(destination_path, compression='gzip')
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays.csv")
+    export_df.to_csv(destination_path, index=False)
+
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_viability_assays{FILE_FORMAT}")
+    export_df = pd.DataFrame({'aeid': aeids_target_viability_assays})
+    export_df.to_parquet(destination_path, compression='gzip')
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_viability_assays.csv")
+    export_df.to_csv(destination_path, index=False)
+
     return df
 
 

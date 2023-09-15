@@ -12,17 +12,18 @@ pd.set_option('mode.chained_assignment', None)
 def save_aeids(config, df):
     aeids = df['aeid'].unique()
     aeids_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids{config['file_format']}")
-    pd.DataFrame(aeids, columns=['aeid']).to_parquet(aeids_path, compression='gzip')
+    aeids_df = pd.DataFrame(aeids, columns=['aeid'])
+    aeids_df.to_parquet(aeids_path, compression='gzip')
+    aeids_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids.csv")
+    aeids_df.to_csv(aeids_path, index=False)
 
     aeids_sorted = np.sort(aeids)
     aeids_sorted_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{config['file_format']}")
-    pd.DataFrame(aeids_sorted, columns=['aeid']).to_parquet(aeids_sorted_path, compression='gzip')
-    with open(os.path.join(METADATA_SUBSET_DIR_PATH, 'aeids.out'), 'w') as f:
-        for aeid in aeids:
-            f.write(str(aeid) + '\n')
-    with open(os.path.join(METADATA_SUBSET_DIR_PATH, 'aeids_sorted.out'), 'w') as f:
-        for aeid in aeids_sorted:
-            f.write(str(aeid) + '\n')
+    aeids_sorted_df = pd.DataFrame(aeids_sorted, columns=['aeid'])
+    aeids_sorted_df.to_parquet(aeids_sorted_path, compression='gzip')
+    aeids_sorted_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted.csv")
+    aeids_sorted_df.to_csv(aeids_sorted_path, index=False)
+
     return aeids
 
 
@@ -67,6 +68,21 @@ def keep_viability_assay_endpoints_together(config, df):
     return df
 
 
+def sort_out_assay_endpoints_from_ice_curation(df):
+    """
+    The cHTS data set in ICE omits the following assay endpoints:
+    All Tanguay zebrafish assay endpoints
+    All Tox21 assay endpoints comprising channel readouts. The Tox21 assays processed by the tcpl algorithm are analyzed as channel 1 and 2 ["ch1" and "ch2" at the end of the assay endpoint names], and their ratio. ICE cHTS provides only the ratio endpoint and not the raw channel outputs, despite their each being an assay endpoint in invitrodb.
+    All Attagene assay endpoints analyzed in the down direction. These assays are transcriptional activation assays, which are only intended to be interpreted as increasing signal (up direction).
+    All background readout assays as identified by assay endpoints having the term "background measurement" the "intended_target_family" field in invitrobd and/or the term "background control" in the "assay_function_type" field in invitrodb.
+    """
+    df = df[~(df['organism'] == "zebrafish")]
+    df = df[~df['assay_component_endpoint_name'].str.endswith(('ch1', 'ch2'))]
+    df = df[~((df['assay_component_endpoint_name'].str.endswith('ATG_')) & (df['analysis_direction'] == 'negative'))]
+    df = df[~((df['intended_target_family'] == 'background measurement') | (df['assay_function_type'] == 'background control'))]
+    return df
+
+
 def subset_for_candidate_assay_endpoints():
     os.makedirs(METADATA_SUBSET_DIR_PATH, exist_ok=True)
     dest_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"candidate_assay_endpoints.parquet.gzip")
@@ -74,9 +90,7 @@ def subset_for_candidate_assay_endpoints():
     df_1 = get_count_and_hit_ratio()
     df_2 = filter_on_assay_format_and_function_type()
     df = df_1.merge(df_2, on="aeid", how="inner")
-
-    df = df[~df['assay_component_endpoint_name'].str.endswith(('ch1', 'ch2'))]
-
+    df = sort_out_assay_endpoints_from_ice_curation(df)
     df.to_parquet(dest_path, compression='gzip')
     # else:
     #     df = pd.read_parquet(dest_path)
@@ -87,7 +101,11 @@ def filter_on_assay_format_and_function_type():
     query = f"SELECT ace.aeid, " \
             f"ace.assay_component_endpoint_name, " \
             f"ace.burst_assay, " \
-            f"a.assay_format_type " \
+            f"ace.intended_target_family, " \
+            f"ace.assay_function_type, " \
+            f"ace.analysis_direction, " \
+            f"a.assay_format_type, " \
+            f"a.organism " \
             f"FROM invitrodb_v3o5.assay_component_endpoint AS ace " \
             f"INNER JOIN assay_component AS ac ON ace.acid = ac.acid " \
             f"INNER JOIN assay AS a ON ac.aid = a.AID " \
