@@ -74,20 +74,66 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
 
 
 def merge_all_outputs():
-    aeid_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))[:20]
-    output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeid_sorted['aeid']]
-    cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}") for aeid in aeid_sorted['aeid']]
-    cols = ['dsstox_substance_id', 'aeid', 'hitcall']
-    # df_all = pd.concat([pd.read_parquet(file) for file in output_paths])
+    aeids_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))[:20]
+    aeids_target_assays = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}"))
+    output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
+    cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}") for aeid in aeids_sorted['aeid']]
     json_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "viability_counterparts_aeid.json")
-    # Load the JSON data from the file
     with open(json_file_path, 'r') as json_file:
         viability_counterparts_aeid = json.load(json_file)
+
+    assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{FILE_FORMAT}"))
 
     dfs = []
     for aeid, file_path in output_paths:
         df = pd.read_parquet(file_path)
-        df = correct_for_cytotoxicity(str(aeid), df, viability_counterparts_aeid)
+        df["hitcall_c"] = df["hitcall"]
+        df.loc[:, 'cytotoxicity_class'] = None
+        df.loc[:, 'cytotox_flag'] = None
+        df.loc[:, 'omit_flag'] = 0
+
+        # Data curation:
+        # cHTS data in ICE have been curated to integrate concentration-response curve fit information and chemical QC data to bolster confidence in hit calls.
+        # https://ice.ntp.niehs.nih.gov/DATASETDESCRIPTION?section=cHTS
+
+        # Curve/assay-based curation:
+        # For NovaScreen (NVS) cell-free biochemical assays, any active calls with less than 50% efficacy.
+        condition_assay = assay_info_df['assay_component_endpoint_name'].str.startswith('NVS_') & (df['cell_format'] == 'cell_free')
+        if aeid in assay_info_df[condition_assay]['aeid']:
+            condition_omit_flag = df['top'] < 0.5  # NovaScreen (NVS) cell-free biochemical assays normalized as percent_activity
+            df.loc[df[condition_omit_flag], 'omit_flag'] = 1
+
+        # For NCATS Tox21 assays, any active calls where only the lowest concentration tested exceeded the assay activity cutoff threshold and the best-fit curve was a gain-loss model.
+        # Note: NCATS Tox21 assays not found
+
+        # Any down-direction (i.e., inhibition, antagonism, loss-of-signal, etc.) active call where the best-fit curve was a gain-loss model.
+        if aeid in assay_info_df[assay_info_df['signal_direction'] == 'loss']['aeid']:
+            condition_omit_flag = df['best_aic_model'] in ['gnls', 'sigmoid']  # gnls and sigmoid both model loss of activity for increasing concentrations
+            df.loc[df[condition_omit_flag], 'omit_flag'] = 2
+
+        # Any active call where the best-fit curve was a gain-loss model and AC50 that was extrapolated below the testing concentration range.
+        condition_omit_flag = (df['best_aic_model'] in ['gnls', 'sigmoid']) & (df['ac50'] < np.min(df['conc']))
+        df.loc[df[condition_omit_flag], 'omit_flag'] = 3
+
+        # Any active concentration-response curve where the AC50 was extrapolated to a concentration above the tested concentration range.
+        condition_omit_flag = df['ac50'] > np.max(df['conc'])
+        df.loc[df[condition_omit_flag], 'omit_flag'] = 4
+
+        # Any active call with flags 11 and 16 from the tcpl pipeline, which suggest marginal efficacy and likely overfitting.
+        # Note: fitc flags 11 and 16 not availbale in new (py)tcpl version. Map new quality warning flags
+
+        # ICE omits for the cHTS data set entire assay endpoints (already done in pipeline setup by subset aeids):
+
+        # Chemical QC-based curation:
+        destination_path = os.path.join(METADATA_DIR_PATH, f"compounds_qc_omit.parquet.gzip")
+        compounds_qc_omit_df = pd.read_parquet(destination_path)
+        condition_omit_flag = df['aeid'].isin(compounds_qc_omit_df['aeid'])
+        df.loc[df[condition_omit_flag], 'omit_flag'] = 5
+
+        # Correct for cytotoxicity in target assasy with corresponding viability assay
+        if aeid in aeids_target_assays:
+            df = correct_for_cytotoxicity(str(aeid), df, viability_counterparts_aeid)
+
         dfs.append(df)
 
     df_all = pd.concat(dfs, ignore_index=True)
@@ -96,14 +142,8 @@ def merge_all_outputs():
 
 
 def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
-    df["hitcall_c"] = df["hitcall"]
-    df.loc[:, 'cytotoxicity_class'] = None
-
     # For cell based assays, try finding matching viability/burst/background assays and correct hitc where
     # AC50 in the former > than AC50 in the latter (we can adjust boundaries around that).
-    if aeid in viability_counterparts_aeid.values():
-        df.loc[:, 'cytotoxicity_class'] = -1
-
     if aeid in viability_counterparts_aeid.values():
         df.loc[:, 'cytotoxicity_class'] = -1
 

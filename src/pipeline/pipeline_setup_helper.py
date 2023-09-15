@@ -170,7 +170,19 @@ def get_mechanistic_target_and_mode_of_action_annotations_from_ice():
     df = pd.read_excel(src_path, sheet_name=tab_name)
     destination_path = os.path.join(METADATA_DIR_PATH, f"mechanistic_target_and_mode_of_action.parquet.gzip")
     df.to_parquet(destination_path, compression='gzip')
-    return df
+
+
+def get_chemical_qc():
+    # Download link: "https://ice.ntp.niehs.nih.gov/downloads/MOA/ChemicalQC.xlsx"
+    src_path = os.path.join(METADATA_DIR_PATH, f"ChemicalQC.xlsx")
+    tab_name = 'cHTS Chemical QC DATA'
+    df = pd.read_excel(src_path, sheet_name=tab_name)
+    destination_path = os.path.join(METADATA_DIR_PATH, f"chemical_qc.parquet.gzip")
+    df.to_parquet(destination_path, compression='gzip')
+    compounds_qc_omit = df[df['NICEATM_qc_summary_call'] == 'QC_OMIT']
+    compounds_qc_omit_df = pd.DataFrame({'dsstox_substance_id': compounds_qc_omit['dtxsid']})
+    destination_path = os.path.join(METADATA_DIR_PATH, f"compounds_qc_omit.parquet.gzip")
+    compounds_qc_omit_df.to_parquet(destination_path, compression='gzip')
 
 
 def get_all_related_assay_infos(config):
@@ -195,10 +207,14 @@ def get_all_related_assay_infos(config):
     assay_component_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"assay_component{config['file_format']}"))
     assay_component_endpoint_df = pd.read_parquet(
         os.path.join(METADATA_DIR_PATH, f"assay_component_endpoint{config['file_format']}"))
+    assay_df = pd.read_parquet(
+        os.path.join(METADATA_DIR_PATH, f"assay{config['file_format']}"))
 
     assay_info_df = (
-        assay_component_df.merge(assay_component_endpoint_df, on='acid')
+        assay_component_df
+        .merge(assay_component_endpoint_df, on='acid')
         .merge(df_aeids[['aeid']], left_on='aeid', right_on='aeid')
+        .merge(assay_df, left_on='aid', right_on='AID')
         .merge(mechanistic_target_and_mode_of_action_df,
                left_on='assay_component_name', right_on='new_AssayEndpointName', how='left')
     )

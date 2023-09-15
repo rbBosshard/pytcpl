@@ -14,7 +14,7 @@ from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
 from src.pipeline.pipeline_setup_helper import generate_balanced_aeid_list, \
     keep_viability_assay_endpoints_together, subset_for_candidate_assay_endpoints, \
     export_metadata_tables_to_parquet, get_mechanistic_target_and_mode_of_action_annotations_from_ice, \
-    get_all_related_assay_infos
+    get_all_related_assay_infos, get_chemical_qc
 
 
 def adapt_viability_counterparts(target_df, viability_df):
@@ -79,7 +79,6 @@ def include_burst_assays(df):
     df = pd.concat([df, burst_assays], ignore_index=True)
 
 
-
 def main():
     print("Started")
     start_time = time.time()
@@ -87,8 +86,9 @@ def main():
     config, _ = load_config()
     init_config(config)
     init_aeid(0)
-    # export_metadata_tables_to_parquet()
-    # ice_df = get_mechanistic_target_and_mode_of_action_annotations_from_ice()
+    export_metadata_tables_to_parquet()
+    get_mechanistic_target_and_mode_of_action_annotations_from_ice()
+    get_chemical_qc()
     df = subset_for_candidate_assay_endpoints()
     df = handle_viability_assays(config, df)
     generate_balanced_aeid_list(config, df)
