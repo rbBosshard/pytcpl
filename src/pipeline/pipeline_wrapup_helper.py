@@ -381,8 +381,8 @@ def flag_cytotoxicity_cases_based_on_burst_assays(df):
     df.loc[(df["acc_um"] >= df["cyto_pt_um"]) & df["cytotox_flag"].isna(), "cytotox_flag"] = 12
     # Flag = 2: Tendentially not cytotoxic but unsure
     df.loc[(df["acc_um"] <= df["cyto_pt_um"]) & df["cytotox_flag"].isna(), "cytotox_flag"] = 2
-    # Flag = 50: all remaining cases. Todo: Assert if this is desired
-    df.loc[df["cytotox_flag"].isna(), "cytotox_flag"] = 50
+    # Flag = 50: all remaining cases. Todo: Uncomment if this is desired
+    # df.loc[df["cytotox_flag"].isna(), "cytotox_flag"] = 50
 
 
 def plot_overview_of_cytotoxicity_data(cytotox):
