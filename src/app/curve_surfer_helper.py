@@ -93,7 +93,7 @@ def add_curves(fig):
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
-    potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd"] if potency in series]
+    potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd", "cytotox_potency"] if potency in series]
     efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
 
     potency_values = [series[potency] for potency in potencies]
@@ -169,6 +169,21 @@ def add_curves(fig):
                 legendgroup="Potency estimates",
                 legendgrouptitle_text="Potency estimates",
             ))
+    
+    # cytotox = series['cytotoxicity_potency']
+    # cytotox_log = np.log10(cytotox)
+    # pot_y = get_model(best_model)('fun')(np.array([cytotox]), **params)[0]
+    # fig.add_trace(go.Scatter(
+    #             name=f"cytotoxicity (ac50)",
+    #             x=[cytotox_log, cytotox_log],
+    #             y=[0, pot_y],
+    #             mode='lines',
+    #             opacity=0.8,
+    #             line=dict(color=color_best, width=3, dash='dot'),
+    #             legendgroup="Potency estimates",
+    #             legendgrouptitle_text="Potency estimates",
+    #         ))
+    
 
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",
                              marker=dict(color="royalblue", symbol="circle-open-dot", size=20), name="Repsonses", showlegend=True))
@@ -268,8 +283,8 @@ def update_df_length():
 def on_hitcall_slider(trigger):
     if trigger == "hitcall_slider":
         interval = st.session_state.hitcall_slider
-        df = st.session_state.df.query(f'{interval[0]} <= hitcall <= {interval[1]}').reset_index(drop=True)
-        st.session_state.df = pd.concat([df, st.session_state.df.query("hitcall.isna()")]) if interval[0] == 0.0 else df
+        df = st.session_state.df.query(f'{interval[0]} <= hitcall_c <= {interval[1]}').reset_index(drop=True)
+        st.session_state.df = pd.concat([df, st.session_state.df.query("hitcall_c.isna()")]) if interval[0] == 0.0 else df
         reset_df_index()
 
 
@@ -334,7 +349,9 @@ def get_compound_info():
     casn_link = casn_link if casn is not None else 'N/A'
     compound_info_df = pd.DataFrame(
         {   
-            "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
+            "Hitcall": [f"{st.session_state.series['hitcall_c']:.2f}"],
+            "Cytotoxicity": [f"{st.session_state.series['cytotox_flag']}"],
+            "Omit-Flag": [f"{st.session_state.series['omit_flag']}"],
             "SPID": [st.session_state.compound_id],
             "DSSTOXSID": [dsstox_substance_id],
             "CASRN": [casn],
@@ -348,7 +365,7 @@ def get_compound_info():
     column_config = {
         "Hitcall": st.column_config.ProgressColumn(
             "Hitcall",
-            help="Bioactivity score :biohazard_sign: ",
+            help=f"Bioactivity score :biohazard_sign:",
             format="%.2f",
             min_value=0,
             max_value=1,
