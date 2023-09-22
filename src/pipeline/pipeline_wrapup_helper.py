@@ -8,6 +8,9 @@ from matplotlib import pyplot as plt
 from joblib import Parallel, delayed
 import matplotlib.cm as cm
 import seaborn as sns
+import matplotlib
+matplotlib.use('Agg')
+
 
 from src.pipeline.models.helper import get_mad
 from src.pipeline.pipeline_helper import check_db, db_append, CONFIG
@@ -89,9 +92,11 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
 
     assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{FILE_FORMAT}"))
 
-    def process_file(aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid):
+    def post_process(i, aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid):
         df = pd.read_parquet(file_path)
+        cutoff = pd.read_parquet(file_path)['cutoff']
         df["hitcall_c"] = df["hitcall"]
+        df.loc[:, 'fitc'] = 1
         df.loc[:, 'cytotox_flag'] = None
         df.loc[:, 'omit_flag'] = "PASS"
         df.loc[:, 'cytotox_potency'] = 1000
@@ -107,10 +112,11 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
 
         return aeid, df
 
+
     dfs = {}
     results = Parallel(n_jobs=config['n_jobs'])(
-        delayed(process_file)(aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid) for
-        aeid, file_path in output_paths)
+        delayed(post_process)(aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid) for
+        i, aeid, file_path in enumerate(output_paths))
 
     for aeid, df in results:
         dfs[aeid] = df

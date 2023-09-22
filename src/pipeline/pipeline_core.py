@@ -41,6 +41,7 @@ def process(df, config, logger):
         Returns:
             pandas.DataFrame: DataFrame with grouped concentration-response series.
         """
+
         def shrink_series(series):
             """
             Shrink a concentration-response series if it contains too many datapoints.
@@ -117,57 +118,101 @@ def process(df, config, logger):
         Returns:
             dict: Dictionary containing hit call results for the series.
         """
-        conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
-        aics = {fit_model: params[fit_model]['aic'] for fit_model in params.keys()}
 
-        if len(aics) == 0:
-            return {"best_aic_model": "none"}
+        best_aic_model, hitcall, top, ac50, ac95, acc, actop, bmd, ac1sd, fitc = None
 
-        if 'cnst' in aics and len(aics) == 1:
-            return {"best_aic_model": "cnst"}
+        if series['fit_params'] is None:
+            hitcall = 0
+        else:
 
-        best_aic_model = min({m: aics[m] for m in aics if m != "cnst"}, key=lambda k: aics[k])
-        rel_likelihood = np.exp((aics[best_aic_model] - aics["cnst"]) / 2) if aics[best_aic_model] <= aics[
-            "cnst"] else 1
-        ps = params[best_aic_model]['pars']
-        ps_list = list(ps.values())
-        ll = params[best_aic_model]['ll']
-        pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
-        # rmse = np.sqrt(np.mean((resp - pred) ** 2))
-        top = np.max(np.abs(pred))  # top is taken to be highest model value
-        inverse_function = get_model(best_aic_model)('inv')
-        ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
-        acc = inverse_function(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
-        actop = inverse_function(top, *ps_list[:-1], conc)
-        ac1sd = inverse_function(onesd, *ps_list[:-1], conc)
-        bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
-        bmd = inverse_function(bmr, *ps_list[:-1], conc)
+            conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
+            aics = {fit_model: params[fit_model]['aic'] for fit_model in params.keys()}
 
-        # Each p_i represents the odds of the curve being a hit according to different criteria;
-        p1 = 1 - rel_likelihood  # p1 represents probability that constant model is correct
+            if len(aics) == 0:
+                return {"best_aic_model": "none"}
 
-        p2 = 1
-        unique_conc = np.unique(conc)
-        for c in unique_conc:
-            # multiply odds of each point falling below cutoff to get odds of all falling below,
-            # use lower tail for positive top and upper tail for neg top
-            median_resp = np.median(resp[conc == c])
-            p = t.cdf(x=median_resp, loc=np.sign(top) * cutoff, scale=np.exp(ps['er']), df=4)
-            p2 *= p if top < 0 else 1 - p
-        p2 = 1 - p2  # odds of at least one point above cutoff
+            if 'cnst' in aics and len(aics) == 1:
+                return {"best_aic_model": "cnst"}
 
-        ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
-        ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,
-                                                 fit_model=get_model(best_aic_model)(
-                                                     'fun'))  # get log-likelihood at cutoff
-        p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
+            best_aic_model = min({m: aics[m] for m in aics if m != "cnst"}, key=lambda k: aics[k])
+            rel_likelihood = np.exp((aics[best_aic_model] - aics["cnst"]) / 2) if aics[best_aic_model] <= aics[
+                "cnst"] else 1
+            ps = params[best_aic_model]['pars']
+            ps_list = list(ps.values())
+            ll = params[best_aic_model]['ll']
+            pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
+            # rmse = np.sqrt(np.mean((resp - pred) ** 2))
+            top = np.max(np.abs(pred))  # top is taken to be highest model value
+            inverse_function = get_model(best_aic_model)('inv')
+            ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
+            ac95 = inverse_function(.5 * top, *ps_list[:-1], conc)
+            acc = inverse_function(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
+            actop = inverse_function(top, *ps_list[:-1], conc)
+            ac1sd = inverse_function(onesd, *ps_list[:-1], conc)
+            bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
+            bmd = inverse_function(bmr, *ps_list[:-1], conc)
 
-        continuous_hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
+            # Hitcall
+            # Each p_i represents the odds of the curve being a hit according to different criteria;
+            p1 = 1 - rel_likelihood  # p1 represents probability that constant model is correct
 
-        out = {'best_aic_model': best_aic_model, 'hitcall': continuous_hitcall, 'top': top, 'ac50': ac50, 'acc': acc,
-               'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd}
+            p2 = 1
+            unique_conc = np.unique(conc)
+            for c in unique_conc:
+                # multiply odds of each point falling below cutoff to get odds of all falling below,
+                # use lower tail for positive top and upper tail for neg top
+                median_resp = np.median(resp[conc == c])
+                p = t.cdf(x=median_resp, loc=np.sign(top) * cutoff, scale=np.exp(ps['er']), df=4)
+                p2 *= p if top < 0 else 1 - p
+            p2 = 1 - p2  # odds of at least one point above cutoff
+
+            ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
+            ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,
+                                                     fit_model=get_model(best_aic_model)(
+                                                         'fun'))  # get log-likelihood at cutoff
+            p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
+
+            hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
+
+        # Compute fit category (fitc), used for cautionary flags, see https://www.frontiersin.org/articles/10.3389/ftox.2023.1275980
+        fitc = compute_fitc(ac50, ac95, conc, hitcall, top)
+
+        # Todo: Compute cautionary flags
+        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'ac95': ac95,
+               'acc': acc, 'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd, 'fitc': fitc}
 
         return out
+
+    def compute_fitc(ac50, ac95, conc, hitcall, top):
+        cutoff_upper = 1.2 * cutoff
+        cutoff_lower = 0.8 * cutoff
+        min_conc, max_conc = np.min(conc), np.max(conc)
+
+        fitc = 2
+        if hitcall >= 0.9:
+            if abs(top) <= cutoff_upper:
+                if ac50 <= min_conc:
+                    fitc = 36
+                elif ac50 > min_conc and ac95 < max_conc:
+                    fitc = 37
+                elif ac50 > min_conc and ac95 >= max_conc:
+                    fitc = 38
+                elif abs(top) > cutoff_upper:
+                    if ac50 <= min_conc:
+                        fitc = 40
+                    elif ac50 > min_conc and ac95 < max_conc:
+                        fitc = 41
+                    elif ac50 > min_conc and ac95 >= max_conc:
+                        fitc = 42
+        elif hitcall < 0.9:
+            if abs(top) < cutoff_lower:
+                fitc = 13
+            elif abs(top) >= cutoff_lower:
+                fitc = 15
+        else:
+            fitc = 2
+
+        return fitc
 
     # Preprocessing
     nj = config['n_jobs']
@@ -193,15 +238,16 @@ def process(df, config, logger):
         track_fitted_params(df_fitted['fit_params'])
 
     # Hit-Calling
-    df_fitted['hitcall'] = 0
-    df_no_fit['hitcall'] = 0
+
+    df = pd.concat([df_fitted, df_no_fit])
+
     desc = get_msg_with_elapsed_time(f"🚥  -> Hit-Calling:   ")
     it = tqdm(df_fitted.iterrows(), desc=desc, total=df_fitted.shape[0], bar_format=custom_format)
     res = pd.DataFrame(Parallel(n_jobs=nj)(delayed(hit)(i) for _, i in it)) if p \
-        else df_fitted.apply(lambda i: hit(i), axis=1, result_type='expand')
-    df_fitted[res.columns] = res
+        else df.apply(lambda i: hit(i), axis=1, result_type='expand')
+    df[res.columns] = res
 
-    df = pd.concat([df_fitted, df_no_fit])
+    # df = pd.concat([df_fitted, df_no_fit])
     for col in config['output_cols_filter']:
         if col not in df.columns:
             df[col] = None
