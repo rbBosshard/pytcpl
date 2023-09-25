@@ -20,7 +20,7 @@ def get_inverse(fit_model, y, x_max, x_min, param, num_points=1000):
 
 
 def get_er_bounds():
-    return -5, 10
+    return -100, 100
 
 
 def get_er_est(resp):
@@ -28,22 +28,25 @@ def get_er_est(resp):
     return np.log(rmad) if rmad > 0 else np.log(1e-4)
 
 
-def get_mmed_conc(conc, resp):
-    max_idx, unique_conc, _ = get_max_index(conc, resp)
+def get_mmed_conc(bidirectional, conc, resp):
+    max_idx, unique_conc, _ = get_max_index(bidirectional, conc, resp)
     mmed_conc = unique_conc[max_idx]
     return mmed_conc  # mmed = rmds[max_idx]
 
 
-def get_mmed(conc, resp):
-    max_idx, _, rmds = get_max_index(conc, resp)
+def get_mmed(bidirectional, conc, resp):
+    max_idx, _, rmds = get_max_index(bidirectional, conc, resp)
     mmed = rmds[max_idx]
     return mmed
 
 
-def get_max_index(conc, resp):
+def get_max_index(bidirectional, conc, resp):
     unique_conc = np.unique(conc)
     # get max response (i.e. max median response for multi-valued responses) and corresponding conc
-    rmds = np.array([np.median(resp[conc == c]) for c in unique_conc])
+    if bidirectional:
+        rmds = np.array([np.median(abs(resp[conc == c])) for c in unique_conc])
+    else:
+        rmds = np.array([np.median(resp[conc == c]) for c in unique_conc])
     max_idx = np.argmax(rmds)
     return max_idx, unique_conc, rmds
 

@@ -78,7 +78,7 @@ def omit_assays_from_ice_curation(df):
     """
     df = df[~(df['organism'] == "zebrafish")]
     df = df[~df['assay_component_endpoint_name'].str.endswith(('ch1', 'ch2'))]
-    df = df[~((df['assay_component_endpoint_name'].str.startswith('ATG_')) & (df['analysis_direction'] == 'negative'))]
+    df = df[~((df['assay_component_endpoint_name'].str.startswith('ATG_')) & (df['signal_direction'] == 'loss'))]
     df = df[~((df['intended_target_family'] == 'background measurement') | (df['assay_function_type'] == 'background control'))]
     return df
 
@@ -96,14 +96,16 @@ def subset_for_candidate_assay_endpoints():
 
 def filter_on_assay_format_type():
     query = f"SELECT ace.aeid, " \
+            f"ace.acid, " \
+            f"a.aid, " \
             f"ace.assay_component_endpoint_name, " \
             f"ace.burst_assay, " \
             f"ace.intended_target_family, " \
             f"ace.assay_function_type, " \
-            f"ace.analysis_direction, " \
+            f"ace.signal_direction, " \
             f"a.assay_format_type, " \
             f"a.organism " \
-            f"FROM invitrodb_v3o5.assay_component_endpoint AS ace " \
+            f"FROM assay_component_endpoint AS ace " \
             f"INNER JOIN assay_component AS ac ON ace.acid = ac.acid " \
             f"INNER JOIN assay AS a ON ac.aid = a.AID " \
             f"WHERE assay_format_type IN ('cell-based') " \
@@ -114,13 +116,14 @@ def filter_on_assay_format_type():
     return df
 
 
+# Estimate on hit ratio
 def get_count_and_hit_ratio():
     query = f"SELECT aeid, " \
             f"COUNT(*) as count, " \
-            f"SUM(hitc = 1) AS hitc_1_count, " \
-            f"SUM(hitc = 0) AS hitc_0_count, " \
-            f"SUM(hitc = 1) / COUNT(*) AS ratio " \
-            f"FROM invitrodb_v3o5.mc5 " \
+            f"SUM(hitc >= 0.1) AS hitc_1_count, " \
+            f"SUM(hitc < 0.1) AS hitc_0_count, " \
+            f"SUM(hitc >= 0.1) / COUNT(*) AS ratio " \
+            f"FROM mc5 " \
             f"GROUP BY aeid;"
     df = query_db(query)
     return df
@@ -151,8 +154,8 @@ def export_metadata_tables_to_parquet():
     tables = ["assay", "assay_component", "assay_component_endpoint",
               "assay_component_endpoint_descriptions",
               "sample", "chemical", "cytotox",
-              "mc4_aeid", "mc5_aeid",
-              "mc4_methods", "mc5_methods"]
+              "mc4_aeid", "mc5_aeid", "mc6_aeid",
+              "mc4_methods", "mc5_methods", "mc6_methods"]
 
     for table in tables:
         df = query_db(f'SELECT * FROM {table}')
@@ -211,7 +214,7 @@ def get_all_related_assay_infos(config):
         assay_component_df
         .merge(assay_component_endpoint_df, on='acid')
         .merge(df_aeids[['aeid']], left_on='aeid', right_on='aeid')
-        .merge(assay_df, left_on='aid', right_on='AID')
+        .merge(assay_df, left_on='aid', right_on='aid')
         .merge(mechanistic_target_and_mode_of_action_df,
                left_on='assay_component_name', right_on='new_AssayEndpointName', how='left')
     )
@@ -229,7 +232,7 @@ def get_all_related_assay_infos(config):
 
             assay_info_distinct_values[column] = distinct_values
             save_distinct_values(column, distinct_values)
-            length_file.write(f"{column}: {len(distinct_values)}:\n")
+            length_file.write(f"{column}: {len(distinct_values)}\n")
 
     json_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "assay_info_distinct_values.json")
     with open(json_file_path, 'w') as json_file:
@@ -246,21 +249,13 @@ def adapt_viability_counterparts(target_df, viability_df):
     viability_counterparts_name = {}
     viability_counterparts_aeid = {}
     for _, row in target_df.iterrows():
-        # Account for lower/uppercase mismatch, e.g. ('TOX21_VDR_BLA_agonist_ratio' & 'TOX21_VDR_BLA_Agonist_viability')
-        assay_name = row['assay_component_endpoint_name'].lower()
-        aeid = str(row['aeid'])
-        # Check if the assay name ends with _ratio or another name and append '_viability' as counterpart
-        if assay_name.endswith('_ratio'):
-            counterpart_name = assay_name[:-6] + '_viability'
-        else:
-            counterpart_name = assay_name + '_viability'
-
-        counterpart_name = counterpart_name.lower()
-
-        if counterpart_name in viability_df['assay_component_endpoint_name'].str.lower().values:
-            viability_counterparts_name[row['assay_component_endpoint_name']] = \
-                viability_df.loc[viability_df['assay_component_endpoint_name'].str.lower() == counterpart_name, 'assay_component_endpoint_name'].values[0]
-            viability_counterparts_aeid[aeid] = str(viability_df.loc[viability_df['assay_component_endpoint_name'].str.lower() == counterpart_name, 'aeid'].values[0])
+        name = row['assay_component_endpoint_name']
+        aeid = row['aeid']
+        aid = row['aid']
+        counterpart_viability_assay_endpoint = viability_df[viability_df['aid'] == aid]
+        if not counterpart_viability_assay_endpoint.empty:
+            viability_counterparts_name[name] = str(counterpart_viability_assay_endpoint['assay_component_endpoint_name'].iloc[0])
+            viability_counterparts_aeid[aeid] = str(counterpart_viability_assay_endpoint['aeid'].iloc[0])
 
     json_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "viability_counterparts_name.json")
     with open(json_file_path, 'w') as json_file:
@@ -282,7 +277,7 @@ def split_assays(df):
     return target_assay_endpoints, viability_assay_endpoints
 
 
-def filter_on_count_and_lower_hitcall_ratio(config, target_assay_endpoints):
+def filter_on_count_and_hitcall_ratio(config, target_assay_endpoints):
     assays_to_drop = set()
 
     for _, row in target_assay_endpoints.iterrows():
@@ -297,23 +292,25 @@ def filter_on_count_and_lower_hitcall_ratio(config, target_assay_endpoints):
 
 
 def handle_viability_assays(config, df):
-    is_burst_assay = df['burst_assay'] == 1
-    burst_assays = df[is_burst_assay]
-    aeids_burst_assays = df[is_burst_assay]['aeid']
-    df_without_burst_assays = df[~is_burst_assay]
-    target_assay_endpoints = df_without_burst_assays[~df_without_burst_assays['assay_component_endpoint_name'].str.endswith('viability')]
-    target_assay_endpoints = filter_on_count_and_lower_hitcall_ratio(config, target_assay_endpoints)
+    is_burst_assay_endpoint = df['burst_assay'] == 1
+    burst_assay_endpoints = df[is_burst_assay_endpoint]
+    aeids_burst_assay_endpoints = df[is_burst_assay_endpoint]['aeid']
+    is_viability_assay_endpoint = df['assay_function_type'].str.endswith('viability')
+    viability_assay_endpoints = df[is_viability_assay_endpoint]
+    # Working on..
+    target_assay_endpoints = df[~(is_burst_assay_endpoint | is_viability_assay_endpoint)]
+    target_assay_endpoints = filter_on_count_and_hitcall_ratio(config, target_assay_endpoints)
     aeids_target_assays = target_assay_endpoints['aeid']
-    viability_assay_endpoints = df[df['assay_component_endpoint_name'].str.endswith('viability')]
+
     viability_assay_endpoints = adapt_viability_counterparts(target_assay_endpoints, viability_assay_endpoints)
     aeids_target_viability_assays = viability_assay_endpoints['aeid']
-    df = pd.concat([burst_assays, target_assay_endpoints, viability_assay_endpoints], ignore_index=True)
+    df = pd.concat([burst_assay_endpoints, target_assay_endpoints, viability_assay_endpoints], ignore_index=True)
     df = df.drop_duplicates().reset_index()
 
-    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assays{FILE_FORMAT}")
-    export_df = pd.DataFrame({'aeid': aeids_burst_assays})
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assay_endpoints{FILE_FORMAT}")
+    export_df = pd.DataFrame({'aeid': aeids_burst_assay_endpoints})
     export_df.to_parquet(destination_path, compression='gzip')
-    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assays.csv")
+    destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_burst_assay_endpoints.csv")
     export_df.to_csv(destination_path, index=False)
 
     destination_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}")

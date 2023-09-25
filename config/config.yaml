@@ -8,6 +8,11 @@ enable_reading_db: 0
 enable_writing_db: 0
 enable_output_compounds: 1
 
+minimize_method: L-BFGS-B
+minimize_tol: 1e-6
+minimize_maxiter: 500
+minimize_maxfun: 500
+
 chunk_size: 10000
 threshold_subsetting_aeids_on_count_compounds_tested: 2000 # -1 #2000
 threshold_subsetting_aeids_on_hit_ratio: 0.005 # -1  #0.005
@@ -15,10 +20,11 @@ threshold_cytotox_min_test: 0.8
 threshold_cytotox_default_pt: 3
 threshold_cytotox_hitc_num: 0.9
 
+aeid_list_manual: 1
 file_format: .parquet.gzip
 instance_id: 0
 instances_total: 4
-max_num_datapoints_per_series_threshold: 1000
+max_num_datapoints_per_series_threshold: 100000
 min_num_median_responses_threshold: 4
 n_jobs: -1
 bmr_scale: 1.349
@@ -29,6 +35,8 @@ curve_fit_models:
   - poly1
   - poly2
   - pow
+  - exp2
+#  - exp3
   - exp4
   - exp5
   - hill
@@ -52,6 +60,7 @@ output_cols_filter:
   - spid
   - top
   - dsstox_substance_id
+  - cautionary_flags
 report_assay_cols:
   - acid
   - analysis_direction

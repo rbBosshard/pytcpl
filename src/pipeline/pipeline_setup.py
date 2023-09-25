@@ -3,6 +3,8 @@ import time
 import sys
 import os
 
+from src.pipeline.pipeline_constants import AEIDS_LIST_PATH
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
 
@@ -24,7 +26,15 @@ def main():
     get_mechanistic_target_and_mode_of_action_annotations_from_ice()
     get_chemical_qc()
     df = subset_for_candidate_assay_endpoints()
-    df = handle_viability_assays(config, df)
+    if config['aeid_list_manual']:
+        aeids = []
+        with open(AEIDS_LIST_PATH, "r") as file:
+            for line in file:
+                number = int(line.strip())
+                aeids.append(number)
+        df = df[df['aeid'].isin(aeids)]
+    else:
+        df = handle_viability_assays(config, df)
     generate_balanced_aeid_list(config, df)
     get_all_related_assay_infos(config)
     

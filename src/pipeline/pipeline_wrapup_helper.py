@@ -84,7 +84,7 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
 def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
     aeids_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))
     aeids_target_assays = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}"))
-    output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
+    output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}"), os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
     cutoff_paths = [os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}") for aeid in aeids_sorted['aeid']]
     json_file_path = os.path.join(METADATA_SUBSET_DIR_PATH, "viability_counterparts_aeid.json")
     with open(json_file_path, 'r') as json_file:
@@ -92,9 +92,9 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
 
     assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{FILE_FORMAT}"))
 
-    def post_process(i, aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid):
-        df = pd.read_parquet(file_path)
-        cutoff = pd.read_parquet(file_path)['cutoff']
+    def post_process(aeid, aeid_path, cutoff_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid):
+        df = pd.read_parquet(aeid_path)
+        # cutoff = pd.read_parquet(cutoff_path)['cutoff']
         df["hitcall_c"] = df["hitcall"]
         df.loc[:, 'fitc'] = 1
         df.loc[:, 'cytotox_flag'] = None
@@ -112,11 +112,17 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
 
         return aeid, df
 
-
     dfs = {}
-    results = Parallel(n_jobs=config['n_jobs'])(
-        delayed(post_process)(aeid, file_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid) for
-        i, aeid, file_path in enumerate(output_paths))
+    if config['n_jobs'] != 1:
+        results = Parallel(n_jobs=config['n_jobs'])(
+            delayed(post_process)(aeid, aeid_path, cutoff_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid) for
+            aeid, aeid_path, cutoff_path in output_paths)
+    else:
+        results = []
+        for aeid, aeid_path, cutoff_path in output_paths:
+            result = post_process(aeid, aeid_path, cutoff_path, assay_info_df, aeids_target_assays,
+                                  viability_counterparts_aeid)
+            results.append(result)
 
     for aeid, df in results:
         dfs[aeid] = df
@@ -300,54 +306,56 @@ def cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays)
     non_target_assays_df = df_all[~df_all['aeid'].isin(aeids_target_assays)].reset_index(drop=True)
     burst_assays = df_all[df_all['aeid'].isin(burst_assays_aeids)].reset_index(drop=True)
 
-    # Some names have changed in the new version but things are equivalent, e.g. cytotox_median_um = cyto_pt_um
-    cytotox_df = compute_cytotoxicity_from_burst_assays(config, burst_assays)
+    if not burst_assays.empty:
+        # Some names have changed in the new version but things are equivalent, e.g. cytotox_median_um = cyto_pt_um
+        cytotox_df = compute_cytotoxicity_from_burst_assays(config, burst_assays)
 
-    # Plot if cytotox_df data is complete
-    check_cytotoxicity_completeness(cytotox_df)
+        # Plot if cytotox_df data is complete
+        check_cytotoxicity_completeness(cytotox_df)
 
-    # Plot overview of cytotoxicity data
-    plot_overview_of_cytotoxicity_data(cytotox_df)
+        # Plot overview of cytotoxicity data
+        plot_overview_of_cytotoxicity_data(cytotox_df)
 
-    # Split active and inactive cases in target assays
-    active_cases = target_assays_df[target_assays_df["hitcall"] > 0].reset_index(drop=True)
-    inactive_cases = target_assays_df[target_assays_df["hitcall"] == 0].reset_index(drop=True)
+        # Split active and inactive cases in target assays
+        active_cases = target_assays_df[target_assays_df["hitcall"] > 0].reset_index(drop=True)
+        inactive_cases = target_assays_df[target_assays_df["hitcall"] == 0].reset_index(drop=True)
 
-    print(f"Active cases in target assays: {len(active_cases)}")
-    print(f"Inactive cases in target assays: {len(inactive_cases)}")
+        print(f"Active cases in target assays: {len(active_cases)}")
+        print(f"Inactive cases in target assays: {len(inactive_cases)}")
 
-    # Merge active_cases with cytotox info
-    active_cases = active_cases.merge(cytotox_df, on="dsstox_substance_id", how="left")
+        # Merge active_cases with cytotox info
+        active_cases = active_cases.merge(cytotox_df, on="dsstox_substance_id", how="left")
 
-    # Flag different cases
-    flag_cytotoxicity_cases_based_on_burst_assays(active_cases)
+        # Flag different cases
+        flag_cytotoxicity_cases_based_on_burst_assays(active_cases)
 
-    # Print summary of flags
-    print_counts(active_cases)
+        # Print summary of flags
+        print_counts(active_cases)
 
-    # Determination of binary cytotoxicity: cytotoxic/non_cytotoxic, and inconclusive
-    active_cases["ctx_acc"] = "inconclusive"
-    active_cases.loc[active_cases["cytotox_flag"].str.startswith("cytotoxic"), "ctx_acc"] = "cytotoxic"
-    active_cases.loc[active_cases["cytotox_flag"].str.startswith("non_cytotoxic"), "ctx_acc"] = "non_cytotoxic"
+        # Determination of binary cytotoxicity: cytotoxic/non_cytotoxic, and inconclusive
+        active_cases["ctx_acc"] = "inconclusive"
+        active_cases.loc[active_cases["cytotox_flag"].str.startswith("cytotoxic"), "ctx_acc"] = "cytotoxic"
+        active_cases.loc[active_cases["cytotox_flag"].str.startswith("non_cytotoxic"), "ctx_acc"] = "non_cytotoxic"
 
-    # Calculate hitc_acc
-    active_cases["hitcall_c"] = np.where(active_cases["ctx_acc"] == "cytotoxic", 0.0, active_cases["hitcall_c"])
-    active_cases["cytotox_potency"] = np.where((active_cases["ctx_acc"] == "cytotoxic") & (~active_cases["cytotox_flag"].str.endswith("viability_check")), active_cases["cyto_pt_um"], active_cases["cytotox_potency"])
+        # Calculate hitc_acc
+        active_cases["hitcall_c"] = np.where(active_cases["ctx_acc"] == "cytotoxic", 0.0, active_cases["hitcall_c"])
+        active_cases["cytotox_potency"] = np.where((active_cases["ctx_acc"] == "cytotoxic") & (~active_cases["cytotox_flag"].str.endswith("viability_check")), active_cases["cyto_pt_um"], active_cases["cytotox_potency"])
 
-    # Count
-    count_hitc = pd.DataFrame({'hitcall': ["inactive", "active"], 'count': [(target_assays_df["hitcall"] == 0).sum(), (target_assays_df["hitcall"] > 0).sum()]})
-    count_hitacc = active_cases["ctx_acc"].value_counts(dropna=False).reset_index()
-    count_hitacc.columns = ["ctx_acc", "count"]
-    count_cytotox_flag = active_cases["cytotox_flag"].value_counts().reset_index()
-    count_cytotox_flag.columns = ["cytotox_flag", "count"]
+        # Count
+        count_hitc = pd.DataFrame({'hitcall': ["inactive", "active"], 'count': [(target_assays_df["hitcall"] == 0).sum(), (target_assays_df["hitcall"] > 0).sum()]})
+        count_hitacc = active_cases["ctx_acc"].value_counts(dropna=False).reset_index()
+        count_hitacc.columns = ["ctx_acc", "count"]
+        count_cytotox_flag = active_cases["cytotox_flag"].value_counts().reset_index()
+        count_cytotox_flag.columns = ["cytotox_flag", "count"]
 
-    # Plot an overview of the flagging and hit calls
-    plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_flag, count_hitacc, count_hitc)
+        # Plot an overview of the flagging and hit calls
+        plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_flag, count_hitacc, count_hitc)
 
-    # Combine active and inactive data frames and vaibility/burst assays
-    df_all_c = merge_all_data(active_cases, inactive_cases, non_target_assays_df)
-
-    return df_all_c
+        # Combine active and inactive data frames and vaibility/burst assays
+        df_all_c = merge_all_data(active_cases, inactive_cases, non_target_assays_df)
+        return df_all_c
+    else:
+        return df_all
 
 
 def print_counts(active_cases):

@@ -1,4 +1,6 @@
 from .cnst import cnst
+from .exp2 import exp2
+from .exp3 import exp3
 from .exp4 import exp4
 from .exp5 import exp5
 from .gnls import gnls
@@ -31,6 +33,8 @@ def get_model(fit_model):
     """
     return {
         'cnst': cnst,
+        'exp2': exp2,
+        'exp3': exp3,
         'exp4': exp4,
         'exp5': exp5,
         'gnls': gnls,

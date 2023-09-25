@@ -4,15 +4,18 @@ from joblib import Parallel, delayed
 from scipy.optimize import minimize
 from scipy.stats import t, chi2
 from tqdm import tqdm
+import warnings
+import traceback
 
 from src.pipeline.pipeline_constants import custom_format
 from src.pipeline.models.models import get_model
 from src.pipeline.models.objective_function import get_negative_log_likelihood
-from src.pipeline.pipeline_helper import get_msg_with_elapsed_time, get_cutoff
+from src.pipeline.pipeline_helper import get_msg_with_elapsed_time, get_cutoff, init_aeid, load_method
+from src.pipeline.pipeline_methods import mc6_mthds
 from src.pipeline.models.track_fitted_params import track_fitted_params
 
 
-def process(df, config, logger):
+def process(assay_endpoint_info, df, config, logger):
     """
     Process concentration-response data.
 
@@ -27,9 +30,14 @@ def process(df, config, logger):
     Returns:
         pandas.DataFrame: A DataFrame with processed concentration-response data.
     """
+    aeid = assay_endpoint_info['aeid'].iloc[0]
+    signal_direction = assay_endpoint_info['signal_direction'].iloc[0]
+    assay_function_type = assay_endpoint_info['assay_function_type'].iloc[0]
+
     cutoffs = get_cutoff()
     cutoff = cutoffs.iloc[0]['cutoff']
     onesd = cutoffs.iloc[0]['onesd']
+    bmad = cutoffs.iloc[0]['bmad']
 
     def group_datapoints_to_series(groups):
         """
@@ -96,11 +104,17 @@ def process(df, config, logger):
         for fit_model in config['curve_fit_models']:
             conc = np.array(series.conc)
             resp = np.array(series.resp)
-            x0 = get_model(fit_model)('x0')(conc, resp)
-            bounds = get_model(fit_model)('bounds')(conc, resp)
+            signal_direction_is_bidirectional = signal_direction == 'bidirectional'
+            x0 = get_model(fit_model)('x0')(signal_direction_is_bidirectional, conc, resp)
+            if signal_direction_is_bidirectional:
+                bounds = get_model(fit_model)('bounds_bidirectional')(conc, resp)
+            else:
+                bounds = get_model(fit_model)('bounds')(conc, resp)
             args = (conc, resp, get_model(fit_model)('fun'))
 
-            fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args)
+            fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args,
+                                  method=config['minimize_method'], tol=float(config['minimize_tol']),
+                                  options={'maxiter': int(config['minimize_maxiter']), 'maxfun': int(config['minimize_maxfun'])})
 
             pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
@@ -119,13 +133,12 @@ def process(df, config, logger):
             dict: Dictionary containing hit call results for the series.
         """
 
-        best_aic_model, hitcall, top, ac50, ac95, acc, actop, bmd, ac1sd, fitc = None
+        best_aic_model, hitcall, top, ac50, ac95, acc, actop, bmd, ac1sd, rmse, fitc = None, None, None, None, None, None, None, None, None, None, None
+        conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
 
-        if series['fit_params'] is None:
+        if params is None:
             hitcall = 0
         else:
-
-            conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
             aics = {fit_model: params[fit_model]['aic'] for fit_model in params.keys()}
 
             if len(aics) == 0:
@@ -141,16 +154,29 @@ def process(df, config, logger):
             ps_list = list(ps.values())
             ll = params[best_aic_model]['ll']
             pred = get_model(best_aic_model)('fun')(conc, *ps_list[:-1]).tolist()
-            # rmse = np.sqrt(np.mean((resp - pred) ** 2))
-            top = np.max(np.abs(pred))  # top is taken to be highest model value
+            rmse = np.sqrt(np.mean((resp - pred) ** 2))
+            bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
+            top = pred[np.argmax(np.abs(pred))]  # top is taken to be highest model value
+
             inverse_function = get_model(best_aic_model)('inv')
             ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
             ac95 = inverse_function(.5 * top, *ps_list[:-1], conc)
-            acc = inverse_function(cutoff, *ps_list[:-1], conc) if cutoff <= top else None
-            actop = inverse_function(top, *ps_list[:-1], conc)
-            ac1sd = inverse_function(onesd, *ps_list[:-1], conc)
-            bmr = onesd * config['bmr_scale']  # bmr_scale is default 1.349
-            bmd = inverse_function(bmr, *ps_list[:-1], conc)
+            actop = inverse_function(top - np.sign(top) * 1e-12, *ps_list[:-1], conc)
+            acc = inverse_function(np.sign(top) * cutoff, *ps_list[:-1], conc) if cutoff <= abs(top) else None
+            ac1sd = inverse_function(np.sign(top) * onesd, *ps_list[:-1], conc) if onesd <= abs(top) else None
+            bmd = inverse_function(np.sign(top) * bmr, *ps_list[:-1], conc) if bmr <= abs(top) else None
+
+            # with warnings.catch_warnings(record=True) as w:
+            #     warnings.filterwarnings("error", category=RuntimeWarning)
+            #     try:
+            #         ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
+            #     except RuntimeWarning as rw:
+            #         traceback_info = traceback.format_exc()
+            #         print(top, ps_list[:-1])
+            #         print(traceback_info)
+            #         print("Caught a RuntimeWarning:", rw)
+            #     except Exception as e:
+            #         print("Caught an exception:", e)
 
             # Hitcall
             # Each p_i represents the odds of the curve being a hit according to different criteria;
@@ -166,20 +192,39 @@ def process(df, config, logger):
                 p2 *= p if top < 0 else 1 - p
             p2 = 1 - p2  # odds of at least one point above cutoff
 
+            # p3: get loglikelihood of top exactly at cutoff, use likelihood profile test
+            # to calculate probability of being above cutoff
+
             ps_list[0] = get_model(best_aic_model)('scale')(cutoff, conc, ps_list)
             ll_cutoff = -get_negative_log_likelihood(params=ps_list, conc=conc, resp=resp,
                                                      fit_model=get_model(best_aic_model)(
                                                          'fun'))  # get log-likelihood at cutoff
-            p3 = (1 + np.sign(top) * chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
+
+            if abs(top) >= cutoff:
+                p3 = (1 + chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
+            else:
+                p3 = (1 - chi2.cdf(2 * (ll - ll_cutoff), 1)) / 2
 
             hitcall = p1 * p2 * p3  # multiply three probabilities to get continuous hit odds overall
 
-        # Compute fit category (fitc), used for cautionary flags, see https://www.frontiersin.org/articles/10.3389/ftox.2023.1275980
+        # Compute fit category (fitc), see https://www.frontiersin.org/articles/10.3389/ftox.2023.1275980
         fitc = compute_fitc(ac50, ac95, conc, hitcall, top)
 
-        # Todo: Compute cautionary flags
-        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'ac95': ac95,
-               'acc': acc, 'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd, 'fitc': fitc}
+        out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'ac95': ac95, 'acc': acc,
+               'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd, 'fitc': fitc, 'cautionary_flags': []}
+
+        if fitc >= 36:
+            info = out.copy()
+            info['cutoff'] = cutoff
+            info['bmad'] = bmad
+            info['resp'] = resp
+            info['conc'] = conc
+            info['rmse'] = rmse
+            info['bidirectional'] = signal_direction == 'bidirectional'
+            info['cell_viability_assay'] = assay_function_type.endswith('viability')
+            cautionary_flags = [mc6_mthds(mthd, info) for mthd in load_method(lvl=6, aeid=aeid, config=config)]
+            cautionary_flag_true = [key for flag_result in cautionary_flags for key, value in flag_result.items() if value]
+            out['cautionary_flags'] = cautionary_flag_true
 
         return out
 
@@ -197,17 +242,17 @@ def process(df, config, logger):
                     fitc = 37
                 elif ac50 > min_conc and ac95 >= max_conc:
                     fitc = 38
-                elif abs(top) > cutoff_upper:
-                    if ac50 <= min_conc:
-                        fitc = 40
-                    elif ac50 > min_conc and ac95 < max_conc:
-                        fitc = 41
-                    elif ac50 > min_conc and ac95 >= max_conc:
-                        fitc = 42
+            elif abs(top) > cutoff_upper:
+                if ac50 <= min_conc:
+                    fitc = 40
+                elif ac50 > min_conc and ac95 < max_conc:
+                    fitc = 41
+                elif ac50 > min_conc and ac95 >= max_conc:
+                    fitc = 42
         elif hitcall < 0.9:
-            if abs(top) < cutoff_lower:
+            if top and abs(top) < cutoff_lower:
                 fitc = 13
-            elif abs(top) >= cutoff_lower:
+            elif top and abs(top) >= cutoff_lower:
                 fitc = 15
         else:
             fitc = 2
@@ -218,7 +263,7 @@ def process(df, config, logger):
     nj = config['n_jobs']
     p = nj != 1
     sample_groups = df.groupby(['aeid', 'spid'])
-    logger.info(f"💻 Processing (fit & hit) {len(sample_groups)} concentration-response series")
+    logger.info(f"💻 Processing (fit ({signal_direction}) & hit) {len(sample_groups)} concentration-response series")
     df = group_datapoints_to_series(sample_groups)
     desc = get_msg_with_elapsed_time(f"🛠️  -> Preprocessing:  ")
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
@@ -239,7 +284,7 @@ def process(df, config, logger):
 
     # Hit-Calling
 
-    df = pd.concat([df_fitted, df_no_fit])
+    df = pd.concat([df_fitted, df_no_fit]).reset_index(drop=True)
 
     desc = get_msg_with_elapsed_time(f"🚥  -> Hit-Calling:   ")
     it = tqdm(df_fitted.iterrows(), desc=desc, total=df_fitted.shape[0], bar_format=custom_format)

@@ -1,5 +1,14 @@
-chemical_results/*
-chemical_results/.gitkeep
+output/*
+output/.gitkeep
+
+cutoff/*
+cutoff/.gitkeep
+
+raw/*
+raw/.gitkeep
+
+output_compounds/*
+output_compounds/.gitkeep
 
 merged/*
 merged/.gitkeep

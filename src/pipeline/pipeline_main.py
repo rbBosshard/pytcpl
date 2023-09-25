@@ -38,9 +38,9 @@ def pipeline(config, confg_path):
     instance_id, instances_total, aeid_list, logger = launch(config, confg_path)
     for aeid in aeid_list:
         try:
-            prolog(aeid, instance_id)
+            assay_endpoint_info = prolog(aeid, instance_id)
             df = fetch_raw_data()
-            df = process(df, config, logger)
+            df = process(assay_endpoint_info, df, config, logger)
             write_output(df)
             epilog()
         except Exception as e:

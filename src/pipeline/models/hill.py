@@ -23,20 +23,9 @@ def hill(field):
     concentrations from responses.
 
     """
-    def hill_inverse(y, tp, ga, p):
-        epsilon = 1e-4
-        try:
-            adjusted_y = np.clip(y, epsilon, tp - epsilon)
-            denominator = np.clip(tp / adjusted_y - 1, epsilon, np.inf)
-            result = ga / (denominator ** (1 / p) + epsilon)
-            result = np.clip(result, 0, 1000)  # Clip the result to a reasonable range
-            return result
-        except (ValueError, ZeroDivisionError, RuntimeWarning):
-            raise Exception("Error: Invalid input values")
-
     return {
         "fun": lambda x, tp, ga, p: tp / (1 + (ga / x) ** p),
-        "inv": lambda y, tp, ga, p, conc=None: hill_inverse(y, tp, ga, p),
+        "inv": lambda y, tp, ga, p, conc=None: ga / (tp / y - 1) ** (1 / p),
         "params": ['tp',
                    'ga',
                    'p',
@@ -45,8 +34,12 @@ def hill(field):
                                                 (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
                                                 (0.3, 8),
                                                 (get_er_bounds())),
-        "x0": lambda conc=None, resp=None: [get_mmed(conc, resp) or 0.01,
-                                            get_mmed_conc(conc, resp) / np.sqrt(10),
+        "bounds_bidirectional": lambda conc=None, resp=None: ((-1.2 * np.max(abs(resp)), 1.2 * np.max(abs(resp))),
+                                                              (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
+                                                              (0.3, 8),
+                                                              (get_er_bounds())),
+        "x0": lambda bidirectional=True, conc=None, resp=None: [get_mmed(bidirectional, conc, resp),
+                                            get_mmed_conc(bidirectional, conc, resp) / np.sqrt(10),
                                             1.2,
                                             get_er_est(resp)],
         "scale": lambda y, conc, params: y,

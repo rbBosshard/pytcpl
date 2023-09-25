@@ -25,29 +25,23 @@ def exp5(field):
     estimate concentrations from responses.
 
     """
-    def exp5_inverse(y, tp, ga, p):
-        epsilon = 1e-4
-        try:
-            adjusted_y = np.clip(y, epsilon, tp - epsilon)
-            result = ga * (-np.log2(1 - adjusted_y / tp + epsilon)) ** (1 / p)
-            result = np.clip(result, 0, 1000)
-            return result
-        except (ValueError, ZeroDivisionError, RuntimeWarning) as e:
-            raise Exception(f"Error: Invalid input values: {e}")
-
     return {
         "fun": lambda x, tp, ga, p: tp * (1 - 2 ** (-(x / ga) ** p)),
-        "inv": lambda y, tp, ga, p, conc=None: exp5_inverse(y, tp, ga, p),
+        "inv": lambda y, tp, ga, p, conc=None: ga * (-np.log2(1 - y / tp)) ** (1 / p),
         "params": ['tp',
                    'ga',
                    'p',
                    'er'],
-        "bounds": lambda conc=None, resp=None: ((1e-4, 1.2 * abs(get_mmed(conc, resp))),
+        "bounds": lambda conc=None, resp=None: ((1e-4, 1.2 * abs(get_mmed(False, conc, resp))),
                                                 (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
                                                 (0.3, 8),
                                                 (get_er_bounds())),
-        "x0": lambda conc=None, resp=None: [get_mmed(conc, resp) or 0.01,
-                                            get_mmed_conc(conc, resp) / np.sqrt(10),
+        "bounds_bidirectional": lambda conc=None, resp=None: ((-1.2 * abs(get_mmed(True, conc, resp)), 1.2 * abs(get_mmed(True, conc, resp))),
+                                                (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
+                                                (0.3, 8),
+                                                (get_er_bounds())),
+        "x0": lambda bidirectional=True, conc=None, resp=None: [get_mmed(bidirectional, conc, resp) or 0.01,
+                                            get_mmed_conc(bidirectional, conc, resp) / np.sqrt(10),
                                             1.2,
                                             get_er_est(resp)],
         "scale": lambda y, conc, params: y,

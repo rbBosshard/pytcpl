@@ -154,7 +154,7 @@ def add_curves(fig):
 
     for i, potency in enumerate(potencies):
         pot = potency_values[i]
-        if pot is not None and not np.isnan(pot):
+        if pot is not None and not np.isnan(pot) and pot < 10:
             pot_log = np.log10(series[potency])
             params = fit_params[best_model]['pars'].copy()
             params.pop('er')
@@ -169,20 +169,7 @@ def add_curves(fig):
                 legendgroup="Potency estimates",
                 legendgrouptitle_text="Potency estimates",
             ))
-    
-    # cytotox = series['cytotoxicity_potency']
-    # cytotox_log = np.log10(cytotox)
-    # pot_y = get_model(best_model)('fun')(np.array([cytotox]), **params)[0]
-    # fig.add_trace(go.Scatter(
-    #             name=f"cytotoxicity (ac50)",
-    #             x=[cytotox_log, cytotox_log],
-    #             y=[0, pot_y],
-    #             mode='lines',
-    #             opacity=0.8,
-    #             line=dict(color=color_best, width=3, dash='dot'),
-    #             legendgroup="Potency estimates",
-    #             legendgrouptitle_text="Potency estimates",
-    #         ))
+
     
 
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",
@@ -351,7 +338,8 @@ def get_compound_info():
         {   
             "Hitcall": [f"{st.session_state.series['hitcall_c']:.2f}"],
             "Cytotoxicity": [f"{st.session_state.series['cytotox_flag']}"],
-            "Omit-Flag": [f"{st.session_state.series['omit_flag']}"],
+            "Cautionary Flags": [f"{st.session_state.series['cautionary_flags']}"],
+            "ICE Omit-Flag": [f"{st.session_state.series['omit_flag']}"],
             "SPID": [st.session_state.compound_id],
             "DSSTOXSID": [dsstox_substance_id],
             "CASRN": [casn],

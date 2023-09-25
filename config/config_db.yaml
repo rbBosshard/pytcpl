@@ -1,11 +1,11 @@
 robin:
-  db: invitrodb_v3o5
+  db: prod_internal_invitrodb_v4_1
   host: localhost
   password: robin
   port: 3306
   username: robin
 bossh:
-  db: invitrodb_v3o5
+  db: prod_internal_invitrodb_v4_1
   host: localhost
   password: root
   port: 3306

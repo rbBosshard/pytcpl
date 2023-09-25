@@ -30,7 +30,9 @@ def cnst(field):
                    'er'],
         "bounds": lambda conc=None, resp=None: ((1e-4, 1e4),
                                                 (get_er_bounds())),
-        "x0": lambda conc=None, resp=None: [1,
+        "bounds_bidirectional": lambda conc=None, resp=None: ((1e-4, 1e4),
+                                                (get_er_bounds())),
+        "x0": lambda bidirectional=True, conc=None, resp=None: [1,
                                             get_er_est(resp)],
         "scale": None
     }.get(field)

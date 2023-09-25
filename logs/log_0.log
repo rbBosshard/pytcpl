@@ -1,12 +1,17 @@
-[00:00:01:15] 🚀 Pytcpl launched!
-[00:00:01:15] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
-[00:00:01:15] 📜 Running pipeline for 380 assay endpoints (See 'config/aeid_list.in')
-[00:00:01:15] 🧩 Engine: instance_id=0, instances_total=1
+[00:00:00:71] 🚀 Pytcpl launched!
+[00:00:00:71] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
+[00:00:00:71] 📜 Running pipeline for 1 assay endpoints (See 'config/aeid_list.in')
+[00:00:00:71] 🧩 Engine: instance_id=0, instances_total=1
 
-[00:00:01:15] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:00:00:71] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:01:28] 🌱 Start processing new assay endpoint: TOX21_DT40_100 (aeid=2130)
-[00:00:01:28] ⏳ Fetching raw data..
-[00:00:01:35] ℹ️ Loaded 622080 single datapoints
-[00:00:01:35] 🌡️ Computing efficacy cutoff
-[00:00:02:12] 💻 Processing (fit & hit) 10499 concentration-response series
+[00:00:00:74] 🌱 Start processing new assay endpoint: ATG_RORg_TRANS (aeid=140)
+[00:00:00:74] ⏳ Fetching raw data..
+[00:00:00:75] ℹ️ Loaded 36103 single datapoints
+[00:00:00:75] 🌡️ Computing efficacy cutoff
+[00:00:00:85] 💻 Processing (fit (gain) & hit) 4489 concentration-response series
+[00:00:06:92] 💽 Writing output data to DB (~2.00 MB)..
+[00:00:07:04] 🥕 Assay endpoint processing completed
+
+[00:00:07:04] 🎊 Pipeline completed!
+[00:00:07:04] 👋 Goodbye

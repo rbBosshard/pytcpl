@@ -30,9 +30,11 @@ def poly1(field):
         "inv": lambda y, a, conc=None: y / a,
         "params": ['a',
                    'er'],
-        "bounds": lambda conc=None, resp=None: ((1e-4, 1e8 * abs(get_mmed(conc, resp))),
+        "bounds": lambda conc=None, resp=None: ((1e-4, 1e8 * abs(get_mmed(False, conc, resp))),
                                                 (get_er_bounds())),
-        "x0": lambda conc=None, resp=None: [get_mmed(conc, resp) or 0.01,
+        "bounds_bidirectional": lambda conc=None, resp=None: ((-1e8 * abs(get_mmed(True, conc, resp)), 1e8 * abs(get_mmed(True, conc, resp))),
+                                                (get_er_bounds())),
+        "x0": lambda bidirectional=True, conc=None, resp=None: [get_mmed(bidirectional, conc, resp) or 0.01,
                                             get_er_est(resp)],
         "scale": lambda y, conc, params: y / np.max(conc),
     }.get(field)

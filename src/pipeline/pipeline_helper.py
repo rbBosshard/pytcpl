@@ -5,20 +5,20 @@ import os
 import sys
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import yaml
 from mysql import connector as mysql
 from sqlalchemy import create_engine, text
 
+from src.pipeline.pipeline_methods import mc4_mthds, mc5_mthds
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
 
-
-from src.pipeline.models.helper import get_mad
 from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \
-    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH, OUTPUT_COMPOUNDS_DIR_PATH
+    CUTOFF_DIR_PATH, CUTOFF_TABLE, AEID_PATH, OUTPUT_DIR_PATH, METADATA_SUBSET_DIR_PATH, OUTPUT_COMPOUNDS_DIR_PATH, \
+    FILE_FORMAT
 
 CONFIG = {}
 logger = logging.getLogger(__name__)
@@ -106,9 +106,11 @@ def prolog(new_aeid, instance_id):
         f.write(str(AEID))
     logger.info(f"#-" * 50 + "\n")
     assay_info_df = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"assay_info{CONFIG['file_format']}"))
-    assay_component_endpoint_name = assay_info_df[assay_info_df['aeid'] == AEID]['assay_component_endpoint_name'].iloc[0]
-    assay_info = f"{assay_component_endpoint_name} (aeid={AEID})"
-    logger.info(f"🌱 Start processing new assay endpoint: {assay_info}")
+    assay_endpoint = assay_info_df[assay_info_df['aeid'] == AEID]
+    assay_component_endpoint_name = assay_endpoint['assay_component_endpoint_name'].iloc[0]
+    assay_info_string = f"{assay_component_endpoint_name} (aeid={AEID})"
+    logger.info(f"🌱 Start processing new assay endpoint: {assay_info_string}")
+    return assay_endpoint
 
 
 def init_aeid(new_aeid):
@@ -233,7 +235,7 @@ def fetch_raw_data():
     logger.info(f"🌡️ Computing efficacy cutoff")
     values = {}
     other_mthds = ['bmed.aeid.lowconc.twells', 'onesd.aeid.lowconc.twells']
-    for mthd in load_method(lvl=4, aeid=AEID) + other_mthds:
+    for mthd in load_method(lvl=4, aeid=AEID, config=CONFIG) + other_mthds:
         values.update({mthd: mc4_mthds(mthd, df)})
 
     bmad = values['bmad.aeid.lowconc.twells'] if 'bmad.aeid.lowconc.twells' in values else values[
@@ -241,7 +243,7 @@ def fetch_raw_data():
     bmed = values['bmed.aeid.lowconc.twells']
     sd = values['onesd.aeid.lowconc.twells']
 
-    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=AEID)]
+    cutoffs = [mc5_mthds(mthd, bmad) for mthd in load_method(lvl=5, aeid=AEID, config=CONFIG)]
     cutoff = max(list(filter(lambda item: item is not None, cutoffs)), default=0)
     out = pd.DataFrame({'aeid': [AEID], 'bmad': [bmad], 'bmed': [bmed], 'onesd': [sd], 'cutoff': [cutoff]})
 
@@ -451,107 +453,6 @@ def get_cutoff():
     return df
 
 
-def mc4_mthds(mthd, df):
-    """
-    Compute specific metrics based on input data for level 4 methods.
-
-    Args:
-        mthd (str): Method name.
-        df (pandas.DataFrame): Input data.
-
-    Returns:
-        float: Computed metric value.
-    """
-    cndx = df['cndx'].isin([1, 2])
-    wllt_t = df['wllt'] == 't'
-    mask = df.loc[cndx & wllt_t, 'resp']
-
-    if mthd == 'bmad.aeid.lowconc.twells':
-        return get_mad(mask)
-    elif mthd == 'bmad.aeid.lowconc.nwells':
-        return get_mad(df.loc[df['wllt'] == 'n', 'resp'])
-    elif mthd == 'onesd.aeid.lowconc.twells':
-        return mask.std()
-    elif mthd == 'bmed.aeid.lowconc.twells':
-        return mask.median()
-
-
-def mc5_mthds(mthd, bmad):
-    """
-    Get predefined values for level 5 methods or perform computations using bmad.
-
-    Args:
-        mthd (str): Method name.
-        bmad (float): Calculated bmad value.
-
-    Returns:
-        float: Method-specific value.
-    """
-    return {
-        'pc20': 20,
-        'pc50': 50,
-        'pc70': 70,
-        'log2_1.2': np.log2(1.2),
-        'log10_1.2': np.log10(1.2),
-        'log2_2': np.log2(2),
-        'log10_2': np.log10(2),
-        'neglog2_0.88': -1 * np.log2(0.88),
-        'coff_2.32': 2.32,
-        'fc0.2': 0.2,
-        'fc0.3': 0.3,
-        'fc0.5': 0.5,
-        'pc05': 5,
-        'pc10': 10,
-        'pc25': 25,
-        'pc30': 30,
-        'pc95': 95,
-        'bmad1': bmad,
-        'bmad2': bmad * 2,
-        'bmad3': bmad * 3,
-        'bmad4': bmad * 4,
-        'bmad5': bmad * 5,
-        'bmad6': bmad * 6,
-        'bmad10': bmad * 10,
-        # 'maxmed20pct': lambda df: df['max_med'].aggregate(lambda x: np.max(x) * 0.20),  # is never used
-    }.get(mthd)
-
-
-def load_method(lvl, aeid):
-    """
-    Load and retrieve the list of methods for a specific level and assay endpoint.
-
-    Args:
-        lvl (int): Method level.
-        aeid (int): Assay endpoint ID.
-
-    Returns:
-        list: List of method names.
-    """
-    tbl_aeid = f"mc{lvl}_aeid"
-    tbl_methods = f"mc{lvl}_methods"
-    path_aeid = os.path.join(METADATA_DIR_PATH, f"{tbl_aeid}{CONFIG['file_format']}")
-    path_methods = os.path.join(METADATA_DIR_PATH, f"{tbl_methods}{CONFIG['file_format']}")
-    available = os.path.exists(path_aeid) and os.path.exists(path_methods)
-    if CONFIG['enable_reading_db'] or not available:
-        flds = [f"b.mc{lvl}_mthd AS mthd"]
-        tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
-        qstring = f"SELECT {', '.join(flds)} " \
-                  f"FROM {', '.join(tbls)} " \
-                  f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
-                  f"AND aeid = {aeid};"
-        return query_db(query=qstring)["mthd"].tolist()
-    else:
-        df_aeid = pd.read_parquet(path_aeid)
-        df_methods = pd.read_parquet(path_methods)
-
-    df_aeid = df_aeid[df_aeid['aeid'] == aeid]
-    level_col = f"mc{lvl}_mthd"
-    df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
-    df = df[level_col].tolist()
-    logger.debug(f"Read from {path_aeid} and {path_methods}")
-    return df
-
-
 def load_config():
     """
     Load and retrieve the configuration settings.
@@ -736,4 +637,40 @@ def get_output_compound(dsstox_substance_id):
     if length == 0:
         print(f"No data found for compound: {dsstox_substance_id}")
     print(f"{length} series loaded")
+    return df
+
+
+def load_method(lvl, aeid, config):
+    """
+    Load and retrieve the list of methods for a specific level and assay endpoint.
+
+    Args:
+        lvl (int): Method level.
+        aeid (int): Assay endpoint ID.
+
+    Returns:
+        list: List of method names.
+    """
+    tbl_aeid = f"mc{lvl}_aeid"
+    tbl_methods = f"mc{lvl}_methods"
+    path_aeid = os.path.join(METADATA_DIR_PATH, f"{tbl_aeid}{FILE_FORMAT}")
+    path_methods = os.path.join(METADATA_DIR_PATH, f"{tbl_methods}{FILE_FORMAT}")
+    available = os.path.exists(path_aeid) and os.path.exists(path_methods)
+    if config['enable_reading_db'] or not available:
+        flds = [f"b.mc{lvl}_mthd AS mthd"]
+        tbls = [f"{tbl_aeid} AS a", f"{tbl_methods} AS b"]
+        qstring = f"SELECT {', '.join(flds)} " \
+                  f"FROM {', '.join(tbls)} " \
+                  f"WHERE a.mc{lvl}_mthd_id = b.mc{lvl}_mthd_id " \
+                  f"AND aeid = {aeid};"
+        return query_db(query=qstring)["mthd"].tolist()
+    else:
+        df_aeid = pd.read_parquet(path_aeid)
+        df_methods = pd.read_parquet(path_methods)
+
+    df_aeid = df_aeid[df_aeid['aeid'] == aeid]
+    level_col = f"mc{lvl}_mthd"
+    df = df_aeid.merge(df_methods, left_on=f"mc{lvl}_mthd_id", right_on=f"mc{lvl}_mthd_id")
+    df = df[level_col].tolist()
+    logger.debug(f"Read from {path_aeid} and {path_methods}")
     return df
