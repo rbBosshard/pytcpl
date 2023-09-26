@@ -217,7 +217,7 @@ def fetch_raw_data():
     """
     logger.info(f"⏳ Fetching raw data..")
     path = os.path.join(RAW_DIR_PATH, f"{AEID}{CONFIG['file_format']}")
-    if not os.path.exists(path):
+    if not os.path.exists(path) or CONFIG['enable_fetching_raw_data_from_db']:
         select_cols = ['spid', 'aeid', 'logc', 'resp', 'cndx', 'wllt']
         table_mapping = {'mc0.m0id': 'mc1.m0id', 'mc1.m0id': 'mc3.m0id'}
         join_string = ' AND '.join([f"{key} = {value}" for key, value in table_mapping.items()])
@@ -257,7 +257,7 @@ def fetch_raw_data():
     return df
 
 
-def db_append(df, tbl):
+def db_append(df, tbl, db=True):
     """
     Append data to a database table.
 
@@ -265,7 +265,7 @@ def db_append(df, tbl):
         df (pandas.DataFrame): Data to append.
         tbl (str): Table name.
     """
-    if CONFIG['enable_writing_db']:
+    if CONFIG['enable_writing_db'] and db:
         try:
             engine = get_sqlalchemy_engine()
             chunk_size = CONFIG['chunk_size']
@@ -282,14 +282,14 @@ def db_append(df, tbl):
     df.to_parquet(file_path, compression='gzip')
 
 
-def db_delete(tbl):
+def db_delete(tbl, db=True):
     """
     Delete data from a database table.
 
     Args:
         tbl (str): Table name.
     """
-    if CONFIG['enable_writing_db']:
+    if CONFIG['enable_writing_db'] and db:
         query_db(f"DELETE FROM {tbl} WHERE aeid = {AEID};")
 
     file_path = os.path.join(DATA_DIR_PATH, tbl, f"{AEID}{CONFIG['file_format']}")
@@ -309,7 +309,7 @@ def write_output(df):
     df = df[CONFIG['output_cols_filter']]
     mb_value = f"{df.memory_usage(deep=True).sum() / (1024 * 1024):.2f} MB"
     logger.info(f"💽 Writing output data to DB (~{mb_value})..")
-    for col in ['conc', 'resp', 'fit_params']:
+    for col in ['cautionary_flags', 'conc', 'resp', 'fit_params']:
         df.loc[:, col] = df[col].apply(json.dumps)
     db_delete("output")
     db_append(df, "output")

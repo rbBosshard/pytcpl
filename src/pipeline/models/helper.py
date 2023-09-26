@@ -11,8 +11,10 @@ def get_inverse(fit_model, y, x_max, x_min, param, num_points=1000):
     x_range = pow_space(x_min, x_max, 10, num_points)
     y_values = fit_model(x_range, *param)
     x = x_min
+    tp = param[0]
     for i in range(num_points - 1):
-        test = y_values[i] <= y <= y_values[i + 1]
+        # Sandwich y
+        test = y_values[i] <= y <= y_values[i + 1] if tp > 0 else y_values[i+1] <= y <= y_values[i]
         if test:
             x = x_range[i]
             break

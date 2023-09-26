@@ -47,7 +47,7 @@ def gnls(field):
                    'la',
                    'q',
                    'er'],
-        "bounds": lambda conc=None, resp=None: ((1e-4, 1.2 * np.max(resp)),
+        "bounds": lambda conc=None, resp=None: ((1e-4, 1.2 * np.max(abs(resp))),
                                                 (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),
                                                 (0.3, 8),
                                                 (np.min(conc) / 10, np.max(conc) * np.sqrt(10)),

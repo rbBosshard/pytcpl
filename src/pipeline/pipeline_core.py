@@ -88,7 +88,11 @@ def process(assay_endpoint_info, df, config, logger):
         """
         conc, resp = np.array(series.conc), np.array(series.resp)
         rmds = np.array([np.median(resp[conc == c]) for c in np.unique(conc)])
-        return (rmds.size >= config['min_num_median_responses_threshold']) and np.any(rmds >= cutoff)
+        enough_concentrations_tested = rmds.size >= config['min_num_median_responses_threshold']
+        high_responses_exist = np.any(abs(rmds) >= 0.8 * cutoff)
+        enough_concentrations_tested_but_responses_to_low = enough_concentrations_tested and not high_responses_exist
+        enough_concentrations_tested_and_high_responses_exist = enough_concentrations_tested and high_responses_exist
+        return (not enough_concentrations_tested, enough_concentrations_tested_but_responses_to_low, enough_concentrations_tested_and_high_responses_exist)
 
     def fit(series):
         """
@@ -106,15 +110,13 @@ def process(assay_endpoint_info, df, config, logger):
             resp = np.array(series.resp)
             signal_direction_is_bidirectional = signal_direction == 'bidirectional'
             x0 = get_model(fit_model)('x0')(signal_direction_is_bidirectional, conc, resp)
-            if signal_direction_is_bidirectional:
-                bounds = get_model(fit_model)('bounds_bidirectional')(conc, resp)
-            else:
-                bounds = get_model(fit_model)('bounds')(conc, resp)
+            bounds = get_model(fit_model)('bounds_bidirectional')(conc, resp) if signal_direction_is_bidirectional else get_model(fit_model)('bounds')(conc, resp)
             args = (conc, resp, get_model(fit_model)('fun'))
 
             fit_result = minimize(get_negative_log_likelihood, x0=x0, bounds=bounds, args=args,
                                   method=config['minimize_method'], tol=float(config['minimize_tol']),
-                                  options={'maxiter': int(config['minimize_maxiter']), 'maxfun': int(config['minimize_maxfun'])})
+                                  options={'maxiter': int(config['minimize_maxiter']),
+                                           'maxfun': int(config['minimize_maxfun'])})
 
             pars = {k: v for k, v in zip(get_model(fit_model)('params'), fit_result.x)}
             ll = -fit_result.fun
@@ -133,7 +135,8 @@ def process(assay_endpoint_info, df, config, logger):
             dict: Dictionary containing hit call results for the series.
         """
 
-        best_aic_model, hitcall, top, ac50, ac95, acc, actop, bmd, ac1sd, rmse, fitc = None, None, None, None, None, None, None, None, None, None, None
+        best_aic_model, hitcall, top, ac50, ac95, acc, actop, bmd, ac1sd, rmse, fitc = \
+            None, None, None, None, None, None, None, None, None, None, None
         conc, resp, params = np.array(series.conc), np.array(series.resp), series.fit_params
 
         if params is None:
@@ -160,7 +163,7 @@ def process(assay_endpoint_info, df, config, logger):
 
             inverse_function = get_model(best_aic_model)('inv')
             ac50 = inverse_function(.5 * top, *ps_list[:-1], conc)
-            ac95 = inverse_function(.5 * top, *ps_list[:-1], conc)
+            ac95 = inverse_function(.95 * top, *ps_list[:-1], conc)
             actop = inverse_function(top - np.sign(top) * 1e-12, *ps_list[:-1], conc)
             acc = inverse_function(np.sign(top) * cutoff, *ps_list[:-1], conc) if cutoff <= abs(top) else None
             ac1sd = inverse_function(np.sign(top) * onesd, *ps_list[:-1], conc) if onesd <= abs(top) else None
@@ -209,11 +212,14 @@ def process(assay_endpoint_info, df, config, logger):
 
         # Compute fit category (fitc), see https://www.frontiersin.org/articles/10.3389/ftox.2023.1275980
         fitc = compute_fitc(ac50, ac95, conc, hitcall, top)
+        if fitc is None:
+            fitc = 2
 
         out = {'best_aic_model': best_aic_model, 'hitcall': hitcall, 'top': top, 'ac50': ac50, 'ac95': ac95, 'acc': acc,
-               'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd, 'fitc': fitc, 'cautionary_flags': []}
+               'actop': actop, 'bmd': bmd, 'ac1sd': ac1sd, 'fitc': int(fitc)}
 
-        if fitc >= 36:
+        cautionary_flag_true = None
+        if fitc >= 13:
             info = out.copy()
             info['cutoff'] = cutoff
             info['bmad'] = bmad
@@ -224,7 +230,8 @@ def process(assay_endpoint_info, df, config, logger):
             info['cell_viability_assay'] = assay_function_type.endswith('viability')
             cautionary_flags = [mc6_mthds(mthd, info) for mthd in load_method(lvl=6, aeid=aeid, config=config)]
             cautionary_flag_true = [key for flag_result in cautionary_flags for key, value in flag_result.items() if value]
-            out['cautionary_flags'] = cautionary_flag_true
+            cautionary_flag_true = cautionary_flag_true if cautionary_flag_true else []
+        out['cautionary_flags'] = [] if cautionary_flag_true is None else cautionary_flag_true
 
         return out
 
@@ -234,7 +241,7 @@ def process(assay_endpoint_info, df, config, logger):
         min_conc, max_conc = np.min(conc), np.max(conc)
 
         fitc = 2
-        if hitcall >= 0.9:
+        if hitcall >= config['activity_threshold']:
             if abs(top) <= cutoff_upper:
                 if ac50 <= min_conc:
                     fitc = 36
@@ -249,7 +256,7 @@ def process(assay_endpoint_info, df, config, logger):
                     fitc = 41
                 elif ac50 > min_conc and ac95 >= max_conc:
                     fitc = 42
-        elif hitcall < 0.9:
+        elif hitcall < config['activity_threshold']:
             if top and abs(top) < cutoff_lower:
                 fitc = 13
             elif top and abs(top) >= cutoff_lower:
@@ -267,27 +274,32 @@ def process(assay_endpoint_info, df, config, logger):
     df = group_datapoints_to_series(sample_groups)
     desc = get_msg_with_elapsed_time(f"🛠️  -> Preprocessing:  ")
     it = tqdm(df.iterrows(), total=df.shape[0], desc=desc, bar_format=custom_format)
-    mask = Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it]
-    mask = pd.Series(mask)
+    no_fit_nan, no_fit_too_low, to_fit = zip(*Parallel(n_jobs=nj)(delayed(check_to_fit)(i) for _, i in it) if p else [check_to_fit(i) for _, i in it])
+    mask_no_fit_nan = pd.Series(no_fit_nan)
+    mask_no_fit_too_low = pd.Series(no_fit_too_low)
+    mask_to_fit = pd.Series(to_fit)
+
     df = df.reset_index()
-    df_to_fit = df[mask].reset_index(drop=True)
-    df_no_fit = df[~mask].reset_index(drop=True)
+    df_to_fit = df[mask_to_fit].reset_index(drop=True)
+    df_no_fit_nan = df[mask_no_fit_nan].reset_index(drop=True)
+    df_no_fit_too_low = df[mask_no_fit_too_low].reset_index(drop=True)
 
     # Curve-Fitting
     desc = get_msg_with_elapsed_time(f"☄️  -> Curve-Fitting: ")
     it = tqdm(df_to_fit.iterrows(), total=df_to_fit.shape[0], desc=desc, bar_format=custom_format)
     fit_params = Parallel(n_jobs=nj)(delayed(fit)(i) for _, i in it) if p else [fit(i) for _, i in it]
     df_fitted = df_to_fit.assign(fit_params=fit_params)
-    df_no_fit['fit_params'] = None
+    df_no_fit_nan['fit_params'] = None
+    df_no_fit_too_low['fit_params'] = None
     if config['enable_curve_fit_parameter_tracking']:
         track_fitted_params(df_fitted['fit_params'])
 
     # Hit-Calling
-
-    df = pd.concat([df_fitted, df_no_fit]).reset_index(drop=True)
-
+    df_no_fit_nan['hitcall'] = None
+    df_no_fit_too_low['hitcall'] = 0
+    df = pd.concat([df_fitted, df_no_fit_nan, df_no_fit_too_low]).reset_index(drop=True)
     desc = get_msg_with_elapsed_time(f"🚥  -> Hit-Calling:   ")
-    it = tqdm(df_fitted.iterrows(), desc=desc, total=df_fitted.shape[0], bar_format=custom_format)
+    it = tqdm(df.iterrows(), desc=desc, total=df.shape[0], bar_format=custom_format)
     res = pd.DataFrame(Parallel(n_jobs=nj)(delayed(hit)(i) for _, i in it)) if p \
         else df.apply(lambda i: hit(i), axis=1, result_type='expand')
     df[res.columns] = res

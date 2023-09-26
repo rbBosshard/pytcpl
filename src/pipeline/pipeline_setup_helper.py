@@ -297,7 +297,7 @@ def handle_viability_assays(config, df):
     aeids_burst_assay_endpoints = df[is_burst_assay_endpoint]['aeid']
     is_viability_assay_endpoint = df['assay_function_type'].str.endswith('viability')
     viability_assay_endpoints = df[is_viability_assay_endpoint]
-    # Working on..
+
     target_assay_endpoints = df[~(is_burst_assay_endpoint | is_viability_assay_endpoint)]
     target_assay_endpoints = filter_on_count_and_hitcall_ratio(config, target_assay_endpoints)
     aeids_target_assays = target_assay_endpoints['aeid']

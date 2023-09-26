@@ -1,24 +1,29 @@
 import numpy as np
 
-from src.pipeline.models.helper import get_mad, get_mmed_conc
+from src.pipeline.models.helper import get_mad, get_mmed_conc, get_mmed
 
 
 def mc6_mthds(mthd, info):
-    return {
-        'ac50.lowconc': ac50_lowconc(mthd, info),
-        'bmd.high': bmd_high(mthd, info),
-        'border': border(mthd, info),
-        'efficacy.50': efficacy_50(mthd, info),
-        'gnls.lowconc': gnls_lowconc(mthd, info),
-        'low.nconc': low_nconc(mthd, info),
-        'low.nrep': low_nrep(mthd, info),
-        'modl.directionality.fail': modl_directionality_fail(mthd, info),
-        'multipoint.neg': multipoint_neg(mthd, info),
-        'noise': noise(mthd, info),
-        'singlept.hit.high': singlept_hit_high(mthd, info),
-        'singlept.hit.mid': singlept_hit_mid(mthd, info),
-        'viability.gnls': viability_gnls(mthd, info),
-    }.get(mthd)
+    method_functions = {
+        'ac50.lowconc': ac50_lowconc,
+        'bmd.high': bmd_high,
+        'border': border,
+        'efficacy.50': efficacy_50,
+        'gnls.lowconc': gnls_lowconc,
+        'low.nconc': low_nconc,
+        'low.nrep': low_nrep,
+        'modl.directionality.fail': modl_directionality_fail,
+        'multipoint.neg': multipoint_neg,
+        'noise': noise,
+        'singlept.hit.high': singlept_hit_high,
+        'singlept.hit.mid': singlept_hit_mid,
+        'viability.gnls': viability_gnls,
+    }
+
+    if mthd in method_functions:
+        return method_functions[mthd](mthd, info)
+    else:
+        return None
 
 
 def mc4_mthds(mthd, df):
@@ -131,12 +136,11 @@ def border(mthd, info):
 def efficacy_50(mthd, info):
     flag = "Less than 50% efficacy"
 
-    flag_condition = (info["hitcall"] >= 0.9) and (info["cutoff"] >= 5) and \
-                     ((info["top"] < 50) or (get_mmed_conc(info['bidirectional'], info['conc'], info['resp']) < 50))
+    flag_condition = (info["hitcall"] >= 0.9) and (abs(info["cutoff"]) >= 5) and \
+                     ((abs(info["top"]) < 50) or (get_mmed(info['bidirectional'], info['conc'], info['resp']) < 50))
 
-    # e3
-    flag_condition = flag_condition or (info["hitcall"] >= 0.9) and (info["cutoff"] < 5) and \
-                     ((info["top"] < np.log2(1.5)) or (get_mmed_conc(info['bidirectional'], info['conc'], info['resp']) < np.log2(1.5)))
+    flag_condition = flag_condition or (info["hitcall"] >= 0.9) and (abs(info["cutoff"]) < 5) and \
+                     ((abs(info["top"]) < np.log2(1.5)) or (get_mmed(info['bidirectional'], info['conc'], info['resp']) < np.log2(1.5)))
 
     return {flag: flag_condition}
 
@@ -173,14 +177,23 @@ def low_nrep(mthd, info):
 def multipoint_neg(mthd, info):
     flag = "Multiple points above baseline, inactive"
 
-    rmds = np.median(info['resp'])
-    med_rmds = rmds >= (3 * info['bmad'])
-    nconc = len(np.unique(info['conc']))
-    nmed_gtbl = np.sum(med_rmds) / nconc
-
+    nmed_gtbl = get_nmed_gtbl(info)
     flag_condition = (nmed_gtbl > 1) and (info["hitcall"] < 0.9)
 
     return {flag: flag_condition}
+
+
+def get_nmed_gtbl(info):
+    resp = np.array(info['resp'])
+    conc = np.array(info['conc'])
+    unique_conc = np.unique(conc)
+    if info['bidirectional']:
+        rmds = np.array([np.median(abs(resp[conc == c])) for c in unique_conc])
+    else:
+        rmds = np.array([np.median(resp[conc == c]) for c in unique_conc])
+    med_rmds = rmds >= (3 * info['bmad'])
+    nmed_gtbl = np.sum(med_rmds)
+    return nmed_gtbl
 
 
 def noise(mthd, info):
@@ -196,10 +209,7 @@ def singlept_hit_high(mthd, info):
 
     lstc = get_mmed_conc(info['bidirectional'], info['conc'], info['resp']) == np.max(info["conc"])
 
-    rmds = np.median(info['resp'])
-    med_rmds = rmds >= (3 * info['bmad'])
-    nconc = len(np.unique(info['conc']))
-    nmed_gtbl = np.sum(med_rmds) / nconc
+    nmed_gtbl = get_nmed_gtbl(info)
 
     flag_condition = (nmed_gtbl == 1) and (info["hitcall"] >= 0.9) and lstc
 
@@ -211,10 +221,7 @@ def singlept_hit_mid(mthd, info):
 
     lstc = get_mmed_conc(info['bidirectional'], info['conc'], info['resp']) == np.max(info["conc"])
 
-    rmds = np.median(info['resp'])
-    med_rmds = rmds >= (3 * info['bmad'])
-    nconc = len(np.unique(info['conc']))
-    nmed_gtbl = np.sum(med_rmds) / nconc
+    nmed_gtbl = get_nmed_gtbl(info)
 
     flag_condition = (nmed_gtbl == 1) and (info["hitcall"] >= 0.9) and ~lstc
 

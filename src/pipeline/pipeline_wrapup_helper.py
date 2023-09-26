@@ -48,8 +48,8 @@ def save_merged(df_all, cutoff_all):
     # For writing to DB ensure it holds that in config/config.yaml: enable_writing_db: 1
     # check_db()
     print("Takes approx. 10 minutes depending on CPUs")
-    db_append(cutoff_all, 'cutoff')
-    db_append(df_all, 'output')
+    db_append(cutoff_all, 'cutoff', db=False)
+    db_append(df_all, 'output', db=False)
     return df_all, cutoff_all
 
 
@@ -96,7 +96,6 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
         df = pd.read_parquet(aeid_path)
         # cutoff = pd.read_parquet(cutoff_path)['cutoff']
         df["hitcall_c"] = df["hitcall"]
-        df.loc[:, 'fitc'] = 1
         df.loc[:, 'cytotox_flag'] = None
         df.loc[:, 'omit_flag'] = "PASS"
         df.loc[:, 'cytotox_potency'] = 1000

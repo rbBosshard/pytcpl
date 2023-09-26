@@ -40,9 +40,9 @@ def pipeline(config, confg_path):
         try:
             assay_endpoint_info = prolog(aeid, instance_id)
             df = fetch_raw_data()
-            df = process(assay_endpoint_info, df, config, logger)
-            write_output(df)
-            epilog()
+            # df = process(assay_endpoint_info, df, config, logger)
+            # write_output(df)
+            # epilog()
         except Exception as e:
             traceback_info = traceback.format_exc()
             error_file_path = os.path.join(LOG_DIR_PATH, f"errors_{instance_id}.log")

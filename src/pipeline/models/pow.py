@@ -30,15 +30,14 @@ def pow(field):
         "params": ['a',
                    'p',
                    'er'],
-        "bounds": lambda conc=None, resp=None: ((1e-8 * abs(get_mmed(False, conc, resp)), 1e8 * abs(
-                    get_mmed(True, conc, resp))),
+        "bounds": lambda conc=None, resp=None: (
+                    (1e-8 * abs(get_mmed(False, conc, resp)), 1e8 * abs(get_mmed(False, conc, resp))),
                     (0.3, 8),
                     (get_er_bounds())),
-        "bounds_bidirectional": lambda conc=None, resp=None: ((-1e8 * abs(
-            get_mmed(True, conc, resp)), 1e8 * abs(
-            get_mmed(True, conc, resp))),
-                                                (0.3, 8),
-                                                (get_er_bounds())),
+        "bounds_bidirectional": lambda conc=None, resp=None: (
+                    (-1e8 * abs(get_mmed(True, conc, resp)), 1e8 * abs(get_mmed(True, conc, resp))),
+                    (0.3, 8),
+                    (get_er_bounds())),
         "x0": lambda bidirectional=True, conc=None, resp=None: [get_mmed(bidirectional, conc, resp) or 0.01,
                                             1.5,
                                             get_er_est(resp)],

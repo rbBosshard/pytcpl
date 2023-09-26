@@ -41,6 +41,7 @@ def set_config_app(config):
 
 def get_series():
     series = st.session_state.df.iloc[st.session_state.df_index]
+    series['cautionary_flags'] = json.loads(series['cautionary_flags'])
     series['conc'] = json.loads(series['conc'])
     series['resp'] = json.loads(series['resp'])
     series['fit_params'] = json.loads(series['fit_params'])
@@ -76,11 +77,13 @@ def init_figure():
     # hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
     # subtitle = f"<br><sup>Hitcall: {hitcall} | {str(series['spid'])} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
     # fig.update_layout(title=title + subtitle, title_font=dict(size=26))
-    
+    signal_direction = st.session_state.assay_info['signal_direction']
+    y0 = -cutoff if signal_direction == "bidirectional" else 0
+       
     fig.update_xaxes(showspikes=True)
     fig.update_yaxes(showspikes=True)
     fig.update_layout(xaxis_title="log10(Concentration) μM", yaxis_title=str(st.session_state.assay_info['normalized_data_type']))
-    fig.add_hrect(y0=0, y1=cutoff, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
+    fig.add_hrect(y0=y0, y1=cutoff, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
                   annotation_text="efficacy cutoff", annotation_position="top left")
     fig.update_layout(legend=dict(groupclick="toggleitem"))
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
@@ -93,7 +96,7 @@ def add_curves(fig):
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
-    potencies = [potency for potency in ["acc", "ac50", "actop", "ac1sd", "bmd", "cytotox_potency"] if potency in series]
+    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_potency"] if potency in series]
     efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
 
     potency_values = [series[potency] for potency in potencies]
@@ -137,38 +140,44 @@ def add_curves(fig):
                            visible=True,
                            name=name, line=dict(width=width, dash=dash)))
 
-    for i, efficacy in enumerate(efficacies):
-        eff = efficacy_values[i]
-        if eff is not None and not np.isnan(eff):
-            fig.add_trace(go.Scatter(
-                name=f"{efficacy} = {eff:.1e}",
-                x=[min(np.log10(x)), max(np.log10(x))],
-                y=[eff, eff],
-                mode='lines',
-                opacity=0.8,
-                line=dict(color='gray', width=2, dash='dashdot'),
-                legendgroup="Efficacy",
-                legendgrouptitle_text="Efficacy",
-                visible="legendonly"
-            ))
 
-    for i, potency in enumerate(potencies):
-        pot = potency_values[i]
-        if pot is not None and not np.isnan(pot) and pot < 10:
-            pot_log = np.log10(series[potency])
-            params = fit_params[best_model]['pars'].copy()
-            params.pop('er')
-            pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
-            fig.add_trace(go.Scatter(
-                name=f"{potency} = {pot:.1e}",
-                x=[pot_log, pot_log],
-                y=[0, pot_y],
-                mode='lines',
-                opacity=0.8,
-                line=dict(color=color_best, width=3, dash='dot'),
-                legendgroup="Potency estimates",
-                legendgrouptitle_text="Potency estimates",
-            ))
+        for i, efficacy in enumerate(efficacies):
+            eff = efficacy_values[i]
+            if eff is not None and not np.isnan(eff):
+                visible = True if efficacy in ['top', 'cutoff'] else "legendonly"
+                fig.add_trace(go.Scatter(
+                    name=f"{efficacy} = {eff:.1e}",
+                    x=[min(np.log10(x)), max(np.log10(x))],
+                    y=[eff, eff],
+                    mode='lines',
+                    opacity=0.8,
+                    line=dict(color='gray', width=2, dash='dashdot'),
+                    legendgroup="Efficacy",
+                    legendgrouptitle_text="Efficacy",
+                    visible=visible
+                ))
+
+        for i, potency in enumerate(potencies):
+            pot = potency_values[i]
+
+            if pot is not None and not np.isnan(pot) and pot < 1000:
+                pot_log = np.log10(series[potency])
+                params = fit_params[best_model]['pars'].copy()
+                params.pop('er')
+                pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
+                visible = True if potency in ['actop', 'acc', 'ac50'] else "legendonly"
+
+                fig.add_trace(go.Scatter(
+                    name=f"{potency} = {pot:.1e}",
+                    x=[pot_log, pot_log],
+                    y=[0, pot_y],
+                    mode='lines',
+                    opacity=0.8,
+                    line=dict(color=color_best, width=3, dash='dot'),
+                    legendgroup="Potency estimates",
+                    legendgrouptitle_text="Potency estimates",
+                    visible=visible
+                ))
 
     
 
@@ -181,7 +190,7 @@ def add_curves(fig):
     median_resp = np.array([np.median(np.array(resp)[conc == c]) for c in unique_conc])
     fig.add_trace(
         go.Scatter(x=np.log10(unique_conc), y=median_resp, mode='markers', legendgroup="Observed responses",
-                   marker=dict(color="red", symbol="circle-open-dot", size=25), name="Median responses", showlegend=True))
+                   marker=dict(color="red", symbol="circle-open-dot", size=25), name="Median responses", showlegend=True, visible="legendonly"))
     return pars_dict
 
 
@@ -334,9 +343,11 @@ def get_compound_info():
     dsstox_substance_id_link = dsstox_substance_id_link if dsstox_substance_id is not None else "N/A"
     casn_link = f'https://commonchemistry.cas.org/detail?cas_rn={casn}'
     casn_link = casn_link if casn is not None else 'N/A'
+    fitc = int(st.session_state.series['fitc'])
     compound_info_df = pd.DataFrame(
         {   
             "Hitcall": [f"{st.session_state.series['hitcall_c']:.2f}"],
+            "Fitc": [f"{fitc}"],
             "Cytotoxicity": [f"{st.session_state.series['cytotox_flag']}"],
             "Cautionary Flags": [f"{st.session_state.series['cautionary_flags']}"],
             "ICE Omit-Flag": [f"{st.session_state.series['omit_flag']}"],
@@ -395,6 +406,8 @@ def get_assay_info(subset=False, transpose=False, replace=False):
 
 subset_assay_info_columns = ["aeid",
                              "assay_component_endpoint_name",
+                             "assay_function_type",
+                             "signal_direction",
                              "MechanisticTarget",
                              "ToxicityEndpoint",
                              "biological_process_target",
