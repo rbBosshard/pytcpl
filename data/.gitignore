@@ -1,11 +1,11 @@
 output/*
 output/.gitkeep
 
-cutoff/*
-cutoff/.gitkeep
+#cutoff/*
+#cutoff/.gitkeep
 
-raw/*
-raw/.gitkeep
+#raw/*
+#raw/.gitkeep
 
 output_compounds/*
 output_compounds/.gitkeep
