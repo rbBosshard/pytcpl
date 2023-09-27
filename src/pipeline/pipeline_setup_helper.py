@@ -95,16 +95,7 @@ def subset_for_candidate_assay_endpoints():
 
 
 def filter_on_assay_format_type():
-    query = f"SELECT ace.aeid, " \
-            f"ace.acid, " \
-            f"a.aid, " \
-            f"ace.assay_component_endpoint_name, " \
-            f"ace.burst_assay, " \
-            f"ace.intended_target_family, " \
-            f"ace.assay_function_type, " \
-            f"ace.signal_direction, " \
-            f"a.assay_format_type, " \
-            f"a.organism " \
+    query = f"SELECT * " \
             f"FROM assay_component_endpoint AS ace " \
             f"INNER JOIN assay_component AS ac ON ace.acid = ac.acid " \
             f"INNER JOIN assay AS a ON ac.aid = a.AID " \
@@ -113,6 +104,7 @@ def filter_on_assay_format_type():
             # f"AND ace.analysis_direction = 'positive' AND signal_direction='gain' " \
 
     df = query_db(query)
+    df = df.loc[:, ~df.columns.duplicated(keep='first')]
     return df
 
 
