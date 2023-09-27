@@ -151,7 +151,7 @@ def export_metadata_tables_to_parquet():
     """
     Export data from specified MySQL tables to Parquet files.
     """
-    tables = ["assay", "assay_component", "assay_component_endpoint",
+    tables = ["assay_source", "assay", "assay_component", "assay_component_endpoint",
               "assay_component_endpoint_descriptions",
               "sample", "chemical", "cytotox",
               "mc4_aeid", "mc5_aeid", "mc6_aeid",
@@ -161,6 +161,11 @@ def export_metadata_tables_to_parquet():
         df = query_db(f'SELECT * FROM {table}')
         destination_path = os.path.join(METADATA_DIR_PATH, f"{table}.parquet.gzip")
         df.to_parquet(destination_path, compression='gzip')
+
+        if table == "assay_source":
+            destination_path = os.path.join(METADATA_DIR_PATH, f"{table}.tex")
+            df[['assay_source_name', 'assay_source_long_name']].to_latex(destination_path, index=False,formatters={"name": str.upper},float_format="{:.1f}".format)
+
 
 
 def get_mechanistic_target_and_mode_of_action_annotations_from_ice():

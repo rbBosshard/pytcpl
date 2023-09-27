@@ -1,5 +1,5 @@
-output/*
-output/.gitkeep
+#output/*
+#output/.gitkeep
 
 #cutoff/*
 #cutoff/.gitkeep

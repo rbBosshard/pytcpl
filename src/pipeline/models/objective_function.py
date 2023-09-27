@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import t
+from scipy.stats import t, norm
 
 
 def get_negative_log_likelihood(params, conc, resp, fit_model, errfun="dt4"):
@@ -34,6 +34,9 @@ def get_negative_log_likelihood(params, conc, resp, fit_model, errfun="dt4"):
     # error = resp - pred
     # sigma_squared = np.var(error)
     # scale = np.sqrt(sigma_squared)
-    log_likelihood = np.sum(t.logpdf(x=resp, df=df, loc=pred, scale=scale))
+    if errfun == "dt4":
+        log_likelihood = np.sum(t.logpdf(x=resp, df=df, loc=pred, scale=scale) - np.log(scale))
+    else:  # errfun == "dnorm":
+        log_likelihood = np.sum(norm.logpdf(x=resp, loc=pred, scale=scale) - np.log(scale))
 
     return -log_likelihood

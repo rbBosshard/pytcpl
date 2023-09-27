@@ -5,9 +5,9 @@ enable_dropping_all_new_tables: 1
 enable_fancy_logging: 1
 enable_profiling: 0
 enable_reading_db: 0
-enable_writing_db: 1
+enable_writing_db: 0
 enable_output_compounds: 1
-enable_fetching_raw_data_from_db: 1
+enable_fetching_raw_data_from_db: 0
 
 n_jobs: -1
 
@@ -39,7 +39,7 @@ curve_fit_models:
   - poly2
   - pow
   - exp2
-#  - exp3
+#  - exp3  # omit due to low winning rate and overflow issue
   - exp4
   - exp5
   - hill
