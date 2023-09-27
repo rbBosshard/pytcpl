@@ -1,32 +1,42 @@
-[00:00:00:68] 🚀 Pytcpl launched!
-[00:00:00:68] ⚙️ Configuration located in C:\Users\bossh\Documents\GitHub\pytcpl\src\pipeline\../../config
-[00:00:00:68] 📜 Running pipeline for 430 assay endpoints (See 'config/aeid_list.in')
-[00:00:00:68] 🧩 Engine: instance_id=0, instances_total=1
+[00:00:01:10] 🚀 Pytcpl launched!
+[00:00:01:10] ⚙️ Configuration located in /home/bossh/pytcpl/src/pipeline/../../config
+[00:00:01:10] 📜 Running pipeline for 107 assay endpoints (See 'config/aeid_list.in')
+[00:00:01:10] 🧩 Engine: instance_id=0, instances_total=4
 
-[00:00:00:68] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:00:01:10] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:00:00:72] 🌱 Start processing new assay endpoint: TOX21_PXR_agonist (aeid=2363)
-[00:00:00:72] ⏳ Fetching raw data..
-[00:00:00:78] ℹ️ Loaded 547200 single datapoints
-[00:00:00:78] 🌡️ Computing efficacy cutoff
-[00:00:01:47] 💻 Processing (fit (gain) & hit) 9671 concentration-response series
-[00:04:28:25] 💽 Writing output data to DB (~10.41 MB)..
-[00:04:29:62] 🥕 Assay endpoint processing completed
+[00:00:01:17] 🌱 Start processing new assay endpoint: TOX21_PXR_agonist (aeid=2363)
+[00:00:01:17] ⏳ Fetching raw data..
+[00:00:01:25] ℹ️ Loaded 547200 single datapoints
+[00:00:01:25] 🌡️ Computing efficacy cutoff
+[00:00:02:40] 💻 Processing (fit (gain) & hit) 9671 concentration-response series
+[00:04:39:90] 💽 Writing output data to DB (~10.97 MB)..
+[00:04:42:06] 🥕 Assay endpoint processing completed
 
-[00:04:29:62] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:04:42:06] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:04:29:63] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_GLO_40hr_viability (aeid=2093)
-[00:04:29:63] ⏳ Fetching raw data..
-[00:04:29:66] ℹ️ Loaded 184320 single datapoints
-[00:04:29:66] 🌡️ Computing efficacy cutoff
-[00:04:30:04] 💻 Processing (fit (loss) & hit) 9671 concentration-response series
-[00:08:06:60] 💽 Writing output data to DB (~6.27 MB)..
-[00:08:07:36] 🥕 Assay endpoint processing completed
+[00:04:42:07] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_GLO_40hr_viability (aeid=2093)
+[00:04:42:07] ⏳ Fetching raw data..
+[00:04:42:12] ℹ️ Loaded 184320 single datapoints
+[00:04:42:12] 🌡️ Computing efficacy cutoff
+[00:04:42:66] 💻 Processing (fit (loss) & hit) 9671 concentration-response series
+[00:09:00:46] 💽 Writing output data to DB (~6.81 MB)..
+[00:09:01:58] 🥕 Assay endpoint processing completed
 
-[00:08:07:36] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+[00:09:01:58] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-[00:08:07:37] 🌱 Start processing new assay endpoint: TOX21_SHH_3T3_GLI3_Antagonist (aeid=2108)
-[00:08:07:37] ⏳ Fetching raw data..
-[00:08:07:46] ℹ️ Loaded 552960 single datapoints
-[00:08:07:46] 🌡️ Computing efficacy cutoff
-[00:08:08:49] 💻 Processing (fit (loss) & hit) 9672 concentration-response series
+[00:09:01:60] 🌱 Start processing new assay endpoint: TOX21_SHH_3T3_GLI3_Antagonist (aeid=2108)
+[00:09:01:60] ⏳ Fetching raw data..
+[00:09:01:70] ℹ️ Loaded 552960 single datapoints
+[00:09:01:70] 🌡️ Computing efficacy cutoff
+[00:09:02:90] 💻 Processing (fit (loss) & hit) 9672 concentration-response series
+[00:12:10:83] 💽 Writing output data to DB (~10.62 MB)..
+[00:12:12:73] 🥕 Assay endpoint processing completed
+
+[00:12:12:73] #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+[00:12:12:75] 🌱 Start processing new assay endpoint: TOX21_RT_HEK293_GLO_16hr_viability (aeid=2088)
+[00:12:12:75] ⏳ Fetching raw data..
+[00:12:12:79] ℹ️ Loaded 184320 single datapoints
+[00:12:12:79] 🌡️ Computing efficacy cutoff
+[00:12:13:40] 💻 Processing (fit (loss) & hit) 9671 concentration-response series
