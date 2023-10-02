@@ -146,9 +146,9 @@ def efficacy_50(mthd, info):
 
 
 def gnls_lowconc(mthd, info):
-    flag = "Gain AC50 < lowest conc when gnls or sigmoid is winning model"
+    flag = "Gain AC50 < lowest conc when gnls or gnls2 is winning model"
 
-    flag_condition = ((info["best_aic_model"] == "gnls") or (info["best_aic_model"] == "sigmoid")) and \
+    flag_condition = ((info["best_aic_model"] == "gnls") or (info["best_aic_model"] == "gnls2")) and \
                      (info["ac50"] < np.min(info["conc"]))
 
     return {flag: flag_condition}
@@ -229,9 +229,9 @@ def singlept_hit_mid(mthd, info):
 
 
 def viability_gnls(mthd, info):
-    flag = "Cell viability assay fit with gnls or sigmoid winning model"
+    flag = "Cell viability assay fit with gnls or gnls2 winning model"
 
-    flag_condition = ((info["best_aic_model"] == "gnls") or (info["best_aic_model"] == "sigmoid")) \
+    flag_condition = ((info["best_aic_model"] == "gnls") or (info["best_aic_model"] == "gnls2")) \
                      and (info["hitcall"] >= 0.9) & (info["cell_viability_assay"] == 1)
 
     return {flag: flag_condition}

@@ -1,26 +1,26 @@
-T47D
 HepG2
-umbilical vein endothelium
-bronchial epithelial cells
-coronary artery smooth muscle cells
-foreskin fibroblast
-keratinocytes and foreskin fibroblasts
-umbilical vein endothelium and peripheral blood mononuclear cells
-CHO-K1
-HEK293T
-HeLa
-MDA-kb2
-MCF7
-VM7
 GH3
-HepaRG
-HCT116
+PR-UAS-bla-HEK293T
 HEK293
+ERR-HEK293T
+NIH/3T3
+HEK293T
+CHO-K1
+MDA-kb2
+VM7
+PGC/ERR HEK293T
+MCF7
 ME-180
 C3H10T1/2
+T47D
+HeLa
+HCT116
+HepaRG
+foreskin fibroblast
 22Rv1
-ERR-HEK293T
-PGC/ERR HEK293T
-NIH/3T3
-PR-UAS-bla-HEK293T
+umbilical vein endothelium
+umbilical vein endothelium and peripheral blood mononuclear cells
+coronary artery smooth muscle cells
+bronchial epithelial cells
+keratinocytes and foreskin fibroblasts
 U2OS

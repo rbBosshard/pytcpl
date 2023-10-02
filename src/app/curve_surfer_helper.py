@@ -96,7 +96,7 @@ def add_curves(fig):
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
-    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_potency"] if potency in series]
+    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_acc"] if potency in series]
     efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
 
     potency_values = [series[potency] for potency in potencies]
@@ -114,7 +114,7 @@ def add_curves(fig):
 
     min_val = min(min_val, min_potencies)
     x = pow_space(min_val, max_val, 10, 200)
-    best_model = series['best_aic_model']
+    best_model = get_correct_model_name(series['best_aic_model'])
     color_best = "gray"
     if fit_params is not None and series['hitcall'] > 0:
         iterator = fit_params.items()
@@ -123,6 +123,7 @@ def add_curves(fig):
             pars_dict[fit_model] = params
             er = params.pop('er')
             aic = round(fit_parameters["aic"], 2)
+            fit_model = get_correct_model_name(fit_model)
             y = np.array(get_model(fit_model)('fun')(x, **params))
             color = px.colors.qualitative.Plotly[index]
             is_best = fit_model == best_model
@@ -162,7 +163,8 @@ def add_curves(fig):
 
             if pot is not None and not np.isnan(pot) and pot < 1000:
                 pot_log = np.log10(series[potency])
-                params = fit_params[best_model]['pars'].copy()
+
+                params = fit_params[get_original_name(best_model)]['pars'].copy()
                 params.pop('er')
                 pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
                 visible = True if potency in ['actop', 'acc', 'ac50'] else "legendonly"
@@ -192,6 +194,16 @@ def add_curves(fig):
         go.Scatter(x=np.log10(unique_conc), y=median_resp, mode='markers', legendgroup="Observed responses",
                    marker=dict(color="red", symbol="circle-open-dot", size=25), name="Median responses", showlegend=True, visible="legendonly"))
     return pars_dict
+
+def get_correct_model_name(fit_model):
+    if fit_model == 'sigmoid':
+        fit_model = 'gnls2'
+    return fit_model
+
+def get_original_name(fit_model):
+    if fit_model == 'gnls2':
+        fit_model = 'sigmoid'
+    return fit_model
 
 
 def reset_df_index():
@@ -344,17 +356,23 @@ def get_compound_info():
     casn_link = f'https://commonchemistry.cas.org/detail?cas_rn={casn}'
     casn_link = casn_link if casn is not None else 'N/A'
     fitc = int(st.session_state.series['fitc'])
+    cytotox_flag = st.session_state.series['cytotox_flag']
+    cytotox_prob = st.session_state.series['cytotox_prob']
+    cytotox_acc = st.session_state.series['cytotox_acc']
     compound_info_df = pd.DataFrame(
         {   
-            "Hitcall": [f"{st.session_state.series['hitcall_c']:.2f}"],
-            "Fitc": [f"{fitc}"],
-            "Cytotoxicity": [f"{st.session_state.series['cytotox_flag']}"],
-            "Cautionary Flags": [f"{st.session_state.series['cautionary_flags']}"],
-            "ICE Omit-Flag": [f"{st.session_state.series['omit_flag']}"],
-            "SPID": [st.session_state.compound_id],
-            "DSSTOXSID": [dsstox_substance_id],
-            "CASRN": [casn],
             "Chemical name": [chnm],
+            "DSSTOXSID": [dsstox_substance_id],
+            "Hitcall corrected": [f"{st.session_state.series['hitcall_c']:.2f}"],
+            "Cytotox ref": [f"{cytotox_flag} assay based" if cytotox_flag is not None else "no target"],
+            "Cytotox ref acc": [f"{(cytotox_acc):.1e}" if cytotox_acc is not None else "N/A"],
+            "Cytotox ref prob": [f"{(cytotox_prob):.2f}" if cytotox_prob is not None else "N/A"],
+            "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
+            "Fitc": [f"{fitc}"],
+            "Caution Flags": [f"{st.session_state.series['cautionary_flags']}"],
+            "ICE Omit Flag": [f"{st.session_state.series['omit_flag']}"],
+            "SPID": [st.session_state.compound_id],
+            "CASRN": [casn],
             "DSSTOXSID Link": [dsstox_substance_id_link],
             "CASRN Link": [casn_link],
 
@@ -362,8 +380,8 @@ def get_compound_info():
     )
 
     column_config = {
-        "Hitcall": st.column_config.ProgressColumn(
-            "Hitcall",
+        "Hitcall corrected": st.column_config.ProgressColumn(
+            "Hitcall corrected",
             help=f"Bioactivity score :biohazard_sign:",
             format="%.2f",
             min_value=0,
@@ -415,4 +433,5 @@ subset_assay_info_columns = ["aeid",
                              "intended_target_family_sub",
                              "intended_target_type",
                              "intended_target_type_sub",
+                             "burst_assay",
                              ]

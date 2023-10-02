@@ -8,7 +8,7 @@ from .hill import hill
 from .poly1 import poly1
 from .poly2 import poly2
 from .pow import pow
-from .sigmoid import sigmoid
+from .gnls2 import gnls2
 
 
 def get_model(fit_model):
@@ -17,7 +17,7 @@ def get_model(fit_model):
 
     This function takes a fit model name as input and returns the corresponding model function that can be used for
     curve fitting. The available fit models include constant, exponential decay (Exp4 and Exp5), gainloss (GNLS),
-    Hill, polynomial (poly1 and poly2), power-law (pow), and sigmoid models.
+    Hill, polynomial (poly1 and poly2), power-law (pow), and gnls2 models.
 
     Args:
         fit_model (str): The name of the fit model for which to retrieve the corresponding model function.
@@ -42,5 +42,5 @@ def get_model(fit_model):
         'poly1': poly1,
         'poly2': poly2,
         'pow': pow,
-        'sigmoid': sigmoid,
+        'gnls2': gnls2,
     }.get(fit_model)

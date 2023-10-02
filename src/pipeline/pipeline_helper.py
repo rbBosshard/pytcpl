@@ -10,10 +10,10 @@ import yaml
 from mysql import connector as mysql
 from sqlalchemy import create_engine, text
 
-from src.pipeline.pipeline_methods import mc4_mthds, mc5_mthds
-
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
+
+from src.pipeline.pipeline_methods import mc4_mthds, mc5_mthds
 
 from src.pipeline.pipeline_constants import CONFIG_DIR_PATH, CONFIG_PATH, AEIDS_LIST_PATH, DDL_PATH, \
     DATA_DIR_PATH, LOG_DIR_PATH, RAW_DIR_PATH, METADATA_DIR_PATH, \

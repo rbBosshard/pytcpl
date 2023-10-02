@@ -1,24 +1,24 @@
-real-time cell-growth kinetics
-cell phenotype
-cell number
-protein conformation
-dye binding
-dna content
-enzyme activity
-mRNA induction
-immunoassay: elisa
-protein content
-dehydrogenase activity determination
 luciferase induction
-protein fragment complementation assay
-fluorescent protein induction
 beta lactamase induction
+mRNA induction
 ATP content
-cAMP measurement
-dead cells
-metabolic activity
-artifact detection
+dye binding
 living cells
-intracellular calcium
-caspase activity
+dead cells
+real-time cell-growth kinetics
+metabolic activity
+protein content
+immunoassay: elisa
+cAMP measurement
+protein fragment complementation assay
+dehydrogenase activity determination
 protein-protein binding
+cell number
+caspase activity
+intracellular calcium
+cell phenotype
+fluorescent protein induction
+dna content
+artifact detection
+protein conformation
+enzyme activity

@@ -9,6 +9,7 @@ from joblib import Parallel, delayed
 import matplotlib.cm as cm
 import seaborn as sns
 import matplotlib
+from scipy.stats import norm
 matplotlib.use('Agg')
 
 
@@ -81,7 +82,7 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
             executor.submit(process_compound, i, compound)
 
 
-def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
+def ice_curation_and_cytotoxicity_handling(config):
     aeids_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))
     aeids_target_assays = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}"))
     output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}"), os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
@@ -95,19 +96,22 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
     def post_process(aeid, aeid_path, cutoff_path, assay_info_df, aeids_target_assays, viability_counterparts_aeid):
         df = pd.read_parquet(aeid_path)
         # cutoff = pd.read_parquet(cutoff_path)['cutoff']
+        # Init new fields relevant for post-processing
+        df.loc[:, 'omit_flag'] = "PASS"
         df["hitcall_c"] = df["hitcall"]
         df.loc[:, 'cytotox_flag'] = None
-        df.loc[:, 'omit_flag'] = "PASS"
-        df.loc[:, 'cytotox_potency'] = 1000
+        df.loc[:, 'cytotox_prob'] = None
+        df.loc[:, 'cytotox_acc'] = 1000
         df.loc[:, 'viability_aeid'] = None
 
         # Data curation: cHTS data in ICE have been curated to integrate concentration-response curve fit information and chemical QC data to bolster confidence in hit calls.
         # https://ice.ntp.niehs.nih.gov/DATASETDESCRIPTION?section=cHTS
-        ice_curation_adding_omit_flags(aeid, assay_info_df, df)
+        if config['enable_ICE_filtering']:
+            ice_curation_adding_omit_flags(aeid, assay_info_df, df)
 
-        # Correct for cytotoxicity in target assasy with corresponding viability assay
-        if aeid in aeids_target_assays['aeid']:
-            df = correct_for_cytotoxicity(str(aeid), df, viability_counterparts_aeid)
+        # Cytotoxicity curation of target assays via corresponding viability assay
+        if aeid in aeids_target_assays['aeid'].values and config['enable_cytotox_filtering_by_viability_assays']:
+            df = handle_cytotoxicity_based_on_viability_assays(config, str(aeid), df, viability_counterparts_aeid)
 
         return aeid, df
 
@@ -129,7 +133,12 @@ def ice_curation_and_cytotoxicity_filtering_with_viability_assays(config):
     df_all = pd.concat(dfs.values(), axis=0)
     cutoff_all = pd.concat([pd.read_parquet(file) for file in cutoff_paths])
 
+    # Cytotoxicity curation of target assays via burst assays
+    if config['enable_cytotox_filtering_by_burst_assays']:
+        df_all = cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays)
+
     plot_omit_flags(df_all, aeids_sorted)
+
     return df_all, cutoff_all, aeids_target_assays['aeid']
 
 
@@ -163,7 +172,7 @@ def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
     # For NovaScreen (NVS) cell-free biochemical assays, any active calls with less than 50% efficacy.
     condition_assay = assay_info_df['assay_component_endpoint_name'].str.startswith('NVS_') & (
                 assay_info_df['cell_format'] == 'cell-free')
-    if aeid in assay_info_df[condition_assay]['aeid']:
+    if aeid in assay_info_df[condition_assay]['aeid'].values:
         condition_omit_flag = df['top'] < 0.5  # NovaScreen (NVS) cell-free biochemical assays normalized as percent_activity
         df.loc[condition_omit_flag, 'omit_flag'] = "OMIT (assay-based)"
 
@@ -171,15 +180,15 @@ def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
     # Note: NCATS Tox21 assays not found
 
     # Any down-direction (i.e., inhibition, antagonism, loss-of-signal, etc.) active call where the best-fit curve was a gain-loss model.
-    if aeid in assay_info_df[assay_info_df['signal_direction'] == 'loss']['aeid']:
+    if aeid in assay_info_df[assay_info_df['signal_direction'] == 'loss']['aeid'].values:
         condition_omit_flag = df['best_aic_model'].isin(
-            ['gnls', 'sigmoid'])  # gnls and sigmoid both model loss of activity for increasing concentrations
+            ['gnls', 'gnls2'])  # gnls and gnls2 both model loss of activity for increasing concentrations
         df.loc[condition_omit_flag, 'omit_flag'] = "OMIT (assay-based)"
     concs = df['conc'].apply(json.loads)
 
     # Any active call where the best-fit curve was a gain-loss model and AC50 that was extrapolated below the testing concentration range.
     min_concs = list(map(min, concs))
-    condition_omit_flag = df['best_aic_model'].isin(['gnls', 'sigmoid']) & (df['ac50'] < min_concs)
+    condition_omit_flag = df['best_aic_model'].isin(['gnls', 'gnls2']) & (df['ac50'] < min_concs)
     df.loc[condition_omit_flag, 'omit_flag'] = "OMIT (assay-based)"
 
     # Any active concentration-response curve where the AC50 was extrapolated to a concentration above the tested concentration range.
@@ -188,7 +197,7 @@ def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
     df.loc[condition_omit_flag, 'omit_flag'] = "OMIT (assay-based)"
 
     # Any active call with flags 11 and 16 from the tcpl pipeline, which suggest marginal efficacy and likely overfitting.
-    # Note: fitc flags 11 and 16 not availbale in new (py)tcpl version. Map new quality warning flags
+    # Note: fitc flags 11 and 16 not availbale in the new (py)tcpl v3.0. Map new quality warning flags
 
     # ICE omits for the cHTS data set entire assay endpoints (already done in pipeline setup by subset aeids):
 
@@ -199,7 +208,7 @@ def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
     df.loc[condition_omit_flag, 'omit_flag'] = "OMIT (chemical-based)"
 
 
-def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
+def handle_cytotoxicity_based_on_viability_assays(config, aeid, df, viability_counterparts_aeid):
     # For cell based assays, try finding matching viability/burst/background assays and correct hitc where
     # AC50 in the former > than AC50 in the latter (we can adjust boundaries around that).
     if aeid in viability_counterparts_aeid:
@@ -209,41 +218,44 @@ def correct_for_cytotoxicity(aeid, df, viability_counterparts_aeid):
         df.loc[:, 'viability_aeid'] = viability_assay_endpoint_aeid
         for index, row in df.iterrows():
             compound = row['dsstox_substance_id']
-            ac50 = row['ac50']
-
+            acc_target = row['acc']
+            hitcall_target = row['hitcall']
             # Find the corresponding compounds in viability_assay_endpoint
             matching_row = viability_assay_endpoint[viability_assay_endpoint['dsstox_substance_id'] == compound]
 
             if not matching_row.empty:
-                ac50_viability = matching_row['ac50'].iloc[0]
+                acc_viability = matching_row['acc'].iloc[0]
                 hitcall_viability = matching_row['hitcall'].iloc[0]
-                best_aic_model_viability = matching_row['best_aic_model'].iloc[0]
 
-                # Compare AC50 values and update 'hitcall' in target assay endpoint if needed
-                contending_cytotoxicity = ac50_viability < ac50 \
-                                          and hitcall_viability > 0.9 \
-                                          and best_aic_model_viability not in ['gnls', 'sigmoid']
+                # Estimate probability as the probability that acc_viability < acc_target, where 0 = not cytotox and 1 = cytotoxic
+                diff = acc_target - acc_viability
+                # Variance in the difference is variance of target acc + variance of cytotox acc
+                # We don't know variance of acc so use 0.3 as a generous estimate based on Watt and Judson 2018
+                var = (10 ** 0.3) ** 2 + (10 ** 0.3) ** 2
 
-                if contending_cytotoxicity:
-                    df.at[index, 'hitcall_c'] = 0.0
-                    df.at[index, 'cytotox_flag'] = "cytotoxic_by_viability_check"
-                    df.at[index, 'cytotox_potency'] = ac50_viability
-                else:
-                    df.at[index, 'cytotox_flag'] = "non_cytotoxic_by_viability_check"
+                # This gives the probability that diff > 0 based on the cumulative probability distribution with mean = 0 and var = var
+                cytotoxicity_confounding_prob = norm.cdf(diff, loc=0, scale=var ** 0.5)
 
+                is_monotonic = matching_row['best_aic_model'].iloc[0] not in ['gnls', 'gnls2']
+                cytotoxicity_confounding_prob *= hitcall_viability * is_monotonic
+                prob_cytotoxicity_corrective = (1 - cytotoxicity_confounding_prob) 
+   
+                df.at[index, 'hitcall_c'] = hitcall_target * prob_cytotoxicity_corrective
+                df.at[index, 'cytotox_flag'] = "viability"
+                df.at[index, 'cytotox_prob'] = cytotoxicity_confounding_prob
+                df.at[index, 'cytotox_acc'] = acc_viability            
     return df
 
 
 def compute_cytotoxicity_from_burst_assays(config, burst_assays):
     threshold_cytotox_min_tested = config['threshold_cytotox_min_test']
-    # Todo: Check why min_test not used is intended, here burst_assays['burstpct'] > 0.05 is used
-    min_test = int(0.8 * len(burst_assays)) if threshold_cytotox_min_tested <= 1 else threshold_cytotox_min_tested
-    # burst_assays = burst_assays[~burst_assays['best_aic_model'].isin(['gnls', 'sigmoid'])]
+    # min_test = int(0.8 * len(burst_assays)) if threshold_cytotox_min_tested <= 1 else threshold_cytotox_min_tested
+    burst_assays = burst_assays[~burst_assays['best_aic_model'].isin(['gnls', 'gnls2'])]
     hitc_num = config['threshold_cytotox_hitc_num']
 
     def compute_metrics(x):
-        med = np.median(np.log10(x.loc[x['hitcall'] >= hitc_num, 'ac50']))
-        mad = get_mad(np.log10(x.loc[x['hitcall'] >= hitc_num, 'ac50']))
+        med = np.median(np.log10(x.loc[x['hitcall'] >= hitc_num, 'acc']))
+        mad = get_mad(np.log10(x.loc[x['hitcall'] >= hitc_num, 'acc']))
         ntst = len(x)
         nhit = np.sum(x['hitcall'] >= hitc_num)
         burstpct = nhit / ntst
@@ -260,7 +272,7 @@ def compute_cytotoxicity_from_burst_assays(config, burst_assays):
     burst_assays.loc[burst_assays['burstpct'] < 0.05, 'cyto_pt'] = config['threshold_cytotox_default_pt']
     burst_assays['cyto_pt_um'] = 10 ** burst_assays['cyto_pt']
     burst_assays['lower_bnd_um'] = 10 ** (burst_assays['cyto_pt'] - 3 * gb_mad)
-    burst_assays = burst_assays.drop(columns=['burstpct'])
+    # burst_assays = burst_assays.drop(columns=['burstpct'])
     path = os.path.join(METADATA_DIR_PATH, f"cytotox_{FILE_FORMAT}")
     burst_assays.to_parquet(path, compression='gzip')
     path = os.path.join(METADATA_DIR_PATH, f"cytotox_.csv")
@@ -306,7 +318,7 @@ def cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays)
     burst_assays = df_all[df_all['aeid'].isin(burst_assays_aeids)].reset_index(drop=True)
 
     if not burst_assays.empty:
-        # Some names have changed in the new version but things are equivalent, e.g. cytotox_median_um = cyto_pt_um
+        # Some names have changed in the new tcpl version 3.0, e.g. cytotox_median_um = cyto_pt_um
         cytotox_df = compute_cytotoxicity_from_burst_assays(config, burst_assays)
 
         # Plot if cytotox_df data is complete
@@ -316,8 +328,9 @@ def cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays)
         plot_overview_of_cytotoxicity_data(cytotox_df)
 
         # Split active and inactive cases in target assays
-        active_cases = target_assays_df[target_assays_df["hitcall"] > 0].reset_index(drop=True)
-        inactive_cases = target_assays_df[target_assays_df["hitcall"] == 0].reset_index(drop=True)
+        is_active = target_assays_df["hitcall"] > 0
+        active_cases = target_assays_df[is_active].reset_index(drop=True)
+        inactive_cases = target_assays_df[~is_active].reset_index(drop=True)
 
         print(f"Active cases in target assays: {len(active_cases)}")
         print(f"Inactive cases in target assays: {len(inactive_cases)}")
@@ -325,30 +338,19 @@ def cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays)
         # Merge active_cases with cytotox info
         active_cases = active_cases.merge(cytotox_df, on="dsstox_substance_id", how="left")
 
-        # Flag different cases
-        flag_cytotoxicity_cases_based_on_burst_assays(active_cases)
+        # Flag different cases, active_cases["cytotox_flag"].isna(), -> already handled by matching viability assays
+        flag_cytotoxicity_cases_based_on_burst_assays(active_cases.loc[~active_cases["cytotox_flag"].isna()])
 
         # Print summary of flags
         print_counts(active_cases)
 
-        # Determination of binary cytotoxicity: cytotoxic/non_cytotoxic, and inconclusive
-        active_cases["ctx_acc"] = "inconclusive"
-        active_cases.loc[active_cases["cytotox_flag"].str.startswith("cytotoxic"), "ctx_acc"] = "cytotoxic"
-        active_cases.loc[active_cases["cytotox_flag"].str.startswith("non_cytotoxic"), "ctx_acc"] = "non_cytotoxic"
-
-        # Calculate hitc_acc
-        active_cases["hitcall_c"] = np.where(active_cases["ctx_acc"] == "cytotoxic", 0.0, active_cases["hitcall_c"])
-        active_cases["cytotox_potency"] = np.where((active_cases["ctx_acc"] == "cytotoxic") & (~active_cases["cytotox_flag"].str.endswith("viability_check")), active_cases["cyto_pt_um"], active_cases["cytotox_potency"])
-
         # Count
         count_hitc = pd.DataFrame({'hitcall': ["inactive", "active"], 'count': [(target_assays_df["hitcall"] == 0).sum(), (target_assays_df["hitcall"] > 0).sum()]})
-        count_hitacc = active_cases["ctx_acc"].value_counts(dropna=False).reset_index()
-        count_hitacc.columns = ["ctx_acc", "count"]
         count_cytotox_flag = active_cases["cytotox_flag"].value_counts().reset_index()
         count_cytotox_flag.columns = ["cytotox_flag", "count"]
 
         # Plot an overview of the flagging and hit calls
-        plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_flag, count_hitacc, count_hitc)
+        # plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_flag, count_hitc)
 
         # Combine active and inactive data frames and vaibility/burst assays
         df_all_c = merge_all_data(active_cases, inactive_cases, non_target_assays_df)
@@ -475,36 +477,30 @@ def plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_flag, count_h
     plt.close()
 
 
-def flag_cytotoxicity_cases_based_on_burst_assays(active_cases):
-    print_counts(active_cases)
+def flag_cytotoxicity_cases_based_on_burst_assays(df):
+    hitcall_target = df['hitcall_c']
+    acc_target = df['acc']
+    acc_cytotox = df['cyto_pt_um']
+    mad_cytotox = df['mad']
+    nhit_over_ntested = df['burstpct']
+    # Estimate probability as the probability that acc_viability < acc_target, where 0 = not cytotox and 1 = cytotoxic
+    diff = acc_target - acc_cytotox
+    # Variance in the difference is variance of target acc + variance of cytotox acc
+    # Convert MAD to stdev, assuming normal dist (https://blog.arkieva.com/relationship-between-mad-standard-deviation/)
+    cytotox_sd = (10 ** mad_cytotox) / ((2 / np.pi) ** 0.5)
+    # We don't know variance of target acc so use 0.3 as a generous estimate based on Watt and Judson 2018
+    var = (10 ** 0.3) ** 2 + cytotox_sd ** 2
+    # This gives the probability that diff > 0 based on the cumulative probability distribution with mean = 0 and var = var
+    cytotoxicity_confounding_prob = norm.cdf(diff, loc=0, scale=var ** 0.5)
+    cytotoxicity_confounding_prob *= nhit_over_ntested
 
-    # High confidence of cytotoxicity rather than specific toxicity
-    upperlim = active_cases["cyto_pt_um"] + (active_cases["cyto_pt_um"] - active_cases["lower_bnd_um"])
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] >= upperlim) & (active_cases["nhit"] >= 5), "cytotox_flag"] = "cytotoxic_high_confidence"
-
-    # Some confidence of cytotoxicity
-    midlim = active_cases["cyto_pt_um"] + 0.5 * (active_cases["cyto_pt_um"] - active_cases["lower_bnd_um"])
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] >= midlim) & (active_cases["acc"] < upperlim) & (active_cases["nhit"] >= 3), "cytotox_flag"] = "cytotoxic_medium_confidence"
-
-    # High confidence of no cytotoxicity
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] < active_cases["lower_bnd_um"]) & (active_cases["ntst"] >= 5), "cytotox_flag"] = "non_cytotoxic_high_confidence"
-
-    # Some confidence of no cytotoxicity
-    lowlim = active_cases["cyto_pt_um"] - 0.5 * (active_cases["cyto_pt_um"] - active_cases["lower_bnd_um"])
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] < lowlim) & (active_cases["acc"] >= active_cases["lower_bnd_um"]) & (active_cases["ntst"] >= 3), "cytotox_flag"] = "non_cytotoxic_medium_confidence"
-
-    # No assays conducted; cannot determine cytotoxicity
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["ntst"] == 0), "cytotox_flag"] = "unavailable_cytotoxicity_reference"
-    active_cases.loc[active_cases["cytotox_flag"].isna() & active_cases["cyto_pt_um"].isna(), "cytotox_flag"] = "unavailable_cytotoxicity_reference"
-
-    # Tendentially cytotoxic but unsure
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] >= active_cases["cyto_pt_um"]), "cytotox_flag"] = "cytotoxic_low_confidence"
-
-    # Tendentially not cytotoxic but unsure
-    active_cases.loc[active_cases["cytotox_flag"].isna() & (active_cases["acc"] <= active_cases["cyto_pt_um"]), "cytotox_flag"] = "non_cytotoxic_low_confidence"
-
-    # All remaining cases. Todo: Uncomment if this is desired
-    active_cases.loc[active_cases["cytotox_flag"].isna(), "cytotox_flag"] = "undetermined_cytotoxicity"
+    # cytotoxicity_confounding_prob = "prob that cytotoxicity kicks in at lower concentrations than specific toxicity" *  "ratio where cytotoxicity occurs below the max tested concentration"
+    # "new hitcall" = "orignial hitcall" * (1 - cytotoxicity_confounding_prob)
+    prob_cytotoxicity_corrective = (1 - cytotoxicity_confounding_prob)
+    df['hitcall_c'] = hitcall_target * prob_cytotoxicity_corrective
+    df['cytotox_flag'] = "burst"
+    df['cytotox_prob'] = cytotoxicity_confounding_prob
+    df['cytotox_acc'] = acc_cytotox
 
 
 def plot_overview_of_cytotoxicity_data(cytotox):

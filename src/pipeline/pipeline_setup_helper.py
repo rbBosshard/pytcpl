@@ -40,6 +40,7 @@ def generate_balanced_aeid_list(config, df):
     print(f"Instances total: {config['instances_total']}")
     print(f"Total num aeids to process: {num_aeids}")
     print(f"Num aeids per instance to process: {tasks_per_instance}")
+    return df
 
 
 def keep_viability_assay_endpoints_together(config, df):
@@ -182,7 +183,7 @@ def get_chemical_qc():
     compounds_qc_omit_df.to_parquet(destination_path, compression='gzip')
 
 
-def get_all_related_assay_infos(config):
+def get_all_related_assay_infos(config, df):
     def convert_to_json_serializable(value):
         if isinstance(value, np.integer):
             return int(value)
@@ -198,21 +199,11 @@ def get_all_related_assay_infos(config):
 
     os.makedirs(os.path.join(METADATA_SUBSET_DIR_PATH, "assay_info_distinct_values"), exist_ok=True)
 
-    df_aeids = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids{config['file_format']}"))
     mechanistic_target_and_mode_of_action_df = pd.read_parquet(
         os.path.join(METADATA_DIR_PATH, f"mechanistic_target_and_mode_of_action{config['file_format']}"))
-    assay_component_df = pd.read_parquet(os.path.join(METADATA_DIR_PATH, f"assay_component{config['file_format']}"))
-    assay_component_endpoint_df = pd.read_parquet(
-        os.path.join(METADATA_DIR_PATH, f"assay_component_endpoint{config['file_format']}"))
-    assay_df = pd.read_parquet(
-        os.path.join(METADATA_DIR_PATH, f"assay{config['file_format']}"))
 
     assay_info_df = (
-        assay_component_df
-        .merge(assay_component_endpoint_df, on='acid')
-        .merge(df_aeids[['aeid']], left_on='aeid', right_on='aeid')
-        .merge(assay_df, left_on='aid', right_on='aid')
-        .merge(mechanistic_target_and_mode_of_action_df,
+        df.merge(mechanistic_target_and_mode_of_action_df,
                left_on='assay_component_name', right_on='new_AssayEndpointName', how='left')
     )
 

@@ -9,6 +9,11 @@ enable_writing_db: 0
 enable_output_compounds: 1
 enable_fetching_raw_data_from_db: 0
 
+enable_ICE_filtering: 1
+enable_cytotox_filtering_by_viability_assays: 1
+enable_cytotox_filtering_by_burst_assays: 1
+
+
 n_jobs: -1
 
 minimize_method: L-BFGS-B

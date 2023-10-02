@@ -35,8 +35,8 @@ def main():
         df = df[df['aeid'].isin(aeids)]
     else:
         df = handle_viability_assays(config, df)
-    generate_balanced_aeid_list(config, df)
-    get_all_related_assay_infos(config)
+    df = generate_balanced_aeid_list(config, df)
+    get_all_related_assay_infos(config, df)
     
     print("Finished")
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")
