@@ -84,7 +84,7 @@ def main():
             st.button(":arrow_down_small: Previous compound", on_click=set_trigger, args=("prev_compound",))
 
         with st.expander("Sort", expanded=False):
-            st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "ac50", "actop"], on_change=set_trigger, args=("sort_by",))
+            st.session_state.sort_by = st.selectbox("Sort By", ["hitcall_c", "hitcall", "acc", "ac50", "actop", "cytotox_acc", "cytotox_prob"], on_change=set_trigger, args=("sort_by",))
             st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=set_trigger, args=("asc",))
         with st.expander("Select hitcall range", expanded=False):
             with st.form("Select hitcall range"):

@@ -78,13 +78,18 @@ def init_figure():
     # subtitle = f"<br><sup>Hitcall: {hitcall} | {str(series['spid'])} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
     # fig.update_layout(title=title + subtitle, title_font=dict(size=26))
     signal_direction = st.session_state.assay_info['signal_direction']
-    y0 = -cutoff if signal_direction == "bidirectional" else 0
+    y0 = -cutoff if signal_direction != "gain" else 0
+    y1 = cutoff if signal_direction != "loss" else 0
        
-    fig.update_xaxes(showspikes=True)
-    fig.update_yaxes(showspikes=True)
-    fig.update_layout(xaxis_title="log10(Concentration) μM", yaxis_title=str(st.session_state.assay_info['normalized_data_type']))
-    fig.add_hrect(y0=y0, y1=cutoff, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
-                  annotation_text="efficacy cutoff", annotation_position="top left")
+    fig.update_xaxes(showspikes=True, tickfont=dict(size=16))  # Adjust 'spikesize' as needed
+    fig.update_yaxes(showspikes=True, tickfont=dict(size=16))  # Adjust 'spikesize' as needed
+
+    fig.update_layout(xaxis_title="log10(Concentration) μM",
+                      yaxis_title=str(st.session_state.assay_info['normalized_data_type']),
+                      xaxis_title_font=dict(size=20),  # Adjust the 'size' value as needed
+                      yaxis_title_font=dict(size=20))
+    fig.add_hrect(y0=y0, y1=y1, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
+                  annotation_text="efficacy cutoff", annotation_position="top left", annotation=dict(font=dict(size=18)))
     fig.update_layout(legend=dict(groupclick="toggleitem"))
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
     # fig.update_layout(margin=dict(t=150))
@@ -96,8 +101,8 @@ def add_curves(fig):
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
 
-    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_acc"] if potency in series]
-    efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series]
+    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_acc"] if potency in series and series[potency] is not None]
+    efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series and series[efficacy] is not None]
 
     potency_values = [series[potency] for potency in potencies]
     efficacy_values = [series[efficacy] for efficacy in efficacies]
@@ -116,7 +121,7 @@ def add_curves(fig):
     x = pow_space(min_val, max_val, 10, 200)
     best_model = get_correct_model_name(series['best_aic_model'])
     color_best = "gray"
-    if fit_params is not None and series['hitcall'] > 0:
+    if fit_params is not None:# and series['hitcall'] > 0:
         iterator = fit_params.items()
         for index, (fit_model, fit_parameters) in enumerate(iterator):
             params = fit_parameters["pars"].copy()
@@ -291,8 +296,13 @@ def update_df_length():
 def on_hitcall_slider(trigger):
     if trigger == "hitcall_slider":
         interval = st.session_state.hitcall_slider
-        df = st.session_state.df.query(f'{interval[0]} <= hitcall_c <= {interval[1]}').reset_index(drop=True)
-        st.session_state.df = pd.concat([df, st.session_state.df.query("hitcall_c.isna()")]) if interval[0] == 0.0 else df
+        if st.session_state.sort_by == "hitcall":
+            sort_slider = "hitcall"
+        else:
+            sort_slider = "hitcall_c"
+
+        df = st.session_state.df.query(f'{interval[0]} <= {sort_slider} <= {interval[1]}').reset_index(drop=True)
+        st.session_state.df = pd.concat([df, st.session_state.df.query(f"{sort_slider}.isna()")]) if interval[0] == 0.0 else df
         reset_df_index()
 
 
@@ -356,7 +366,7 @@ def get_compound_info():
     casn_link = f'https://commonchemistry.cas.org/detail?cas_rn={casn}'
     casn_link = casn_link if casn is not None else 'N/A'
     fitc = int(st.session_state.series['fitc'])
-    cytotox_flag = st.session_state.series['cytotox_flag']
+    cytotox_ref = st.session_state.series['cytotox_ref']
     cytotox_prob = st.session_state.series['cytotox_prob']
     cytotox_acc = st.session_state.series['cytotox_acc']
     compound_info_df = pd.DataFrame(
@@ -364,7 +374,7 @@ def get_compound_info():
             "Chemical name": [chnm],
             "DSSTOXSID": [dsstox_substance_id],
             "Hitcall corrected": [f"{st.session_state.series['hitcall_c']:.2f}"],
-            "Cytotox ref": [f"{cytotox_flag} assay based" if cytotox_flag is not None else "no target"],
+            "Cytotox ref": [f"{cytotox_ref} assay based" if cytotox_ref is not None else "no target"],
             "Cytotox ref acc": [f"{(cytotox_acc):.1e}" if cytotox_acc is not None else "N/A"],
             "Cytotox ref prob": [f"{(cytotox_prob):.2f}" if cytotox_prob is not None else "N/A"],
             "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],

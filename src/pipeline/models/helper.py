@@ -56,4 +56,4 @@ def get_max_index(bidirectional, conc, resp):
 def get_mad(x):
     """Calculate the median absolute deviation (MAD) of an array"""
     bmad_constant = 1.4826
-    return bmad_constant * np.median(np.abs(x - np.median(x)))
+    return bmad_constant * np.nanmedian(np.abs(x - np.nanmedian(x)))
