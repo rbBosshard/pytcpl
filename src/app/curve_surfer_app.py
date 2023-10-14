@@ -97,10 +97,13 @@ def main():
                 submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("hitcall_slider",))
                 placeholder_hitcall_slider = st.empty()
 
-    with st.expander("Assay endpoint infos", expanded=False):
-        assay_info_container = st.empty()
-    with st.expander("Compound infos", expanded=False):
-        compound_info_container = st.empty()
+
+    # with st.expander("Assay endpoint infos", expanded=False):
+    #     assay_info_container = st.empty()
+    # with st.expander("Compound infos", expanded=False):
+    #     compound_info_container = st.empty()
+    assay_info_container = st.empty()
+    compound_info_container = st.empty()
 
     fig, pars_dict, height = update(slider)
 

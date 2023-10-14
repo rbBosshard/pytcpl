@@ -68,17 +68,19 @@ def init_figure():
     series.update({"cutoff": cutoff, "bmad": cutoff_df.at[0, 'bmad'],"onesd": cutoff_df.at[0, 'onesd']})
     fig = go.Figure()
     margin = 0
-    if st.checkbox("Show title", value=True, key="ShowTitle"):
-        margin = 100
-        try:
-            casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
-        except IndexError:
-            casn, chnm, dsstox_substance_id = None, None, None
-            st.warning(f"No chemical information found for SPID {series['spid']}")
-        title = "AEID: " + str(st.session_state.aeid) + " | " + st.session_state.assay_info["assay_component_endpoint_name"]
-        hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
-        subtitle = f"<br><sup>Hitcall: {hitcall} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
-        fig.update_layout(title=title + subtitle, title_font=dict(size=26))
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.checkbox("Update Layout", value=True, key="ShowTitle", help="Show title and subtitle"):
+            margin = 100
+            try:
+                casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
+            except IndexError:
+                casn, chnm, dsstox_substance_id = None, None, None
+                st.warning(f"No chemical information found for SPID {series['spid']}")
+            title = st.session_state.assay_info["assay_component_endpoint_name"] + " | " +  "aeid: " + str(st.session_state.aeid)
+            hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
+            subtitle = f"<br><sup>{chnm} | Hitcall: {hitcall} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
+            fig.update_layout(title=title + subtitle, title_font=dict(size=26))
     
     signal_direction = st.session_state.assay_info['signal_direction']
     y0 = -cutoff if signal_direction != "gain" else 0
@@ -101,17 +103,18 @@ def init_figure():
 
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
 
-    return fig
+    return fig, col2
 
 
-def add_curves(fig):
+def add_curves(fig, col2):
     height = 720
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
     potency_candidates, efficacy_candidates =["acc", "actop", "cytotox_acc"], ["top", "cutoff"]
-    if st.checkbox("Verbose", value=False, key="verbose"):
-        height = 840
-        potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["top", "cutoff", "bmad", "onesd"]
+    with col2:
+        if st.checkbox("Verbose", value=False, key="verbose", help="Show all potency and efficacy estimates"):
+            height = 840
+            potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["top", "cutoff", "bmad", "onesd"]
 
     potencies = [potency for potency in potency_candidates if potency in series and series[potency] is not None] # "ac1sd", bmd", "ac95", "ac50", 
     efficacies = [efficacy for efficacy in efficacy_candidates if efficacy in series and series[efficacy] is not None] # , "bmad", "onesd"
@@ -438,20 +441,23 @@ def get_assay_info(subset=False, transpose=False, replace=False):
 
         # Function to convert camel case to words with spaces
         def camel_case_to_words(name):
-            return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
-
+            conversion = re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
+            # Uppercase the first character
+            return conversion[0].upper() + conversion[1:]
+            
         # Create a mapping dictionary for column renaming
         column_mapping = {col: camel_case_to_words(col) for col in assay_info_df.columns}
 
         # Rename columns using the mapping dictionary
         assay_info_df = assay_info_df.rename(columns=column_mapping)
         assay_info_df = assay_info_df.rename(columns={"assay component endpoint name": "assay endpoint"})
+        assay_info_df = assay_info_df.rename(columns={"Aeid": "aeid"})
 
     return assay_info_df
 
 
-subset_assay_info_columns = ["aeid",
-                             "assay_component_endpoint_name",
+subset_assay_info_columns = ["assay_component_endpoint_name",
+                             "aeid",
                              "assay_function_type",
                              "signal_direction",
                              "MechanisticTarget",

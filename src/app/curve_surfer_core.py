@@ -60,6 +60,6 @@ def update(slider):
     if st.session_state.focus_on_compound_submitted or (trigger == 'hitcall_slider' and st.session_state.focus_on_compound):
         refresh_data(trigger)
 
-    fig = init_figure()
-    pars_dict, height = add_curves(fig)
+    fig, col2 = init_figure()
+    pars_dict, height = add_curves(fig, col2)
     return fig, pars_dict, height
