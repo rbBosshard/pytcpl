@@ -27,7 +27,7 @@ def main():
     The function utilizes various Streamlit components and session_state attributes for UI and interaction management.
 
     """
-    title = "PyTCPL Curve Surfer"
+    title = "PYTCPL CURVE SURFER"
     st.set_page_config(page_title=title, page_icon="☣️", layout='wide')
     config, _ = load_config()
     set_config_app(config)
@@ -36,15 +36,13 @@ def main():
         check_reset(config)
 
     with st.sidebar:
-        st.header(title + "🏄")
+        st.title(title + "🏄")
 
-        st.divider()
-
-        st.subheader("Assay endpoint settings")
+        st.header("Assay endpoint settings")
 
         st.session_state.assay_info_column = st.selectbox("Filter on:", subset_assay_info_columns, on_change=set_trigger, args=("assay_info_column",))
         # st.session_state.assay_info_selected_fields = [st.session_state.assay_info_distinct_values[st.session_state.assay_info_column][0]]
-        with st.expander("Filter assay endpoints", expanded=False):
+        with st.expander("Filter assay endpoints", expanded=True):
             with st.form("Filter assay endpoints"):
                 assay_info_selected_fields = st.multiselect("Multiselect fields:",  
                     st.session_state.assay_info_distinct_values[st.session_state.assay_info_column], 
@@ -56,14 +54,16 @@ def main():
                 placeholder_assay_info = st.empty()
                 placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
 
-        st.button(":arrow_up_small: Next assay", on_click=set_trigger, args=("next_assay_endpoint",))
-        st.button(":arrow_down_small: Previous assay", on_click=set_trigger, args=("prev_assay_endpoint",))
+        # st.write("Assay endpoint")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.button("Previous", on_click=set_trigger, args=("prev_assay_endpoint",), use_container_width=True, key="prev_assay_endpoint")
+        with col2:
+            st.button("Next", on_click=set_trigger, args=("next_assay_endpoint",), use_container_width=True, key="next_assay_endpoint")
 
-        st.divider()
-
-        st.subheader("Compounds settings")
+        st.header("Compounds settings")
        
-        with st.expander("Select specific DTXSID", expanded=False):
+        with st.expander("Select specific DTXSID", expanded=True):
             with st.form("Select specific DTXSID"):
                 dtxsids = st.session_state.df["dsstox_substance_id"]
                 dtxsids = dtxsids.drop_duplicates().dropna().tolist()
@@ -80,8 +80,11 @@ def main():
                 
 
         if not st.session_state.focus_on_compound:
-            st.button(":arrow_up_small: Next compound", on_click=set_trigger, args=("next_compound",))
-            st.button(":arrow_down_small: Previous compound", on_click=set_trigger, args=("prev_compound",))
+            col1, col2 = st.columns(2)
+            with col1:
+                st.button("Previous", on_click=set_trigger, args=("prev_compound",), use_container_width=True)
+            with col2:
+                st.button("Next", on_click=set_trigger, args=("next_compound",), use_container_width=True)
 
         with st.expander("Sort", expanded=False):
             st.session_state.sort_by = st.selectbox("Sort By", ["hitcall_c", "hitcall", "acc", "ac50", "actop", "cytotox_acc", "cytotox_prob"], on_change=set_trigger, args=("sort_by",))
@@ -94,12 +97,12 @@ def main():
                 submitted = st.form_submit_button("Submit!", on_click=set_trigger, args=("hitcall_slider",))
                 placeholder_hitcall_slider = st.empty()
 
-    with st.expander("Assay endpoint infos", expanded=True):
+    with st.expander("Assay endpoint infos", expanded=False):
         assay_info_container = st.empty()
-    with st.expander("Compound infos", expanded=True):
+    with st.expander("Compound infos", expanded=False):
         compound_info_container = st.empty()
 
-    fig, pars_dict = update(slider)
+    fig, pars_dict, height = update(slider)
 
     placeholder_assay_info.write(f"{len(st.session_state.aeids)} assay endpoints in filter")
     placeholder_hitcall_slider.write(f"{st.session_state.df_length} series in filter")
@@ -109,9 +112,9 @@ def main():
     assay_info_container.dataframe(get_assay_info(subset=True, transpose=True, replace=True), hide_index=True, use_container_width=True)
     compound_info_container.dataframe(compund_info_df, column_config=column_config, hide_index=True, use_container_width=True)
 
-    height = 720
     fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True, height=height)
+
 
     
     # Todo: Provide curve fit model functions

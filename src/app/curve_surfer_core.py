@@ -61,5 +61,5 @@ def update(slider):
         refresh_data(trigger)
 
     fig = init_figure()
-    pars_dict = add_curves(fig)
-    return fig, pars_dict
+    pars_dict, height = add_curves(fig)
+    return fig, pars_dict, height

@@ -67,42 +67,54 @@ def init_figure():
     cutoff = cutoff_df.at[0, 'cutoff']
     series.update({"cutoff": cutoff, "bmad": cutoff_df.at[0, 'bmad'],"onesd": cutoff_df.at[0, 'onesd']})
     fig = go.Figure()
-
-    # try:
-    #     casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
-    # except IndexError:
-    #     casn, chnm, dsstox_substance_id = None, None, None
-    #     st.warning(f"No chemical information found for SPID {series['spid']}")
-    # title = "AEID: " + str(st.session_state.aeid) + " | " + st.session_state.assay_info["assay_component_endpoint_name"]
-    # hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
-    # subtitle = f"<br><sup>Hitcall: {hitcall} | {str(series['spid'])} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
-    # fig.update_layout(title=title + subtitle, title_font=dict(size=26))
+    margin = 0
+    if st.checkbox("Show title", value=True, key="ShowTitle"):
+        margin = 100
+        try:
+            casn, chnm, dsstox_substance_id = get_chem_info(series['spid'])
+        except IndexError:
+            casn, chnm, dsstox_substance_id = None, None, None
+            st.warning(f"No chemical information found for SPID {series['spid']}")
+        title = "AEID: " + str(st.session_state.aeid) + " | " + st.session_state.assay_info["assay_component_endpoint_name"]
+        hitcall = f"{series['hitcall']:.2f}"  # f"{series['hitcall']:.0%}"
+        subtitle = f"<br><sup>Hitcall: {hitcall} | {chnm} | {str(dsstox_substance_id)} | {str(casn)}</sup>"
+        fig.update_layout(title=title + subtitle, title_font=dict(size=26))
+    
     signal_direction = st.session_state.assay_info['signal_direction']
     y0 = -cutoff if signal_direction != "gain" else 0
     y1 = cutoff if signal_direction != "loss" else 0
        
-    fig.update_xaxes(showspikes=True, tickfont=dict(size=16))  # Adjust 'spikesize' as needed
-    fig.update_yaxes(showspikes=True, tickfont=dict(size=16))  # Adjust 'spikesize' as needed
+    fig.update_xaxes(showspikes=True, tickfont=dict(size=22, color="black"))  # Adjust 'spikesize' as needed
+    fig.update_yaxes(showspikes=True, tickfont=dict(size=22, color="black"))  # Adjust 'spikesize' as needed
 
-    fig.update_layout(xaxis_title="log10(Concentration) μM",
-                      yaxis_title=str(st.session_state.assay_info['normalized_data_type']),
-                      xaxis_title_font=dict(size=20),  # Adjust the 'size' value as needed
-                      yaxis_title_font=dict(size=20))
-    fig.add_hrect(y0=y0, y1=y1, fillcolor='aquamarine', opacity=0.2, layer='below', line=dict(width=0),
-                  annotation_text="efficacy cutoff", annotation_position="top left", annotation=dict(font=dict(size=18)))
-    fig.update_layout(legend=dict(groupclick="toggleitem"))
+    fig.update_layout(
+        xaxis_title="log10(Concentration) μM",
+        yaxis_title=f"{st.session_state.assay_info['normalized_data_type']}",
+        xaxis_title_font=dict(size=25, color="black"),
+        yaxis_title_font=dict(size=25, color="black"),
+    )
+    fig.add_hrect(y0=y0, y1=y1, fillcolor='blue', opacity=0.05, layer='below',
+                  annotation_text="efficacy cutoff", annotation_position="top left", annotation=dict(font=dict(size=20)))
+    fig.update_layout(legend=dict(groupclick="toggleitem", font=dict(size=15, color='black')), font=dict(color="black", size=15), margin=dict(t=margin))
+    fig.update_layout(xaxis=dict(showgrid=True, gridwidth=1.4))
+    fig.update_layout(yaxis=dict(showgrid=True, gridwidth=1.4))
+
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
-    # fig.update_layout(margin=dict(t=150))
 
     return fig
 
 
 def add_curves(fig):
+    height = 720
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
+    potency_candidates, efficacy_candidates =["acc", "actop", "cytotox_acc"], ["top", "cutoff"]
+    if st.checkbox("Verbose", value=False, key="verbose"):
+        height = 840
+        potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["top", "cutoff", "bmad", "onesd"]
 
-    potencies = [potency for potency in ["acc", "ac50", "ac95", "actop", "ac1sd", "bmd", "cytotox_acc"] if potency in series and series[potency] is not None]
-    efficacies = [efficacy for efficacy in ["top", "cutoff", "bmad", "onesd"] if efficacy in series and series[efficacy] is not None]
+    potencies = [potency for potency in potency_candidates if potency in series and series[potency] is not None] # "ac1sd", bmd", "ac95", "ac50", 
+    efficacies = [efficacy for efficacy in efficacy_candidates if efficacy in series and series[efficacy] is not None] # , "bmad", "onesd"
 
     potency_values = [series[potency] for potency in potencies]
     efficacy_values = [series[efficacy] for efficacy in efficacies]
@@ -120,7 +132,6 @@ def add_curves(fig):
     min_val = min(min_val, min_potencies)
     x = pow_space(min_val, max_val, 10, 200)
     best_model = get_correct_model_name(series['best_aic_model'])
-    color_best = "gray"
     if fit_params is not None:# and series['hitcall'] > 0:
         iterator = fit_params.items()
         for index, (fit_model, fit_parameters) in enumerate(iterator):
@@ -132,11 +143,10 @@ def add_curves(fig):
             y = np.array(get_model(fit_model)('fun')(x, **params))
             color = px.colors.qualitative.Plotly[index]
             is_best = fit_model == best_model
-            color_best = color if is_best else color_best
             is_best_tag = f"(BEST)" if is_best else ""
             dash = 'solid' if is_best else "dash"
             name = f"{fit_model} {is_best_tag}"
-            width = 4 if is_best else 2
+            width = 5 if is_best else 4
             opacity = 0.9
 
             fig.add_trace(
@@ -146,50 +156,49 @@ def add_curves(fig):
                            visible=True,
                            name=name, line=dict(width=width, dash=dash)))
 
+            if is_best:
+                for i, efficacy in enumerate(efficacies):
+                    eff = efficacy_values[i]
+                    if eff is not None and not np.isnan(eff):
+                        visible = True if efficacy in ['top'] else "legendonly"
+                        fig.add_trace(go.Scatter(
+                            name=f"{efficacy} = {eff:.1e}",
+                            x=[min(np.log10(x)), max(np.log10(x))],
+                            y=[eff, eff],
+                            mode='lines',
+                            opacity=1,
+                            line=dict(color=color, width=4, dash="dot"),
+                            legendgroup="Efficacy",
+                            legendgrouptitle_text="Efficacy",
+                            visible=visible
+                        ))
 
-        for i, efficacy in enumerate(efficacies):
-            eff = efficacy_values[i]
-            if eff is not None and not np.isnan(eff):
-                visible = True if efficacy in ['top', 'cutoff'] else "legendonly"
-                fig.add_trace(go.Scatter(
-                    name=f"{efficacy} = {eff:.1e}",
-                    x=[min(np.log10(x)), max(np.log10(x))],
-                    y=[eff, eff],
-                    mode='lines',
-                    opacity=0.8,
-                    line=dict(color='gray', width=2, dash='dashdot'),
-                    legendgroup="Efficacy",
-                    legendgrouptitle_text="Efficacy",
-                    visible=visible
-                ))
+                for i, potency in enumerate(potencies):
+                    pot = potency_values[i]
 
-        for i, potency in enumerate(potencies):
-            pot = potency_values[i]
+                    if pot is not None and not np.isnan(pot) and pot < 1000:
+                        pot_log = np.log10(series[potency])
 
-            if pot is not None and not np.isnan(pot) and pot < 1000:
-                pot_log = np.log10(series[potency])
+                        params = fit_params[get_original_name(best_model)]['pars'].copy()
+                        params.pop('er')
+                        pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
+                        visible = True if potency in ['actop', 'acc'] else "legendonly"
 
-                params = fit_params[get_original_name(best_model)]['pars'].copy()
-                params.pop('er')
-                pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
-                visible = True if potency in ['actop', 'acc', 'ac50'] else "legendonly"
-
-                fig.add_trace(go.Scatter(
-                    name=f"{potency} = {pot:.1e}",
-                    x=[pot_log, pot_log],
-                    y=[0, pot_y],
-                    mode='lines',
-                    opacity=0.8,
-                    line=dict(color=color_best, width=3, dash='dot'),
-                    legendgroup="Potency estimates",
-                    legendgrouptitle_text="Potency estimates",
-                    visible=visible
-                ))
+                        fig.add_trace(go.Scatter(
+                            name=f"{potency} = {pot:.1e}",
+                            x=[pot_log, pot_log],
+                            y=[0, pot_y],
+                            mode='lines',
+                            opacity=0.8,
+                            line=dict(color=color, width=4),
+                            legendgroup="Potency estimates",
+                            legendgrouptitle_text="Potency estimates",
+                            visible=visible
+                        ))
 
     
-
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",
-                             marker=dict(color="royalblue", symbol="circle-open-dot", size=20), name="Repsonses", showlegend=True))
+                             marker=dict(symbol="x", size=16, color="royalblue"), name="Repsonses", showlegend=True))
 
     unique_conc = np.unique(conc)
     # get max response (i.e. max median response for multi-valued responses) and corresponding conc
@@ -197,8 +206,9 @@ def add_curves(fig):
     median_resp = np.array([np.median(np.array(resp)[conc == c]) for c in unique_conc])
     fig.add_trace(
         go.Scatter(x=np.log10(unique_conc), y=median_resp, mode='markers', legendgroup="Observed responses",
-                   marker=dict(color="red", symbol="circle-open-dot", size=25), name="Median responses", showlegend=True, visible="legendonly"))
-    return pars_dict
+                   marker=dict(color="red", symbol="star", size=16), name="Median responses", showlegend=True, visible="legendonly"))
+
+    return pars_dict, height
 
 def get_correct_model_name(fit_model):
     if fit_model == 'sigmoid':
@@ -373,16 +383,16 @@ def get_compound_info():
         {   
             "Chemical name": [chnm],
             "DSSTOXSID": [dsstox_substance_id],
-            "Hitcall corrected": [f"{st.session_state.series['hitcall_c']:.2f}"],
+            "CASRN": [casn],
+            "SPID": [st.session_state.compound_id],
+            "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
+            "Hitcall_cytotox_corrected": [f"{st.session_state.series['hitcall_c']:.2f}"],
             "Cytotox ref": [f"{cytotox_ref} assay based" if cytotox_ref is not None else "no target"],
             "Cytotox ref acc": [f"{(cytotox_acc):.1e}" if cytotox_acc is not None else "N/A"],
             "Cytotox ref prob": [f"{(cytotox_prob):.2f}" if cytotox_prob is not None else "N/A"],
-            "Hitcall": [f"{st.session_state.series['hitcall']:.2f}"],
             "Fitc": [f"{fitc}"],
             "Caution Flags": [f"{st.session_state.series['cautionary_flags']}"],
             "ICE Omit Flag": [f"{st.session_state.series['omit_flag']}"],
-            "SPID": [st.session_state.compound_id],
-            "CASRN": [casn],
             "DSSTOXSID Link": [dsstox_substance_id_link],
             "CASRN Link": [casn_link],
 
@@ -390,8 +400,15 @@ def get_compound_info():
     )
 
     column_config = {
-        "Hitcall corrected": st.column_config.ProgressColumn(
-            "Hitcall corrected",
+        "Hitcall": st.column_config.ProgressColumn(
+            "Hitcall",
+            help=f"Bioactivity score :biohazard_sign:",
+            format="%.2f",
+            min_value=0,
+            max_value=1,
+        ), 
+        "Hitcall_cytotox_corrected": st.column_config.ProgressColumn(
+            "Hitcall_cytotox_corrected",
             help=f"Bioactivity score :biohazard_sign:",
             format="%.2f",
             min_value=0,
@@ -428,6 +445,7 @@ def get_assay_info(subset=False, transpose=False, replace=False):
 
         # Rename columns using the mapping dictionary
         assay_info_df = assay_info_df.rename(columns=column_mapping)
+        assay_info_df = assay_info_df.rename(columns={"assay component endpoint name": "assay endpoint"})
 
     return assay_info_df
 
