@@ -95,7 +95,7 @@ def init_figure():
         xaxis_title_font=dict(size=25, color="black"),
         yaxis_title_font=dict(size=25, color="black"),
     )
-    fig.add_hrect(y0=y0, y1=y1, fillcolor='blue', opacity=0.05, layer='below',
+    fig.add_hrect(y0=y0, y1=y1, fillcolor='blue', opacity=0.15, layer='below',
                   annotation_text="efficacy cutoff", annotation_position="top left", annotation=dict(font=dict(size=20)))
     fig.update_layout(legend=dict(groupclick="toggleitem", font=dict(size=15, color='black')), font=dict(color="black", size=15), margin=dict(t=margin))
     fig.update_layout(xaxis=dict(showgrid=True, gridwidth=1.4))
@@ -164,9 +164,10 @@ def add_curves(fig, col2):
                     eff = efficacy_values[i]
                     if eff is not None and not np.isnan(eff):
                         visible = True if efficacy in ['top'] else "legendonly"
+                        x_min = min(np.log10(x)) 
                         fig.add_trace(go.Scatter(
                             name=f"{efficacy} = {eff:.1e}",
-                            x=[min(np.log10(x)), max(np.log10(x))],
+                            x=[x_min, max(np.log10(x))],
                             y=[eff, eff],
                             mode='lines',
                             opacity=1,
@@ -175,6 +176,18 @@ def add_curves(fig, col2):
                             legendgrouptitle_text="Efficacy",
                             visible=visible
                         ))
+                        if efficacy != "cutoff":
+                            annotation = go.layout.Annotation(
+                                x=x_min, y=eff,
+                                text=f"{efficacy}",
+                                showarrow=True,
+                                ax=-20, ay=0,
+                                arrowwidth=0.1,
+                                arrowhead=0,
+                                font=dict(size=20),
+                                visible=True if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
+                            )
+                            fig.add_annotation(annotation)
 
                 for i, potency in enumerate(potencies):
                     pot = potency_values[i]
@@ -198,6 +211,17 @@ def add_curves(fig, col2):
                             legendgrouptitle_text="Potency estimates",
                             visible=visible
                         ))
+                        annotation = go.layout.Annotation(
+                            x=pot_log, y=0,
+                            text=f"{potency}",
+                            showarrow=True,
+                            arrowhead=0,
+                            # arrow show direct upwards
+                            ax=0, ay=25,
+                            font=dict(size=22),
+                            visible=True if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
+                        )
+                        fig.add_annotation(annotation)
 
     
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",
