@@ -98,8 +98,8 @@ def init_figure():
     fig.add_hrect(y0=y0, y1=y1, fillcolor='blue', opacity=0.15, layer='below',
                   annotation_text="efficacy cutoff", annotation_position="top left", annotation=dict(font=dict(size=20)))
     fig.update_layout(legend=dict(groupclick="toggleitem", font=dict(size=15, color='black')), font=dict(color="black", size=15), margin=dict(t=margin))
-    fig.update_layout(xaxis=dict(showgrid=True, gridwidth=1.4))
-    fig.update_layout(yaxis=dict(showgrid=True, gridwidth=1.4))
+    fig.update_layout(xaxis=dict(showgrid=True))
+    fig.update_layout(yaxis=dict(showgrid=True))
 
     # fig.update_layout(hovermode="x unified")  # uncomment to enable unified hover
 
