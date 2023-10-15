@@ -110,9 +110,10 @@ def add_curves(fig, col2):
     height = 720
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
-    potency_candidates, efficacy_candidates =["acc", "actop", "cytotox_acc"], ["top", "cutoff"]
+    potency_candidates, efficacy_candidates =["acc", "actop", 'ac50', "cytotox_acc"], ["top", "cutoff"]
     with col2:
-        if st.checkbox("Verbose", value=False, key="verbose", help="Show all potency and efficacy estimates"):
+        verbose_checkbox = st.checkbox("Verbose", value=False, key="verbose", help="Show all potency and efficacy estimates")
+        if verbose_checkbox:
             height = 840
             potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["top", "cutoff", "bmad", "onesd"]
 
@@ -185,7 +186,7 @@ def add_curves(fig, col2):
                                 arrowwidth=0.1,
                                 arrowhead=0,
                                 font=dict(size=20),
-                                visible=True if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
+                                visible=True # if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
                             )
                             fig.add_annotation(annotation)
 
@@ -198,7 +199,7 @@ def add_curves(fig, col2):
                         params = fit_params[get_original_name(best_model)]['pars'].copy()
                         params.pop('er')
                         pot_y = get_model(best_model)('fun')(np.array([pot]), **params)[0]
-                        visible = True if potency in ['actop', 'acc'] else "legendonly"
+                        visible = True if potency in ['acc', 'ac50', 'actop'] else "legendonly"
 
                         fig.add_trace(go.Scatter(
                             name=f"{potency} = {pot:.1e}",
@@ -211,17 +212,18 @@ def add_curves(fig, col2):
                             legendgrouptitle_text="Potency estimates",
                             visible=visible
                         ))
-                        annotation = go.layout.Annotation(
-                            x=pot_log, y=0,
-                            text=f"{potency}",
-                            showarrow=True,
-                            arrowhead=0,
-                            # arrow show direct upwards
-                            ax=0, ay=25,
-                            font=dict(size=22),
-                            visible=True if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
-                        )
-                        fig.add_annotation(annotation)
+                        if potency in ['acc', 'ac50', 'actop']:
+                            annotation = go.layout.Annotation(
+                                x=pot_log, y=0,
+                                text=f"{potency}",
+                                showarrow=True,
+                                arrowhead=0,
+                                # arrow show direct upwards
+                                ax=0, ay=25,
+                                font=dict(size=22),
+                                visible=True # if visible != "legendonly" else False  # Set annotation visibility based on trace visibility
+                            )
+                            fig.add_annotation(annotation)
 
     
     fig.add_trace(go.Scatter(x=np.log10(conc), y=resp, mode='markers', legendgroup="Observed responses", legendgrouptitle_text="Observed responses",

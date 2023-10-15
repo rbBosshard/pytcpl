@@ -14,8 +14,7 @@ sys.path.append(parent_dir)
 
 from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
 from src.pipeline.pipeline_wrapup_helper import ice_curation_and_cytotoxicity_handling, \
-    save_merged, groupb_by_compounds, remove_files_not_matching_to_aeid_list, \
-    group_by_aeids, cytotoxicity_curation_with_burst_assays
+    save_merged, groupb_by_compounds, group_by_aeids
 
 
 def main():
