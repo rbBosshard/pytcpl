@@ -2,7 +2,7 @@
 
 #### Welcome to the GitHub repository for the _pytcpl_ package.
 
-#### _pytcpl_ is a streamlined Python package that incorporates the **mc4** and **mc5** levels of [tcpl](https://github.com/USEPA/CompTox-ToxCast-tcpl), providing concentration-response curve fitting and hitcalling based on [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2). It utilizes the [Invitrodb version 3.5 release](https://cfpub.epa.gov/si/si_public_record_Report.cfm?dirEntryId=355484&Lab=CCTE) as its backend database.
+#### _pytcpl_ is a streamlined Python package that incorporates the **mc4**, **mc5** and **mc6** levels of [tcpl](https://github.com/USEPA/CompTox-ToxCast-tcpl), providing concentration-response curve fitting and hitcalling based on [tcplfit2](https://github.com/USEPA/CompTox-ToxCast-tcplFit2). It utilizes the [Invitrodb version 4.1 release](https://clowder.edap-cluster.com/spaces/647f710ee4b08a6b394e426b) as its backend database.
 ___
 
 ### (Optional) Use conda environment
