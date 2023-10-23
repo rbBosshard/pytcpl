@@ -26,18 +26,14 @@ pip install -r requirements.txt
 ```
 
 ### Running pipeline:
-
-#### Required
-
+Notes:
+- Download & Install [invitroDBv4.1](https://epa.figshare.com/articles/dataset/ToxCast_Database_invitroDB_/6062623) on you local machine or server
 - Goto [config_db.yaml](config/config_db.yaml) to add/set your own MySQL database connection parameters
-- Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline
-
-#### Optional
-
 - Goto [config.yaml](config/config.yaml) to customize pipeline behaviour
 - Goto [DDL](config/DDL) to set Data Definition Language (DDL) statements, used to create new MySQL database schema
   objects
 - [Automate](src/pipeline/pipeline_setup.py) list generation [aeid_list.in](config/aeid_list.in) suited for balanced workloads for distributed compute instances 
+- Goto [aeid_list.in](config/aeid_list.in) to set assay endpoint ids (aeids) to be processed by the pipeline (only has effect if aeid_list_manual: 1 in [config_db.yaml](config/config_db.yaml))
 
 #### Run pipeline (on single machine) 
 
@@ -66,6 +62,6 @@ streamlit run src/app/curve_surfer_app.py --server.address="localhost"
 
 - If you run the command, the [Curve Surfer](http://localhost:8501/) web app should open as a new browser tab
 - Curve Surfer only works for assay endpoints already processed by pipeline
-- Goto [https://pytcpl.streamlit.app/](https://pytcpl.streamlit.app/)
+- Or goto online version [https://pytcpl.streamlit.app/](https://pytcpl.streamlit.app/)
 
 [streamlit-curve_surfer-2023-08-09-22-08-26.webm](https://github.com/rbBosshard/pytcpl/assets/100019212/0578d442-826b-4c78-b95e-9f0447408123)

@@ -3,11 +3,11 @@ import time
 import sys
 import os
 
-from src.pipeline.pipeline_constants import AEIDS_LIST_PATH
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.append(parent_dir)
 
+from src.pipeline.pipeline_constants import AEIDS_LIST_PATH
 from src.pipeline.pipeline_helper import load_config, init_config, init_aeid
 from src.pipeline.pipeline_setup_helper import generate_balanced_aeid_list, \
     subset_for_candidate_assay_endpoints, \
@@ -16,6 +16,9 @@ from src.pipeline.pipeline_setup_helper import generate_balanced_aeid_list, \
 
 
 def main():
+    """
+    Main function for the pipeline setup.
+    """
     print("Started")
     start_time = time.time()
     

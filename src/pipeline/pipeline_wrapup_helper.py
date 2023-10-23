@@ -46,6 +46,9 @@ def remove_files_not_matching_to_aeid_list(delete=False):
 
 
 def save_merged(df_all, cutoff_all):
+    """
+    Save merged data frame and cutoff data frame to parquet files.
+    """
     # For writing to DB ensure it holds that in config/config.yaml: enable_writing_db: 1
     # check_db()
     print("Takes approx. 10 minutes depending on CPUs")
@@ -55,6 +58,9 @@ def save_merged(df_all, cutoff_all):
 
 
 def groupb_by_compounds(config, df_all):
+    """
+    Group by compounds and save to parquet files.
+    """
     compounds = df_all['dsstox_substance_id'].dropna().unique()
     compounds_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"compounds_tested{config['file_format']}")
     compounds_df = pd.DataFrame(compounds, columns=['dsstox_substance_id'])
@@ -70,6 +76,9 @@ def groupb_by_compounds(config, df_all):
 
 
 def get_compound_results(df_all, num_compounds, unique_compounds):
+    """
+    Get results for each compound and save to parquet files.
+    """
     def process_compound(i, compound):
         print(f"{i + 1}/{num_compounds}: {compound}")
         compound_df = df_all[df_all['dsstox_substance_id'] == compound]
@@ -83,6 +92,9 @@ def get_compound_results(df_all, num_compounds, unique_compounds):
 
 
 def ice_curation_and_cytotoxicity_handling(config):
+    """
+    Perform ICE curation and cytotoxicity handling.
+    """
     aeids_sorted = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_sorted{FILE_FORMAT}"))
     aeids_target_assays = pd.read_parquet(os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids_target_assays{FILE_FORMAT}"))
     output_paths = [(aeid, os.path.join(OUTPUT_DIR_PATH, f"{aeid}{FILE_FORMAT}"), os.path.join(CUTOFF_DIR_PATH, f"{aeid}{FILE_FORMAT}")) for aeid in aeids_sorted['aeid']]
@@ -139,10 +151,13 @@ def ice_curation_and_cytotoxicity_handling(config):
 
     plot_omit_flags(df_all, aeids_sorted)
 
-    return df_all, cutoff_all, aeids_target_assays['aeid']
+    return df_all, cutoff_all
 
 
 def plot_omit_flags(df_all, aeids_sorted):
+    """
+    Plot overview of omit flags.
+    """
     omit_flags = df_all['omit_flag'].value_counts(dropna=False).reset_index()
     omit_flags.columns = ["omit_flag", "count"]
 
@@ -168,6 +183,9 @@ def plot_omit_flags(df_all, aeids_sorted):
 
 
 def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
+    """
+    Add omit flags based on ICE curation.
+    """
     # Curve/assay-based curation:
     # For NovaScreen (NVS) cell-free biochemical assays, any active calls with less than 50% efficacy.
     condition_assay = assay_info_df['assay_component_endpoint_name'].str.startswith('NVS_') & (
@@ -209,6 +227,9 @@ def ice_curation_adding_omit_flags(aeid, assay_info_df, df):
 
 
 def handle_cytotoxicity_based_on_viability_assays(config, aeid, df, viability_counterparts_aeid):
+    """"
+    Handle cytotoxicity based on viability assays.
+    """
     # For cell based assays, try finding matching viability/burst/background assays and correct hitc where
     # AC50 in the former > than AC50 in the latter (we can adjust boundaries around that).
     if aeid in viability_counterparts_aeid:
@@ -251,6 +272,9 @@ def handle_cytotoxicity_based_on_viability_assays(config, aeid, df, viability_co
 
 
 def compute_cytotoxicity_from_burst_assays(config, burst_assays):
+    """
+    Compute cytotoxicity from burst assays.
+    """
     threshold_cytotox_min_tested = config['threshold_cytotox_min_test']
     # min_test = int(0.8 * len(burst_assays)) if threshold_cytotox_min_tested <= 1 else threshold_cytotox_min_tested
     burst_assays = burst_assays[~burst_assays['best_aic_model'].isin(['gnls', 'gnls2'])]
@@ -294,6 +318,9 @@ def compute_cytotoxicity_from_burst_assays(config, burst_assays):
 
 
 def group_by_aeids(df_all):
+    """
+    Group by aeids and save to parquet files.
+    """
     aeids = df_all['aeid'].dropna().unique()
     num_aeids = len(aeids)
 
@@ -312,6 +339,9 @@ def group_by_aeids(df_all):
 
 
 def cytotoxicity_curation_with_burst_assays(config, df_all, aeids_target_assays):
+    """
+    Cytotoxicity curation of target assays via burst assays.
+    """
     path = os.path.join(METADATA_DIR_PATH, f"assay_component_endpoint{FILE_FORMAT}")
     df = pd.read_parquet(path)
     burst_assays_aeids = df[df['burst_assay'] == 1]['aeid']
@@ -482,6 +512,9 @@ def plot_overview_cytotoxicity_flagging_and_hitcalls(count_cytotox_ref, count_hi
 
 
 def cytotox_adjustment_for_rest_of_cases_based_on_burst_assays(df):
+    """
+    Cytotoxicity adjustment for rest of cases based on burst assays.
+    """
     hitcall_target = df['hitcall']
     acc_target = df['acc']
     acc_cytotox = df['cyto_pt_um']
@@ -511,6 +544,9 @@ def cytotox_adjustment_for_rest_of_cases_based_on_burst_assays(df):
 
 
 def plot_overview_of_cytotoxicity_data(cytotox):
+    """
+    Plot overview of cytotoxicity data.
+    """
     fig, axes = plt.subplots(5, 1, figsize=(10, 10))
     axes = axes.flatten()
     titles = ["Median (ac50) cytotoxicity (log10 µM) ", "MAD (ac50) cytotoxicity (log10 µM)", "Lower bound: Median - 3 * global MAD (log10 µM)", "# tested", "# active"]

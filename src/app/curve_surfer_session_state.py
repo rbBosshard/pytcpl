@@ -13,6 +13,9 @@ from src.pipeline.pipeline_helper import init_aeid
 
 
 def check_reset(config):
+    """
+    Check if the session state needs to be reset.
+    """
     if "df_index" not in st.session_state:
         reset_df_index()
     if "last_aeid" not in st.session_state:

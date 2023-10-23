@@ -4,6 +4,9 @@ from src.pipeline.models.helper import get_mad, get_mmed_conc, get_mmed
 
 
 def mc6_mthds(mthd, info):
+    """
+    Compute specific warning flags based on input data for level 6 methods.
+    """
     method_functions = {
         'ac50.lowconc': ac50_lowconc,
         'bmd.high': bmd_high,

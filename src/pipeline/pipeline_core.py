@@ -23,6 +23,7 @@ def process(assay_endpoint_info, df, config, logger):
     grouping datapoints, curve fitting, and hit calling for each concentration-response series.
 
     Args:
+        assay_endpoint_info (pandas.DataFrame): The DataFrame containing assay endpoint information.
         df (pandas.DataFrame): The DataFrame containing concentration-response data.
         config (dict): Configuration settings for data processing.
         logger: Logger object for logging messages.

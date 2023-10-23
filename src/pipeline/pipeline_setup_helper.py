@@ -10,6 +10,9 @@ pd.set_option('mode.chained_assignment', None)
 
 
 def save_aeids(config, df):
+    """
+    Save AEIDs (Assay Endpoint IDs) to file for distributed processing.
+    """
     aeids = df['aeid'].unique()
     aeids_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"aeids{config['file_format']}")
     aeids_df = pd.DataFrame(aeids, columns=['aeid'])
@@ -28,6 +31,9 @@ def save_aeids(config, df):
 
 
 def generate_balanced_aeid_list(config, df):
+    """
+    Generate a list of AEIDs (Assay Endpoint IDs) to process in parallel.
+    """
     df = df.sort_values('hitc_1_count', ascending=False).reset_index(drop=True)
     aeids = save_aeids(config, df)
     num_aeids = len(aeids)
@@ -44,6 +50,9 @@ def generate_balanced_aeid_list(config, df):
 
 
 def keep_viability_assay_endpoints_together(config, df):
+    """
+    Keep viability assay endpoints together with their counterparts.
+    """
     # Separate dataframes based on endpoint names
     ratio_df = df[
         df['assay_component_endpoint_name'].str.endswith("_ratio") & (
@@ -85,6 +94,9 @@ def omit_assays_from_ice_curation(df):
 
 
 def subset_for_candidate_assay_endpoints():
+    """
+    Subset for candidate assay endpoints.
+    """
     os.makedirs(METADATA_SUBSET_DIR_PATH, exist_ok=True)
     dest_path = os.path.join(METADATA_SUBSET_DIR_PATH, f"candidate_assay_endpoints.parquet.gzip")
     df1 = get_count_and_hit_ratio()
@@ -96,6 +108,9 @@ def subset_for_candidate_assay_endpoints():
 
 
 def filter_on_assay_format_type():
+    """
+    Filter assay endpoints on assay format type.
+    """
     query = f"SELECT * " \
             f"FROM assay_component_endpoint AS ace " \
             f"INNER JOIN assay_component AS ac ON ace.acid = ac.acid " \
@@ -111,6 +126,9 @@ def filter_on_assay_format_type():
 
 # Estimate on hit ratio
 def get_count_and_hit_ratio():
+    """
+    Get count and hit ratio for assay endpoints.
+    """
     query = f"SELECT aeid, " \
             f"COUNT(*) as count, " \
             f"SUM(hitc >= 0.1) AS hitc_1_count, " \
@@ -162,6 +180,9 @@ def export_metadata_tables_to_parquet():
 
 
 def get_mechanistic_target_and_mode_of_action_annotations_from_ice():
+    """
+    Get mechanistic target and mode of action annotations from ICE.
+    """
     # Download link: "https://ice.ntp.niehs.nih.gov/downloads/MOA/cHTSMT_ALL.xlsx"
     src_path = os.path.join(METADATA_DIR_PATH, f"cHTSMT_ALL.xlsx")
     tab_name = 'AllMTMOA'
@@ -171,6 +192,9 @@ def get_mechanistic_target_and_mode_of_action_annotations_from_ice():
 
 
 def get_chemical_qc():
+    """
+    Get chemical QC data from ICE.
+    """
     # Download link: "https://ice.ntp.niehs.nih.gov/downloads/MOA/ChemicalQC.xlsx"
     src_path = os.path.join(METADATA_DIR_PATH, f"ChemicalQC.xlsx")
     tab_name = 'cHTS Chemical QC DATA'
@@ -184,6 +208,9 @@ def get_chemical_qc():
 
 
 def get_all_related_assay_infos(config, df):
+    """
+    Get all related assay info from ICE.
+    """
     def convert_to_json_serializable(value):
         if isinstance(value, np.integer):
             return int(value)
@@ -234,6 +261,9 @@ def get_all_related_assay_infos(config, df):
 
 
 def adapt_viability_counterparts(target_df, viability_df):
+    """
+    Adapt viability counterparts.
+    """
     viability_counterparts_name = {}
     viability_counterparts_aeid = {}
     for _, row in target_df.iterrows():
@@ -260,6 +290,9 @@ def adapt_viability_counterparts(target_df, viability_df):
 
 
 def split_assays(df):
+    """
+    Split assays.
+    """
     viability_assay_endpoints = df[df['assay_component_endpoint_name'].str.endswith('viability')]
     target_assay_endpoints = df[~df['assay_component_endpoint_name'].str.endswith('viability')]
     return target_assay_endpoints, viability_assay_endpoints
@@ -280,6 +313,9 @@ def filter_on_count_and_hitcall_ratio(config, target_assay_endpoints):
 
 
 def handle_viability_assays(config, df):
+    """
+    Handle viability assays for cytotoxicity correction.
+    """
     is_burst_assay_endpoint = df['burst_assay'] == 1
     burst_assay_endpoints = df[is_burst_assay_endpoint]
     aeids_burst_assay_endpoints = df[is_burst_assay_endpoint]['aeid']

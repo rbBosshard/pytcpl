@@ -108,204 +108,158 @@ The function utilizes various Streamlit components and session_state attributes 
 <span id="src-app-curve-surfer-helper-module"></span><h2>src.app.curve_surfer_helper module<a class="headerlink" href="#module-src.app.curve_surfer_helper" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.add_curves">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">add_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#add_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.add_curves" title="Permalink to this definition"></a></dt>
-<dd><p>Add curves to the plot based on series data.</p>
-<p>This function adds response and fitted curves to the plot based on the provided series data. It also adds potency and
-efficacy markers to the plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>series</strong> (<em>dict</em>) – Dictionary containing series data.</p></li>
-<li><p><strong>fig</strong> (<em>go.Figure</em>) – Plotly figure object to which curves are added.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary containing fitted curve parameters.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">add_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#add_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.add_curves" title="Permalink to this definition"></a></dt>
+<dd><p>Add curves and annotations to figure.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.check_reset">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">check_reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#check_reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.check_reset" title="Permalink to this definition"></a></dt>
-<dd><p>Check and set session state variables.</p>
-<p>This function checks and sets various session state variables used by the app. It ensures that necessary variables are
-initialized or reset as needed.</p>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.check_sort">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">check_sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#check_sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.check_sort" title="Permalink to this definition"></a></dt>
+<dd><p>Check how dataframe needs to be sorted.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.filter_spid">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">filter_spid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#filter_spid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.filter_spid" title="Permalink to this definition"></a></dt>
-<dd><p>Filter data based on the selected SPID.</p>
-<p>This function filters the data based on the selected Sample ID (SPID) and updates the hitcall slider accordingly.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_assay_and_sample_info">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_assay_and_sample_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_assay_and_sample_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_assay_and_sample_info" title="Permalink to this definition"></a></dt>
-<dd><p>Get assay and sample information for display.</p>
-<p>This function retrieves assay and sample information for the currently selected AEID and SPID. It formats the information
-and prepares it for display in an expander.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Formatted assay and sample information.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_assay_info">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_assay_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_assay_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_assay_info" title="Permalink to this definition"></a></dt>
+<dd><p>Get assay information.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_chem_info">
 <span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_chem_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_chem_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_chem_info" title="Permalink to this definition"></a></dt>
-<dd><p>Get chemical information for a given SPID.</p>
-<p>This function retrieves chemical information such as CAS number, chemical name, and DSSTox substance ID for a
-specified Sample ID (SPID).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>spid</strong> (<em>str</em>) – Sample ID for which to retrieve chemical information.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing CAS number, chemical name, and DSSTox substance ID.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
-</dd>
-</dl>
+<dd><p>Get chemical information for a given spid.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_output_data">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_output_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_output_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_output_data" title="Permalink to this definition"></a></dt>
-<dd><p>Retrieve output data for a specific AEID.</p>
-<p>This function fetches the output data for a given AEID. It determines whether to retrieve the data from a local file,
-a remote source, or a database query based on configuration settings. The retrieved data is returned as a dataframe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame containing the output data for the specified AEID.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_compound_info">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_compound_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_compound_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_compound_info" title="Permalink to this definition"></a></dt>
+<dd><p>Get compound information.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_correct_model_name">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_correct_model_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_correct_model_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_correct_model_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_original_name">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_original_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_original_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_original_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_series">
 <span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_series" title="Permalink to this definition"></a></dt>
-<dd><p>Get the series data for the currently selected index.</p>
-<p>This function retrieves the data for the currently selected index (id) from the session_state dataframe. The data is
-processed and returned as a dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary containing the series data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
+<dd><p>Get series from dataframe based on current df_index.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.get_trigger">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">get_trigger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#get_trigger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.get_trigger" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.init_figure">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">init_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#init_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.init_figure" title="Permalink to this definition"></a></dt>
-<dd><p>Initialize the plot figure for visualizing data.</p>
-<p>This function initializes a Plotly figure object for visualizing the data. It sets up various plot attributes such as
-title, labels, and annotations. It also adds the efficacy cutoff line to the plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>series</strong> (<em>dict</em>) – Dictionary containing series data.</p></li>
-<li><p><strong>cutoff_df</strong> (<em>pd.DataFrame</em>) – DataFrame containing cutoff data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Initialized Plotly figure object.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>go.Figure</p>
-</dd>
-</dl>
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">init_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#init_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.init_figure" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize figure.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.load_data">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.load_data" title="Permalink to this definition"></a></dt>
-<dd><p>Load data for a specific AEID.</p>
-<p>This function loads data for a given assay endpoint ID (AEID). It retrieves the data from an output table and a cutoff
-table. The data is either fetched from a local file or a remote source based on configuration settings. The loaded data
-is returned as two dataframes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>aeid</strong> (<em>int</em>) – Assay endpoint ID for which to load data.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing two dataframes, one for the output data and the other for the cutoff data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.load_assay_endpoint">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">load_assay_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#load_assay_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.load_assay_endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Load assay endpoint data for a given aeid.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.reset_id">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">reset_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#reset_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.reset_id" title="Permalink to this definition"></a></dt>
-<dd><p>Reset the index (id) of the current series.</p>
-<p>This function resets the index (id) of the currently selected series to the initial value.</p>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.load_cutoff">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">load_cutoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aeid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#load_cutoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.load_cutoff" title="Permalink to this definition"></a></dt>
+<dd><p>Load cutoff data for a given aeid.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.load_output_compound">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">load_output_compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dss_tox_substance_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#load_output_compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.load_output_compound" title="Permalink to this definition"></a></dt>
+<dd><p>Load output compound data for a given dsstox_substance_id.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.on_filter_assay_endpoints">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">on_filter_assay_endpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#on_filter_assay_endpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.on_filter_assay_endpoints" title="Permalink to this definition"></a></dt>
+<dd><p>Filter assay endpoints based on selected fields.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.on_hitcall_slider">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">on_hitcall_slider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#on_hitcall_slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.on_hitcall_slider" title="Permalink to this definition"></a></dt>
+<dd><p>Filter dataframe based on hitcall slider.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.on_iterate_assay_endpoint">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">on_iterate_assay_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#on_iterate_assay_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.on_iterate_assay_endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Iterate through assay endpoints.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.on_iterate_compounds">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">on_iterate_compounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#on_iterate_compounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.on_iterate_compounds" title="Permalink to this definition"></a></dt>
+<dd><p>Iterate through compounds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.on_select_compound">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">on_select_compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slider</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#on_select_compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.on_select_compound" title="Permalink to this definition"></a></dt>
+<dd><p>Select compound based on current compound_id.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.refresh_data">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">refresh_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#refresh_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.refresh_data" title="Permalink to this definition"></a></dt>
+<dd><p>Refresh data based on current trigger.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.reset_df_index">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">reset_df_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#reset_df_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.reset_df_index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.set_config_app">
 <span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">set_config_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#set_config_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.set_config_app" title="Permalink to this definition"></a></dt>
-<dd><p>Set the configuration for the Streamlit app.</p>
-<p>This function sets the global configuration variable CONFIG using the provided configuration dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config</strong> (<em>dict</em>) – Configuration settings for the app.</p>
-</dd>
-</dl>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.set_trigger">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">set_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#set_trigger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.set_trigger" title="Permalink to this definition"></a></dt>
+<dd><p>Set trigger in session state.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.app.curve_surfer_helper.sort">
 <span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.sort" title="Permalink to this definition"></a></dt>
-<dd><p>Sort the data based on user-selected criteria.</p>
-<p>This function sorts the data in the session state dataframe based on user-selected sorting criteria and ascending/descending
-order.</p>
+<dd><p>Sort dataframe based on current sort_by and asc values.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.trigger">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#trigger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.trigger" title="Permalink to this definition"></a></dt>
-<dd><p>Set the trigger in session state.</p>
-<p>This function sets the trigger value in the session state, which is used to control app behavior based on user
-interactions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trigger</strong> (<em>str</em>) – The trigger value to set.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.update_aeid">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">update_aeid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#update_aeid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.update_aeid" title="Permalink to this definition"></a></dt>
+<dd><p>Update aeid in session state.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.app.curve_surfer_helper.update">
-<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.update" title="Permalink to this definition"></a></dt>
-<dd><p>Update the app state and visualization.</p>
-<p>This function updates the app’s state and visualization based on user interactions and triggers. It handles loading data,
-filtering, sorting, and updating the Plotly figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A tuple containing the updated Plotly figure and a dictionary of fitted curve parameters.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>tuple</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.update_df_index">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">update_df_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#update_df_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.update_df_index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.update_df_length">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">update_df_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#update_df_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.update_df_length" title="Permalink to this definition"></a></dt>
+<dd><p>Update length of dataframe.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.app.curve_surfer_helper.update_spid">
+<span class="sig-prename descclassname"><span class="pre">src.app.curve_surfer_helper.</span></span><span class="sig-name descname"><span class="pre">update_spid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/app/curve_surfer_helper.html#update_spid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.app.curve_surfer_helper.update_spid" title="Permalink to this definition"></a></dt>
+<dd><p>Update spid in session state.</p>
 </dd></dl>
 
 </section>

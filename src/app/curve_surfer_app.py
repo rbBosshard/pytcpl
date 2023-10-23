@@ -87,7 +87,7 @@ def main():
                 st.button("Next", on_click=set_trigger, args=("next_compound",), use_container_width=True)
 
         with st.expander("Sort", expanded=False):
-            st.session_state.sort_by = st.selectbox("Sort By", ["hitcall_c", "hitcall", "acc", "ac50", "actop", "cytotox_acc", "cytotox_prob"], on_change=set_trigger, args=("sort_by",))
+            st.session_state.sort_by = st.selectbox("Sort By", ["hitcall", "hitcall_c", "acc", "ac50", "actop", "cytotox_acc", "cytotox_prob"], on_change=set_trigger, args=("sort_by",))
             st.session_state.asc = st.selectbox("Ascending", (False, True), on_change=set_trigger, args=("asc",))
         with st.expander("Select hitcall range", expanded=False):
             with st.form("Select hitcall range"):
@@ -119,8 +119,8 @@ def main():
     st.plotly_chart(fig, use_container_width=True, height=height)
 
 
-    
-    # Todo: Provide curve fit model functions
+
+
     with st.expander("Curve fit parameters"):
         st.json(pars_dict)
     with st.expander("Assay endpoint infos extensive"):

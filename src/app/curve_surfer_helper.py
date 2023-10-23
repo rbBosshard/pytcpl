@@ -18,18 +18,27 @@ ERR_MSG = f"No data found for this query"
 
 @st.cache_data
 def load_assay_endpoint(aeid):  # id used to facilitate caching
+    """
+    Load assay endpoint data for a given aeid.
+    """
     df = get_output_data(aeid).reset_index(drop=True)
     return df
 
 
 @st.cache_data
 def load_cutoff(aeid):  # id used to facilitate caching
+    """
+    Load cutoff data for a given aeid.
+    """
     cutoff_df = get_cutoff().reset_index(drop=True)
     return cutoff_df
 
 
 @st.cache_data
 def load_output_compound(dss_tox_substance_id):  # id used to facilitate caching
+    """
+    Load output compound data for a given dsstox_substance_id.
+    """
     return get_output_compound(dss_tox_substance_id).reset_index(drop=True)
 
 
@@ -40,6 +49,9 @@ def set_config_app(config):
 
 
 def get_series():
+    """
+    Get series from dataframe based on current df_index.
+    """
     series = st.session_state.df.iloc[st.session_state.df_index]
     series['cautionary_flags'] = json.loads(series['cautionary_flags'])
     series['conc'] = json.loads(series['conc'])
@@ -54,6 +66,9 @@ def get_series():
 
 
 def get_chem_info(spid):
+    """
+    Get chemical information for a given spid.
+    """
     chem = get_chemical([spid]).iloc[0]
     casn = chem['casn']
     chnm = chem['chnm']
@@ -62,6 +77,9 @@ def get_chem_info(spid):
 
 
 def init_figure():
+    """
+    Initialize figure.
+    """
     series = st.session_state.series
     cutoff_df = st.session_state.cutoff_df
     cutoff = cutoff_df.at[0, 'cutoff']
@@ -107,6 +125,9 @@ def init_figure():
 
 
 def add_curves(fig, col2):
+    """
+    Add curves and annotations to figure.
+    """
     height = 720
     series = st.session_state.series
     conc, resp, fit_params = np.array(series['conc']), series['resp'], series['fit_params']
@@ -115,7 +136,7 @@ def add_curves(fig, col2):
         verbose_checkbox = st.checkbox("Verbose", value=False, key="verbose", help="Show all potency and efficacy estimates")
         if verbose_checkbox:
             height = 840
-            potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["top", "cutoff", "bmad", "onesd"]
+            potency_candidates, efficacy_candidates = ["ac1sd", "bmd", "ac95", "ac50", "acc", "actop", "cytotox_acc"], ["cutoff", "bmad", "top"] # , "onesd" 
 
     potencies = [potency for potency in potency_candidates if potency in series and series[potency] is not None] # "ac1sd", bmd", "ac95", "ac50", 
     efficacies = [efficacy for efficacy in efficacy_candidates if efficacy in series and series[efficacy] is not None] # , "bmad", "onesd"
@@ -164,7 +185,7 @@ def add_curves(fig, col2):
                 for i, efficacy in enumerate(efficacies):
                     eff = efficacy_values[i]
                     if eff is not None and not np.isnan(eff):
-                        visible = True if efficacy in ['top'] else "legendonly"
+                        visible = True if efficacy in ['top', 'bmad'] else "legendonly"
                         x_min = min(np.log10(x)) 
                         fig.add_trace(go.Scatter(
                             name=f"{efficacy} = {eff:.1e}",
@@ -255,6 +276,9 @@ def reset_df_index():
 
 
 def set_trigger(trigger):
+    """
+    Set trigger in session state.
+    """
     st.session_state.trigger = trigger
     if trigger == 'filter_assay_endpoints':
         on_filter_assay_endpoints(trigger)
@@ -272,16 +296,25 @@ def set_trigger(trigger):
 
 
 def sort():
+    """
+    Sort dataframe based on current sort_by and asc values.
+    """
     st.session_state.df = st.session_state.df.sort_values(
         by=st.session_state.sort_by, ascending=st.session_state.asc, na_position='last').reset_index(drop=True)
     reset_df_index()
 
 
 def update_spid():
+    """
+    Update spid in session state.
+    """
     st.session_state.compound_id = st.session_state.df.iloc[st.session_state.df_index]['spid']
 
 
 def on_select_compound(trigger, slider):
+    """
+    Select compound based on current compound_id.
+    """
     if trigger == "select_compound" or (trigger == "select_compound_focus_changed" and st.session_state.focus_on_compound):
         res = st.session_state.df[st.session_state.df['dsstox_substance_id'] == st.session_state.compound_id]
         if res.empty:
@@ -302,6 +335,9 @@ def update_df_index():
 
 
 def on_iterate_compounds(trigger):
+    """
+    Iterate through compounds.
+    """
     if trigger == "next_compound":
         st.session_state.df_index += 1
     if trigger == "prev_compound":
@@ -309,6 +345,9 @@ def on_iterate_compounds(trigger):
 
 
 def on_iterate_assay_endpoint(trigger):
+    """
+    Iterate through assay endpoints.
+    """
     if st.session_state.focus_on_compound:
         if trigger == "next_assay_endpoint":
             st.session_state.df_index += 1
@@ -322,17 +361,26 @@ def on_iterate_assay_endpoint(trigger):
 
 
 def check_sort(trigger):
+    """
+    Check how dataframe needs to be sorted.
+    """
     if trigger in ["sort_by", "asc", "hitcall_slider"]:
         sort()
 
 
 def update_df_length():
+    """
+    Update length of dataframe.
+    """
     st.session_state.df_length =  len(st.session_state.df)
     if st.session_state.df_length == 0:
         raise Exception(ERR_MSG)
 
 
 def on_hitcall_slider(trigger):
+    """
+    Filter dataframe based on hitcall slider.
+    """
     if trigger == "hitcall_slider":
         interval = st.session_state.hitcall_slider
         if st.session_state.sort_by == "hitcall":
@@ -346,6 +394,9 @@ def on_hitcall_slider(trigger):
 
 
 def refresh_data(trigger):
+    """
+    Refresh data based on current trigger.
+    """
     fresh_load = st.session_state.last_aeid != st.session_state.aeid or st.session_state.focus_on_compound_submitted
     refresh_load = fresh_load or trigger in ["compound", "hitcall_slider"]
     if refresh_load:
@@ -364,6 +415,9 @@ def refresh_data(trigger):
 
 
 def update_aeid():
+    """
+    Update aeid in session state.
+    """
     if st.session_state.focus_on_compound:
         if len(st.session_state.df) == 0:
             raise Exception(ERR_MSG)
@@ -377,6 +431,9 @@ def update_aeid():
 
 
 def on_filter_assay_endpoints(trigger):
+    """
+    Filter assay endpoints based on selected fields.
+    """
     if trigger == "filter_assay_endpoints":
         if not st.session_state.assay_info_selected_fields:
             st.session_state.aeids = st.session_state.aeids_all.copy()
@@ -395,6 +452,9 @@ def get_trigger():
 
 
 def get_compound_info():
+    """
+    Get compound information.
+    """
     try:
         casn, chnm, dsstox_substance_id = get_chem_info(st.session_state.compound_id)
     except IndexError:
@@ -455,6 +515,9 @@ def get_compound_info():
 
 
 def get_assay_info(subset=False, transpose=False, replace=False):
+    """
+    Get assay information.
+    """
     assay_info_df = st.session_state.assay_info[subset_assay_info_columns] if subset else st.session_state.assay_info
     assay_info_df = assay_info_df.to_frame()
     if transpose:

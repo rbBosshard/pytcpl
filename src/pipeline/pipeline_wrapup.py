@@ -18,6 +18,9 @@ from src.pipeline.pipeline_wrapup_helper import ice_curation_and_cytotoxicity_ha
 
 
 def main():
+    """
+    Main function for the pipeline wrapup.
+    """
     print("Started")
     start_time = time.time()
 
@@ -26,7 +29,7 @@ def main():
     init_aeid(0)
 
     # remove_files_not_matching_to_aeid_list(delete=False)
-    df_all, cutoff_all, aeids_target_assays = ice_curation_and_cytotoxicity_handling(config)
+    df_all, cutoff_all = ice_curation_and_cytotoxicity_handling(config)
     group_by_aeids(df_all)
     groupb_by_compounds(config, df_all)
     save_merged(df_all, cutoff_all)
